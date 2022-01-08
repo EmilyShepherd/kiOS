@@ -1,0 +1,48 @@
+#!/bin/busybox sh
+#
+#
+BB=/bin/busybox
+
+case $1 in
+  bound|renew)
+    [ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
+    [ -n "$subnet" ] && NETMASK="netmask $subnet"
+
+    $BB ifconfig $interface $ip $BROADCAST $NETMASK
+
+    if [ -n "$router" ]; then
+      while $BB iproute del default dev $interface; do :; done
+
+      metric=0
+      for i in $router; do
+        $BB iproute add default via $i dev $interface metric $metric
+        metric=$(($metric + 1))
+      done
+    fi
+
+    # Update resolver configuration file
+    $BB echo "" > /etc/resolv.conf
+    [ -n "$domain" ] && /bin/busybox echo "domain $domain" >> /etc/resolv.conf
+
+    for i in $dns; do
+      $BB echo "nameserver $i" >> /etc/resolv.conf
+    done
+  ;;
+
+  deconfig)
+    $BB ifconfig $interface 0.0.0.0
+  ;;
+
+  leasefail)
+    $BB echo "$0: Lease failed: $message"
+  ;;
+
+  nak)
+    $BB echo "$0: Received a NAK: $message"
+  ;;
+
+  *)
+    $BB echo "$0: Unknown udhcpc command: $1";
+    exit 1;
+  ;;
+esac
