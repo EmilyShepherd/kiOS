@@ -25,7 +25,7 @@ esac
 
 case $url in
   github)
-    url=https://github.com/${project}/${pkg}/archive/refs/tags/v${version}.tar.gz
+    url=https://github.com/${project}/${pkg}/archive/refs/tags/${version}.tar.gz
     ;;
 esac
 

@@ -1,4 +1,4 @@
-version=1.23.0
+version=v1.23.0
 project=kubernetes-sigs
 url=github
 type="make"
