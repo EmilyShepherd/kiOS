@@ -50,7 +50,7 @@ curl -L $url | tar -x$extract -C src --strip-components 1
 cd src
 
 export GOARCH=arm64
-export CROSS_COMPILE=aarch64
+export CROSS_COMPILE=aarch64-linux-musl-
 export PREFIX=$BUILD_DIR
 
 case $type in
