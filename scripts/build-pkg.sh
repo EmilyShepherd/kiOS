@@ -63,6 +63,11 @@ export CC=$(which ${TARGET}-gcc)
 export CXX=$(which ${TARGET}-g++)
 export STRIP=$(which ${TARGET}-strip)
 
+if test "$(type -t pre_build)" == "function"
+then
+  pre_build
+fi
+
 case $type in
   configure)
     ./configure --prefix=${BUILD_DIR} --host=${TARGET} $configure_flags
