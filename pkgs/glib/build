@@ -1,0 +1,12 @@
+
+version=2.71.0
+url=https://download.gnome.org/sources/glib/2.71/glib-2.71.0.tar.xz
+checksum=926816526f6e4bba9af726970ff87be7dac0b70d5805050c6207b7bb17ea4fca
+
+build() {
+  rm -rf _build
+  meson _build -Dprefix=${BUILD_DIR} --cross-file ../files/aarch64
+
+  ninja -C _build
+  ninja -C _build install
+}
