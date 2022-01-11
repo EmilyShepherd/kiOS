@@ -1,7 +1,5 @@
 
 BUSYBOX_VERSION=1.34.1
-FIRMWARE_VERSION=1.20210527
-KERNEL_VERSION=5.10.17-v8+
 
 all: init build/bin/busybox modules
 
@@ -30,19 +28,6 @@ ${BB_SRC}/busybox: ${BB_SRC}/Makefile ${BB_SRC}/.config
 build/bin/busybox: ${BB_SRC}/busybox
 	mkdir -p build/bin
 	cp $< $@
-
-# Firmware
-FW_SRC=src/firmware-${FIRMWARE_VERSION}
-
-${FW_SRC}:
-	mkdir -p src
-	curl -L https://github.com/raspberrypi/firmware/archive/refs/tags/${FIRMWARE_VERSION}.tar.gz | tar -xzC src
-
-build/lib/modules/${KERNEL_VERSION}/modules.dep: ${FW_SRC}
-	mkdir -p build/lib/modules
-	cp -r ${FW_SRC}/modules/${KERNEL_VERSION} build/lib/modules/
-
-modules: build/lib/modules/${KERNEL_VERSION}/modules.dep
 
 # Init
 build/etc/inittab build/etc/init.d/rcS build/etc/init.d/ip:

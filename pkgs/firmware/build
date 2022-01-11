@@ -1,0 +1,10 @@
+
+url=github
+project=raspberrypi
+version=1.20210527
+kernel_version=5.10.17-v8+
+
+build() {
+  mkdir -p ${BUILD_DIR}/lib/modules
+  cp -r modules/${kernel_version} ${BUILD_DIR}/lib/modules/
+}
