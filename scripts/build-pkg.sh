@@ -62,6 +62,7 @@ export PKG_CONFIG_PATH=${BUILD_DIR}/lib/pkgconfig
 export CC=$(which ${TARGET}-gcc)
 export CXX=$(which ${TARGET}-g++)
 export STRIP=$(which ${TARGET}-strip)
+export CFLAGS="-isystem ${BUILD_DIR}/include"
 
 if test "$(type -t pre_build)" == "function"
 then
