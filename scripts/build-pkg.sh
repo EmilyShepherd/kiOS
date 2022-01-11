@@ -63,4 +63,7 @@ case $type in
     make
     make ${install_target:-install}
     ;;
+  *)
+    build
+    ;;
 esac
