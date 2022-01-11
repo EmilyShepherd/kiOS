@@ -1,8 +1,7 @@
 #!/bin/bash
 set -e
 
-BUILD_DIR=$(pwd)/build
-DIST_DIR=$(pwd)/dist
+BUILD_DIR=$(pwd)/.build
 TARGET=aarch64-linux-musl
 
 if test "$1" == "--clean"
