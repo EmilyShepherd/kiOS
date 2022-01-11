@@ -34,6 +34,8 @@ case $url in
     extract=j ;;
   *.gz)
     extract=z ;;
+  *.xz)
+    extract=J ;;
 esac
 
 if test -n "$CLEAN"
