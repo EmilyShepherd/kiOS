@@ -46,12 +46,15 @@ fi
 
 mkdir -p src $BUILD_DIR
 
-if ! test -f srcpkg || ! test $(sha256sum srcpkg | head -c 64) == "$checksum"
+if test -n "$url"
 then
-  curl -L $url -o srcpkg
-fi
+  if ! test -f srcpkg || ! test $(sha256sum srcpkg | head -c 64) == "$checksum"
+  then
+    curl -L $url -o srcpkg
+  fi
 
-tar -x$extract -C src --strip-components 1 -f srcpkg
+  tar -x$extract -C src --strip-components 1 -f srcpkg
+fi
 
 cd src
 
