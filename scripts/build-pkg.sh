@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 BUILD_DIR=$(pwd)/build
 DIST_DIR=$(pwd)/dist
