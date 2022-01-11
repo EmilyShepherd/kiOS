@@ -56,6 +56,7 @@ tar -x$extract -C src --strip-components 1 -f srcpkg
 cd src
 
 export GOARCH=arm64
+export ARCH=arm64
 export CROSS_COMPILE=aarch64-linux-musl-
 export PREFIX=$BUILD_DIR
 export PKG_CONFIG_PATH=${BUILD_DIR}/lib/pkgconfig
