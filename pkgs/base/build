@@ -1,0 +1,5 @@
+
+build() {
+  cd $BUILD_DIR
+  mkdir -p sys proc var run dev
+}
