@@ -57,11 +57,13 @@ cd src
 export GOARCH=arm64
 export CROSS_COMPILE=aarch64-linux-musl-
 export PREFIX=$BUILD_DIR
+export PKG_CONFIG_PATH=${BUILD_DIR}/lib/pkgconfig
+export CC=$(which ${TARGET}-gcc)
+export CXX=$(which ${TARGET}-g++)
+export STRIP=$(which ${TARGET}-strip)
 
 case $type in
   configure)
-    export PKG_CONFIG_PATH=${BUILD_DIR}/lib/pkgconfig 
-    export CC=$(which ${TARGET}-gcc)
     ./configure --prefix=${BUILD_DIR} --host=${TARGET} $configure_flags
     make
     make install
