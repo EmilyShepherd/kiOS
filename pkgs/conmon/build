@@ -1,0 +1,9 @@
+
+version=v2.0.31
+url=https://github.com/containers/conmon/releases/download/${version}/conmon-arm.zip
+
+build() {
+  curl -L $url --output conmon-arm.zip
+  7z e conmon-arm.zip
+  install -m 755 conmon ${BUILD_DIR}/bin/
+}
