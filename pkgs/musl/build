@@ -4,3 +4,8 @@ type=configure
 configure_flags="--syslibdir=${BUILD_DIR}/lib"
 url=http://www.musl-libc.org/releases/${pkg}-${version}.tar.gz
 checksum=1370c9a812b2cf2a7d92802510cca0058cc37e66a7bedd70051f0a34015022a3
+
+pre_build() {
+  mkdir -p ${BUILD_DIR}/lib
+  ln -sf libc.so ${BUILD_DIR}/lib/ld-musl-aarch64.so.1
+}
