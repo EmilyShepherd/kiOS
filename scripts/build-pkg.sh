@@ -77,9 +77,9 @@ fi
 
 case $type in
   configure)
-    ./configure --prefix=${BUILD_DIR} --host=${TARGET} $configure_flags
-    make
-    make install
+    ./configure --prefix=${BUILD_DIR} --host=aarch64-unknown-linux-gnu $configure_flags
+    make $make_target
+    make ${install_target:-install}
     ;;
   make)
     make $make_target
