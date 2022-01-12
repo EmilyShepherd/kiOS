@@ -58,6 +58,7 @@ fi
 cd src
 
 export GOARCH=arm64
+export CGO_ENABLED=1
 export ARCH=arm64
 export CROSS_COMPILE=aarch64-linux-musl-
 export PREFIX=$BUILD_DIR
@@ -79,7 +80,7 @@ case $type in
     make install
     ;;
   make)
-    make
+    make $make_target
     make ${install_target:-install}
     ;;
   *)

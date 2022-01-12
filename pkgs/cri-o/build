@@ -2,5 +2,6 @@ version=v1.23.0
 project=kubernetes-sigs
 url=github
 type="make"
+make_target=binaries
 install_target=install.bin
 checksum=2fbbd732335961dfb2c276e8b48cc96ced70e770c664f949a7b72a9263158f15
