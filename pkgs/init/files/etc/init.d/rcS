@@ -18,15 +18,7 @@ _mount /dev -o mode=0755,nosuid -t devtmpfs dev
 _mount /dev/pts -o mode=0620,gid=5,nosuid,noexec -n -t devpts devpts
 _mount /dev/shm -o mode=1777,nosuid,nodev -n -t tmpfs shm
 _mount /dev/kernel/security -n -t securityfs securityfs
-
-_mount /sys/fs/cgroup -o mode=0755 -t tmpfs cgroup
-_mount /sys/fs/cgroup/unified -t cgroup2 -o nsdelegate cgroup2
-
-while read -r _subsys_name _hierarchy _num_cgroups _enabled; do
-    [ "$_enabled" = "1" ] || continue
-    _controller="/sys/fs/cgroup/${_subsys_name}"
-    _mount $_controller -t cgroup -o "$_subsys_name" cgroup
-done < /proc/cgroups
+_mount /sys/fs/cgroup -t cgroup2 -o nsdelegate cgroup2
 
 $BB ip link set dev lo up
 $BB ip link set dev eth0 up
