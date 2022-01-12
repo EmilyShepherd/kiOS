@@ -43,15 +43,17 @@ then
   rm -rf src
 fi
 
-mkdir -p src $BUILD_DIR
+mkdir -p $BUILD_DIR
 
 if test -n "$url"
 then
   if ! test -f srcpkg || ! test $(sha256sum srcpkg | head -c 64) == "$checksum"
   then
+    rm -rf src
     curl -L $url -o srcpkg
   fi
 
+  mkdir -p src
   tar -x$extract -C src --strip-components 1 -f srcpkg
 fi
 
