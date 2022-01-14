@@ -43,7 +43,7 @@ then
   rm -rf src
 fi
 
-mkdir -p $BUILD_DIR
+mkdir -p $BUILD_DIR src
 
 if test -n "$url"
 then
