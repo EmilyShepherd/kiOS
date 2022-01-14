@@ -10,7 +10,7 @@ build() {
   export GOARCH=
   export GOFLAGS='-tags=providerless,dockerless'
   export KUBE_BUILD_PLATFORMS="linux/arm64"
-  make all WHAT="cmd/kubelet cmd/kubeadm cmd/kubectl"
+  hack/make-rules/build.sh cmd/kubelet cmd/kubeadm cmd/kubectl
 
   cp _output/local/bin/linux/arm64/* ${BUILD_DIR}/bin/
 }
