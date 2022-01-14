@@ -69,6 +69,7 @@ export CC=$(which ${TARGET}-gcc)
 export CXX=$(which ${TARGET}-g++)
 export STRIP=$(which ${TARGET}-strip)
 export CFLAGS="-isystem ${BUILD_DIR}/include"
+export LDFLAGS='-w -s'
 
 if test "$(type -t pre_build)" == "function"
 then
