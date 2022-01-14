@@ -8,6 +8,7 @@ build() {
   export KUBE_LINUX_ARM64_CC=$CC
   export CC=
   export GOARCH=
+  export GOFLAGS='-tags=providerless,dockerless'
   export KUBE_BUILD_PLATFORMS="linux/arm64"
   make all WHAT="cmd/kubelet cmd/kubeadm cmd/kubectl"
 
