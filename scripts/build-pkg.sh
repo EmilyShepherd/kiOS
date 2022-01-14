@@ -63,13 +63,17 @@ export GOARCH=arm64
 export CGO_ENABLED=1
 export ARCH=arm64
 export CROSS_COMPILE=aarch64-linux-musl-
-export PREFIX=$BUILD_DIR
+export PREFIX=""
+export DESTDIR=$BUILD_DIR
+export PKG_CONFIG_SYSTEM_LIBRARY_PATH=${BUILD_DIR}/lib
+export PKG_CONFIG_LIBDIR=${BUILD_DIR}/lib
 export PKG_CONFIG_PATH=${BUILD_DIR}/lib/pkgconfig
+export PKG_CONFIG_SYSROOT_DIR=${BUILD_DIR}
 export CC=$(which ${TARGET}-gcc)
 export CXX=$(which ${TARGET}-g++)
 export STRIP=$(which ${TARGET}-strip)
 export CFLAGS="-isystem ${BUILD_DIR}/include"
-export LDFLAGS='-w -s'
+export LDFLAGS="-w -s"
 
 if test "$(type -t pre_build)" == "function"
 then
@@ -78,7 +82,7 @@ fi
 
 case $type in
   configure)
-    ./configure --prefix=${BUILD_DIR} --host=aarch64-unknown-linux-gnu $configure_flags
+    ./configure --prefix="" --host=aarch64-unknown-linux-gnu --with-sysroot=${BUILD_DIR} $configure_flags
     make $make_target
     make ${install_target:-install}
     ;;
