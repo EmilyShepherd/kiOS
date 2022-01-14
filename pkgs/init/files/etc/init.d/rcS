@@ -25,6 +25,8 @@ do
   _mount /sys/fs/cgroup/$_subsys_name -t cgroup -o $_subsys_name cgroup
 done < /proc/cgroups
 
+$BB echo ki-dev > /proc/sys/kernel/hostname
+
 $BB ip link set dev lo up
 $BB ip link set dev eth0 up
 
