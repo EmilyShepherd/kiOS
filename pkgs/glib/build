@@ -5,7 +5,7 @@ checksum=926816526f6e4bba9af726970ff87be7dac0b70d5805050c6207b7bb17ea4fca
 
 build() {
   rm -rf _build
-  meson _build -Dprefix="/" --cross-file ../files/aarch64
+  meson _build -Dprefix="/" --cross-file ../aarch64
 
   ninja -C _build
   ninja -C _build install

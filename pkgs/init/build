@@ -1,4 +1,4 @@
 
 build() {
-  cp -r ../files/etc ${BUILD_DIR}/
+  :
 }

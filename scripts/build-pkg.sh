@@ -3,6 +3,7 @@ set -e
 
 BUILT_PACKAGES=$(pwd)/.build/built
 BUILD_DIR=$(pwd)/.build/root
+INITRD=$(pwd)/.build/initrd
 TARGET=aarch64-linux-musl
 
 if test "$1" == "--clean"
@@ -50,7 +51,7 @@ then
   rm -rf src
 fi
 
-mkdir -p $BUILD_DIR $BUILT_PACKAGES src
+mkdir -p $BUILD_DIR $BUILT_PACKAGES ${INITRD}/{bin,lib} src
 
 if test -n "$url"
 then
@@ -101,5 +102,44 @@ case $type in
     build
     ;;
 esac
+
+cd ..
+
+if test -d files
+then
+  cp -r files/* ${BUILD_DIR}/
+  cp -r files/* ${INITRD}/
+fi
+
+for file in $files
+do
+  cp -r ${BUILD_DIR}/$file ${INITRD}/$file
+done
+
+process_elf() {
+  for lib in $(readelf -d ${BUILD_DIR}/$1 | grep NEEDED | grep -o '\[.*\]' | tr '[]' ' ')
+  do
+    if ! test -f ${INITRD}/lib/$lib
+    then
+      cp -L ${BUILD_DIR}/lib/$lib ${INITRD}/lib/
+      process_elf lib/$lib
+    fi
+  done
+}
+
+for bin in $binaries
+do
+  path=${BUILD_DIR}/$bin
+  if test -e $path
+  then
+    cp -d $path ${INITRD}/bin/
+    process_elf $bin
+
+    if test -L $path
+    then
+      cp -L $(dirname $path)/$(readlink $path) ${INITRD}/bin/
+    fi
+  fi
+done
 
 touch $BUILT_PACKAGES/$pkg

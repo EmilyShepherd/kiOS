@@ -3,6 +3,7 @@ url=github
 project=kubernetes
 version=v1.23.1
 checksum=9529d76a623f133fd609765b040382d593c97803220f5166451f0dbca5c807d5
+binaries="/bin/kubelet"
 
 build() {
   export KUBE_LINUX_ARM64_CC=$CC
