@@ -2,3 +2,4 @@
 type=netfilter
 version=1.0.5
 checksum=f9ff3c11305d6e03d81405957bdc11aea18e0d315c3e3f48da53a24ba251b9f5
+depends="libnfnetlink"

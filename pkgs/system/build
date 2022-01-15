@@ -1,0 +1,6 @@
+
+depends="musl busybox cri-o runc init base iptables cni-plugins conmon conntrack-tools kubernetes"
+
+build() {
+  :
+}

@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
 
-BUILD_DIR=$(pwd)/.build
+BUILT_PACKAGES=$(pwd)/.build/built
+BUILD_DIR=$(pwd)/.build/root
 TARGET=aarch64-linux-musl
 
 if test "$1" == "--clean"
@@ -11,10 +12,16 @@ then
 fi
 
 pkg=$1
+pkgpath=pkgs/$pkg
 
-cd pkgs/$pkg
+. $pkgpath/build
 
-. ./build
+for dep in $depends
+do
+  test -f $BUILT_PACKAGES/$dep || $0 $dep
+done
+
+cd $pkgpath
 
 case $type in
   netfilter)
@@ -43,7 +50,7 @@ then
   rm -rf src
 fi
 
-mkdir -p $BUILD_DIR src
+mkdir -p $BUILD_DIR $BUILT_PACKAGES src
 
 if test -n "$url"
 then
@@ -94,3 +101,5 @@ case $type in
     build
     ;;
 esac
+
+touch $BUILT_PACKAGES/$pkg
