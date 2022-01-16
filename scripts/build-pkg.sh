@@ -133,11 +133,13 @@ do
   path=${BUILD_DIR}/$bin
   if test -e $path
   then
-    cp -d $path ${INITRD}/bin/
     process_elf $bin
 
-    if test -L $path
+    if ! test -L $path
     then
+      cp $path ${INITRD}/bin/
+    else
+      ln -fs $(basename $(readlink $path)) ${INITRD}/bin/$(basename $bin)
       cp -L $(dirname $path)/$(readlink $path) ${INITRD}/bin/
     fi
   fi
