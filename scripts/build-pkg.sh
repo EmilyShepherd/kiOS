@@ -4,6 +4,7 @@ set -e
 BUILT_PACKAGES=$(pwd)/.build/built
 BUILD_DIR=$(pwd)/.build/root
 INITRD=$(pwd)/.build/initrd
+BOOTPART=$(pwd)/.build/bootpart
 TARGET=aarch64-linux-musl
 
 if test "$1" == "--clean"
@@ -51,7 +52,7 @@ then
   rm -rf src
 fi
 
-mkdir -p $BUILD_DIR $BUILT_PACKAGES ${INITRD}/{bin,lib} src
+mkdir -p $BUILD_DIR $BUILT_PACKAGES ${INITRD}/{bin,lib} ${BOOTPART} src
 
 if test -n "$url"
 then
