@@ -3,14 +3,13 @@ version=v5.10
 project=torvalds
 url=github
 checksum=85eaf2c340ff369fefb281ef4afebfc394412b8c0a3b4ff8aadcbe1ebefc3aa4
+install_target="zinstall modules_install dtbs_install"
+type=make
 
 pre_build() {
-  export INSTALL_PATH=${BOOTPART}
-  export INSTALL_MOD_PATH=${BOOTPART}
+  export INSTALL_PATH=${BUILD_DIR}/boot
+  export INSTALL_MOD_PATH=${BUILD_DIR}
+
+  mkdir -p $INSTALL_PATH
 }
 
-build() {
-  cp ../config ./.config
-  make -j 16
-  make zinstall modules_install dtbs_install
-}
