@@ -1,0 +1,3 @@
+
+depends="initramfs linux rpi-firmware"
+file_location=$BOOTPART

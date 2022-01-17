@@ -3,5 +3,6 @@ depends="initramfs-files"
 
 build() {
   cd ${INITRD}
-  find . | cpio -oH newc -R +0:+0 | zstd -T16 > ${BOOTPART}/initramfs
+  mkdir -p ${BOOTPART}/kernel
+  find . | cpio -oH newc -R +0:+0 | zstd -T16 > ${BOOTPART}/kernel/initramfs
 }

@@ -98,14 +98,17 @@ do_build() {
   cd src
   run_cmd pre_build || true
   run_cmd build || run_cmd build_$type || true
+  run_cmd post_build || true
   cd ..
 }
 
 copy_files() {
   if test -d files
   then
-    cp -r files/* ${BUILD_DIR}/
-    cp -r files/* ${INITRD}/
+    for location in ${file_location:-$BUILD_DIR $INITRD}
+    do
+      cp -r files/* ${location}/
+    done
   fi
 
   for file in $files
