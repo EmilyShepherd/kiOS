@@ -113,7 +113,7 @@ copy_files() {
 
   for file in $files
   do
-    cp -r ${BUILD_DIR}/$file ${INITRD}/$file
+    cp -r ${BUILD_DIR}/$file ${INITRD}/$(dirname $file)/
   done
 }
 
