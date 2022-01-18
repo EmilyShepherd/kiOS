@@ -22,7 +22,9 @@ _mount /sys/fs/cgroup -t tmpfs -o mode=0755 cgroup
 
 while read -r _subsys_name _hierarchy _num_cgroups _enabled
 do
-  _mount /sys/fs/cgroup/$_subsys_name -t cgroup -o $_subsys_name cgroup
+  if test $_enabled == "1"; then
+    _mount /sys/fs/cgroup/$_subsys_name -t cgroup -o $_subsys_name cgroup
+  fi
 done < /proc/cgroups
 
 $BB echo ki-dev > /proc/sys/kernel/hostname
