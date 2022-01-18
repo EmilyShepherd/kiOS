@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Busybox version: 1.34.1
-# Mon Jan 17 21:09:32 2022
+# Mon Jan 17 23:31:25 2022
 #
 CONFIG_HAVE_DOT_CONFIG=y
 
@@ -136,7 +136,7 @@ CONFIG_FEATURE_COPYBUF_KB=4
 #
 # Archival Utilities
 #
-# CONFIG_FEATURE_SEAMLESS_XZ is not set
+CONFIG_FEATURE_SEAMLESS_XZ=y
 # CONFIG_FEATURE_SEAMLESS_LZMA is not set
 # CONFIG_FEATURE_SEAMLESS_BZ2 is not set
 # CONFIG_FEATURE_SEAMLESS_GZ is not set
@@ -154,7 +154,7 @@ CONFIG_FEATURE_COPYBUF_KB=4
 # CONFIG_LZCAT is not set
 # CONFIG_LZMA is not set
 # CONFIG_UNXZ is not set
-# CONFIG_XZCAT is not set
+CONFIG_XZCAT=y
 # CONFIG_XZ is not set
 # CONFIG_BZIP2 is not set
 CONFIG_BZIP2_SMALL=0
