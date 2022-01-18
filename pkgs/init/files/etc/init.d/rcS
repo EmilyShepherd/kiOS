@@ -10,6 +10,10 @@ _mount() {
   $BB mount "$@" "$dir"
 }
 
+_bmount() {
+  test -d $2 && _mount $1 --bind $2
+}
+
 _mount /proc -o nosuid,noexec,nodev -t proc proc
 _mount /sys -o nosuid,noexec,nodev -t sysfs sys
 _mount /run -o mode=0755,nosuid,nodev -t tmpfs run
@@ -18,6 +22,27 @@ _mount /dev/pts -o mode=0620,gid=5,nosuid,noexec -n -t devpts devpts
 _mount /dev/shm -o mode=1777,nosuid,nodev -n -t tmpfs shm
 _mount /dev/kernel/security -n -t securityfs securityfs
 _mount /sys/fs/cgroup -t tmpfs -o mode=0755 cgroup
+
+$BB mdev -s
+
+if ! test -e /dev/mmcblk1p2
+then
+  $BB echo "n
+p
+2
+524288
+
+t
+2
+93
+w" | $BB fdisk /dev/mmcblk1
+  $BB mkfs.ext2 /dev/mmcblk1p2
+fi
+
+_mount /boot -o ro /dev/mmcblk1p1
+_bmount /lib/modules /boot/kernel/modules
+_bmount /etc/ssl/certs /boot/ssl
+_mount /srv -o rw /dev/mmcblk1p2
 
 while read -r _subsys_name _hierarchy _num_cgroups _enabled
 do
