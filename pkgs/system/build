@@ -1,4 +1,4 @@
 
-depends="musl busybox cri-o runc init base iptables cni-plugins conmon conntrack-tools kubernetes"
+depends="musl busybox cri-o runc init iptables cni-plugins conmon conntrack-tools kubernetes"
 provides="initramfs-files"
 
