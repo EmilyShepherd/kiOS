@@ -11,7 +11,6 @@ _mount() {
 }
 
 _mount /proc -o nosuid,noexec,nodev -t proc proc
-_mount / -o remount,rw
 _mount /sys -o nosuid,noexec,nodev -t sysfs sys
 _mount /run -o mode=0755,nosuid,nodev -t tmpfs run
 _mount /dev -o mode=0755,nosuid -t devtmpfs dev
