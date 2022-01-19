@@ -9,12 +9,7 @@ files="/opt"
 build() {
   mkdir -p ${BUILD_DIR}/opt/cni/bin ./bin
 
-  for plugin in main/bridge main/loopback ipam/host-local
-  do
-    name=$(basename $plugin)
-    go build -o bin/$name ./plugins/$plugin/
-    $STRIP bin/$name
-  done
+  ./build_linux.sh
 
   cp bin/* ${BUILD_DIR}/opt/cni/bin/
 }
