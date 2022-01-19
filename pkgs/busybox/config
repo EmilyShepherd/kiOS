@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Busybox version: 1.34.1
-# Mon Jan 17 23:31:25 2022
+# Wed Jan 19 16:30:15 2022
 #
 CONFIG_HAVE_DOT_CONFIG=y
 
@@ -691,8 +691,8 @@ CONFIG_NSENTER=y
 # CONFIG_FEATURE_TASKSET_FANCY is not set
 # CONFIG_FEATURE_TASKSET_CPULIST is not set
 # CONFIG_UEVENT is not set
-# CONFIG_UMOUNT is not set
-# CONFIG_FEATURE_UMOUNT_ALL is not set
+CONFIG_UMOUNT=y
+CONFIG_FEATURE_UMOUNT_ALL=y
 # CONFIG_UNSHARE is not set
 # CONFIG_WALL is not set
 
