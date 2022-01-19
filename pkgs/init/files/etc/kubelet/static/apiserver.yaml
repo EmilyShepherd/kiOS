@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    component: kube-apiserver
+    tier: control-plane
+  name: kube-apiserver
+  namespace: kube-system
+spec:
+  hostNetwork: true
+  containers:
+  - command:
+    - kube-apiserver
+    - --etcd-servers=http://127.0.0.1:2379
+    - --service-cluster-ip-range=10.96.0.0/12
+    - --service-account-issuer=ki
+    - --api-audiences=ki
+    - --client-ca-file=/etc/kubernetes/pki/ca.pem
+    - --service-account-key-file=/etc/kubernetes/pki/sa.pem
+    - --service-account-signing-key-file=/etc/kubernetes/pki/sa-key.pem
+    - --admission-control=NamespaceLifecycle,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
+    image: k8s.gcr.io/kube-apiserver:v1.23.1
+    name: kube-apiserver
+    volumeMounts:
+    - mountPath: /var/run/kubernetes
+      name: run
+    - mountPath: /etc/kubernetes/pki
+      name: pki
+  priorityClassName: system-cluster-critical
+  volumes:
+  - hostPath:
+      path: /var/run/kubernetes
+      type: DirectoryOrCreate
+    name: run
+  - hostPath:
+      path: /var/pki
+      type: DirectoryOrCreate
+    name: pki
+
