@@ -15,25 +15,25 @@ spec:
     - --service-cluster-ip-range=10.96.0.0/12
     - --service-account-issuer=ki
     - --api-audiences=ki
+    - --tls-cert-file=/etc/kubernetes/pki/api.pem
+    - --tls-private-key-file=/etc/kubernetes/pki/api-key.pem
     - --client-ca-file=/etc/kubernetes/pki/ca.pem
     - --service-account-key-file=/etc/kubernetes/pki/sa.pem
     - --service-account-signing-key-file=/etc/kubernetes/pki/sa-key.pem
-    - --admission-control=NamespaceLifecycle,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
+    - --kubelet-preferred-address-types=InternalIP,Hostname,InternalDNS,ExternalDNS,ExternalIP
+    - --kubelet-client-certificate=/etc/kubernetes/pki/admin.pem
+    - --kubelet-client-key=/etc/kubernetes/pki/admin-key.pem
+    - --authorization-mode=Node,RBAC
+    - --enable-bootstrap-token-auth=true
     image: k8s.gcr.io/kube-apiserver:v1.23.1
     name: kube-apiserver
     volumeMounts:
-    - mountPath: /var/run/kubernetes
-      name: run
     - mountPath: /etc/kubernetes/pki
       name: pki
   priorityClassName: system-cluster-critical
   volumes:
   - hostPath:
-      path: /var/run/kubernetes
-      type: DirectoryOrCreate
-    name: run
-  - hostPath:
-      path: /var/pki
+      path: /var/lib/kubelet/pki
       type: DirectoryOrCreate
     name: pki
 

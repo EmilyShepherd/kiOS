@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    component: kube-scheduler
+    tier: control-plane
+  name: kube-scheduler
+  namespace: kube-system
+spec:
+  hostNetwork: true
+  containers:
+  - command:
+    - kube-scheduler
+    - --client-ca-file=/etc/kubernetes/pki/ca.pem
+    - --kubeconfig=/etc/kubernetes/kubeconfig
+    image: k8s.gcr.io/kube-scheduler:v1.23.1
+    name: kube-scheduler
+    volumeMounts:
+    - mountPath: /etc/kubernetes/pki/ca.pem
+      name: ca
+    - mountPath: /etc/kubernetes/pki/client.pem
+      name: client
+    - mountPath: /etc/kubernetes/pki/client-key.pem
+      name: client-key
+    - mountPath: /etc/kubernetes/kubeconfig
+      name: kubeconfig
+  priorityClassName: system-cluster-critical
+  volumes:
+  - hostPath:
+      path: /var/lib/kubelet/pki/ca.pem
+      type: File
+    name: ca
+  - hostPath:
+      path: /var/lib/kubelet/pki/scheduler.pem
+      type: File
+    name: client
+  - hostPath:
+      path: /var/lib/kubelet/pki/scheduler-key.pem
+      type: File
+    name: client-key
+  - hostPath:
+      path: /etc/kubelet/kubeconfig.pod
+      type: File
+    name: kubeconfig
+
