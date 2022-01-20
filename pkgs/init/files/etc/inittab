@@ -1,3 +1,3 @@
 ::sysinit:/etc/init.d/rcS
-::respawn:/bin/busybox udhcpc -fs /etc/init.d/ip
+::respawn:/etc/init.d/ip init
 ::respawn:/bin/busybox ntpd -np 0.pool.ntp.org
