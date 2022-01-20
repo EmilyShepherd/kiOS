@@ -1,7 +1,12 @@
 #!/bin/busybox sh
 #
-PATH=/bin
-BB=$PATH/busybox
+
+export PATH=/bin
+export BB=$PATH/busybox
+BOOTPART=/dev/mmcblk1p1
+DATAPART=/dev/mmcblk1p2
+CONFIGDIR=etc
+BOOTSTRAP=bootstrap.tar.xz
 
 _mount() {
   local dir=$1
@@ -14,43 +19,81 @@ _bmount() {
   test -d $2 && _mount $1 --bind $2
 }
 
-_mount /proc -o nosuid,noexec,nodev -t proc proc
-_mount /sys -o nosuid,noexec,nodev -t sysfs sys
-_mount /run -o mode=0755,nosuid,nodev -t tmpfs run
-_mount /dev -o mode=0755,nosuid -t devtmpfs dev
-_mount /dev/pts -o mode=0620,gid=5,nosuid,noexec -n -t devpts devpts
-_mount /dev/shm -o mode=1777,nosuid,nodev -n -t tmpfs shm
-_mount /dev/kernel/security -n -t securityfs securityfs
-_mount /sys/fs/cgroup -t tmpfs -o mode=0755 cgroup
+tmpmount() {
+  _mount $1 -o rw,nosuid,nodev tmpfs tmp
+}
 
-$BB mdev -s
+mount_boot() {
+  _mount /boot -o ro $BOOTPART
+  _bmount /lib/modules /boot/kernel/modules
+  _bmount /etc/ssl/certs /boot/$CONFIGDIR/ssl
+}
 
-if ! test -e /dev/mmcblk1p2
-then
-  $BB echo "n
-p
-2
-524288
+mount_cgroups() {
+  while read -r _subsys_name _hierarchy _num_cgroups _enabled
+  do
+    if test $_enabled == "1"; then
+      _mount /sys/fs/cgroup/$_subsys_name -t cgroup -o $_subsys_name cgroup
+    fi
+  done < /proc/cgroups
+}
 
-t
-2
-93
-w" | $BB fdisk /dev/mmcblk1
-  $BB mkfs.ext2 /dev/mmcblk1p2
-fi
+mount_fs() {
+  _mount /proc -o nosuid,noexec,nodev -t proc proc
+  _mount /sys -o nosuid,noexec,nodev -t sysfs sys
+  _mount /dev -o mode=0755,nosuid -t devtmpfs dev
+  _mount /dev/pts -o mode=0620,gid=5,nosuid,noexec -n -t devpts devpts
+  _mount /dev/shm -o mode=1777,nosuid,nodev -n -t tmpfs shm
+  _mount /dev/kernel/security -n -t securityfs securityfs
+  _mount /sys/fs/cgroup -t tmpfs -o mode=0755 cgroup
+  mount_cgroups
+  tmpmount /run
+  tmpmount /tmp
+  tmpmount /var
+  $BB mkdir /var/log /var/lib /var/tmp /var/cache /var/run
+  _mount / -o remount,ro
+}
 
-_mount /boot -o ro /dev/mmcblk1p1
-_bmount /lib/modules /boot/kernel/modules
-_bmount /etc/ssl/certs /boot/ssl
-_mount /srv -o rw /dev/mmcblk1p2
+wait_for_devices() {
+  $BB mdev -s
+}
 
-while read -r _subsys_name _hierarchy _num_cgroups _enabled
+mount_data() {
+  _mount /var/lib -o rw $DATAPART
+}
+
+set_hostname() {
+  local hostname=boot/$CONFIGDIR/hostname
+  test -f $hostname && $BB cat > /proc/sys/kernel/hostname
+}
+
+for arg in $($BB cat /proc/cmdline)
 do
-  if test $_enabled == "1"; then
-    _mount /sys/fs/cgroup/$_subsys_name -t cgroup -o $_subsys_name cgroup
-  fi
-done < /proc/cgroups
+  $BB echo $arg | read -d'=' param value
+  case $param in
+    ki.bootpart) BOOTPART=$value ;;
+    ki.datapart) DATAPART=$value ;;
+    ki.configdir) CONFIGDIR=$value ;;
+    ki.bootstrap) BOOTSTRAP="$BOOTSTRAP $value" ;;
+  esac
+done
+
+mount_fs
+mount_cgroups
+wait_for_devices
+mount_boot
+mount_data
+set_hostname
+
 
 $BB ip link set dev lo up
 $BB ip link set dev eth0 up
 
+
+for archive in $BOOTSTRAP
+do
+  if test -f /boot/$BOOTSTRAP
+  then
+    xzcat $$bootstrap | tar x
+  fi
+done
