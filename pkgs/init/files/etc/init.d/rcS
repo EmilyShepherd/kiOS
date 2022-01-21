@@ -21,7 +21,7 @@ _bmount() {
 }
 
 tmpmount() {
-  _mount $1 -o rw,nosuid,nodev tmpfs tmp
+  _mount $1 -o rw,nosuid,nodev -t tmpfs tmp
 }
 
 mount_boot() {
@@ -53,6 +53,7 @@ mount_fs() {
   tmpmount /tmp
   tmpmount /var
   $BB mkdir /var/log /var/lib /var/tmp /var/cache /var/run
+  mount --make-shared /var
 }
 
 wait_for_devices() {
