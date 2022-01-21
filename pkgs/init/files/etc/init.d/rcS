@@ -68,6 +68,16 @@ set_hostname() {
   test -f $hostname && $BB cat > /proc/sys/kernel/hostname
 }
 
+set_machineid() {
+  local machineid=boot/$CONFIGDIR/machineid
+  if test -f $machineid
+  then
+    $BB cat $machineid > /etc/machine-id
+  else
+    $BB cat /proc/device-tree/serial-number > /etc/machine-id
+  fi
+}
+
 for arg in $($BB cat /proc/cmdline)
 do
   $BB echo $arg | read -d'=' param value
@@ -85,7 +95,7 @@ wait_for_devices
 mount_boot
 mount_data
 set_hostname
-
+set_machineid
 
 $BB ip link set dev lo up
 $BB ip link set dev eth0 up
