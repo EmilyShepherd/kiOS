@@ -3,7 +3,7 @@ url=github
 project=kubernetes
 version=v1.23.1
 checksum=9529d76a623f133fd609765b040382d593c97803220f5166451f0dbca5c807d5
-binaries="/bin/kubelet"
+binaries="/bin/kubelet /bin/kubeadm"
 
 build() {
   export KUBE_LINUX_ARM64_CC=$CC
@@ -11,7 +11,7 @@ build() {
   export GOARCH=
   export GOFLAGS='-tags=providerless,dockerless'
   export KUBE_BUILD_PLATFORMS="linux/arm64"
-  hack/make-rules/build.sh cmd/kubelet cmd/kubeadm cmd/kubectl
+  hack/make-rules/build.sh cmd/kubelet cmd/kubeadm
 
   cp _output/local/bin/linux/arm64/* ${BUILD_DIR}/bin/
 }

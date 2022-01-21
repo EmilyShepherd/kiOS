@@ -1,0 +1,13 @@
+#!/bin/busybox sh
+
+if ! test -f /var/lib/kubelet/config.yaml
+then
+  $BB echo Kubelet config file is missing!
+  exit 1
+fi
+
+. /var/lib/kubelet/kubeadm-flags.env
+
+kubelet $KUBELET_KUBEADM_ARGS \
+  --config /var/lib/kubelet/config.yaml \
+  --kubeconfig /etc/kubernetes/kubelet.conf

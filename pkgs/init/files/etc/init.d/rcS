@@ -16,7 +16,8 @@ _mount() {
 }
 
 _bmount() {
-  test -d $2 && _mount $1 --bind $2
+  $BB mkdir -p $2
+  _mount $1 --bind $2
 }
 
 tmpmount() {
@@ -24,9 +25,10 @@ tmpmount() {
 }
 
 mount_boot() {
-  _mount /boot -o ro $BOOTPART
+  _mount /boot -o rw $BOOTPART
   _bmount /lib/modules /boot/kernel/modules
   _bmount /etc/ssl/certs /boot/$CONFIGDIR/ssl
+  _bmount /etc/kubernetes /boot/$CONFIGDIR/kubernetes
 }
 
 mount_cgroups() {
@@ -51,7 +53,6 @@ mount_fs() {
   tmpmount /tmp
   tmpmount /var
   $BB mkdir /var/log /var/lib /var/tmp /var/cache /var/run
-  _mount / -o remount,ro
 }
 
 wait_for_devices() {

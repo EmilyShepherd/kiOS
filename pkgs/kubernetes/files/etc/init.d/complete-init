@@ -1,0 +1,6 @@
+#!/bin/busybox sh
+
+kubeadm init phase wait-control-plane
+kubeadm init phase upload-config all
+kubeadm init phase upload-certs --upload-certs
+kubeadm init phase addon all
