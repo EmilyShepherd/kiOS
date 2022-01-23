@@ -2,6 +2,4 @@
 ::respawn:/etc/init.d/ip init
 ::respawn:/bin/busybox ntpd -n
 ::respawn:/bin/crio
-::wait:/etc/init.d/init-node
 ::respawn:/etc/init.d/kubelet
-::once:/etc/init.d/complete-init

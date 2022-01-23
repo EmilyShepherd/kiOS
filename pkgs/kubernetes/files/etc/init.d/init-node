@@ -1,7 +1,0 @@
-#!/bin/busybox sh
-
-kubeadm init phase certs all
-kubeadm init phase kubeconfig all
-kubeadm init phase control-plane all
-kubeadm init phase etcd local
-kubeadm init phase kubelet-start

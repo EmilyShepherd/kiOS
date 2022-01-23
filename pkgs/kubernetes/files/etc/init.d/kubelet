@@ -1,13 +1,37 @@
 #!/bin/busybox sh
+#
+#
+#
+#
 
-if ! test -f /var/lib/kubelet/config.yaml
+BB=/bin/busybox
+CRIO_SOCK=/var/run/crio/crio.sock
+KUBELET_CONFIG=/var/lib/kubelet/config.yaml
+
+wait_for_file() {
+  while ! test -e $1; do $BB sleep 1; done
+}
+
+wait_for_file $CRIO_SOCK
+
+# If there is no config for the kubelet, we have to start up in
+# standalone mode. The default installation includes a static pod to
+# bootstrap the cluster.
+if ! test -f $KUBELET_CONFIG
 then
-  $BB echo Kubelet config file is missing!
-  exit 1
+  kubelet --container-runtime remote \
+    --container-runtime-endpoint unix:///var/run/crio/crio.sock \
+    --pod-manifest-path=/etc/kubernetes/manifests
+
+  kubeletpid=$!
+
+  wait_for_file $KUBELET_CONFIG
+
+  kill $kubletpid
 fi
 
 . /var/lib/kubelet/kubeadm-flags.env
 
-kubelet $KUBELET_KUBEADM_ARGS \
-  --config /var/lib/kubelet/config.yaml \
+exec kubelet $KUBELET_KUBEADM_ARGS \
+  --config $KUBELET_CONFIG \
   --kubeconfig /etc/kubernetes/kubelet.conf

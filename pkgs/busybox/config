@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Busybox version: 1.34.1
-# Thu Jan 20 00:43:57 2022
+# Sun Jan 23 20:01:12 2022
 #
 CONFIG_HAVE_DOT_CONFIG=y
 
@@ -288,7 +288,7 @@ CONFIG_RMDIR=y
 # CONFIG_SEQ is not set
 # CONFIG_SHRED is not set
 # CONFIG_SHUF is not set
-# CONFIG_SLEEP is not set
+CONFIG_SLEEP=y
 # CONFIG_FEATURE_FANCY_SLEEP is not set
 # CONFIG_SORT is not set
 # CONFIG_FEATURE_SORT_BIG is not set
