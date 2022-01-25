@@ -160,7 +160,7 @@ build_dependencies() {
 }
 
 load_pkg() {
-  pkgpath=pkgs/$pkg
+  pkgpath=$(pwd)/pkgs/$pkg
 
   if test -f $pkgpath/build
   then
