@@ -11,7 +11,7 @@ TARGET=aarch64-linux-musl
 build_configure() {
   if ! test -f ${configure_test:-Makefile}
   then
-    ./${configure_cmd:-configure} --prefix="" \
+    ./${configure_cmd:-configure} --prefix=$PREFIX \
       --host=aarch64-unknown-linux-gnu \
       --with-sysroot=${BUILD_DIR} \
       $configure_flags
