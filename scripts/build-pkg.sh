@@ -188,6 +188,19 @@ mark_built() {
   done
 }
 
+build_container() {
+  if test -f $pkgpath/Dockerfile
+  then
+    cd $BUILD_DIR
+    image=docker.io/emilyls/$pkg:$version
+    podman build \
+      --no-cache --squash \
+      --platform=linux/arm64/v8 \
+      -t $image \
+      -f $pkgpath/Dockerfile .
+  fi
+}
+
 if test "$1" == "--clean"
 then
   export CLEAN=1
@@ -204,4 +217,5 @@ prepare_workspace
 do_build
 copy_files
 copy_binaries
+build_container
 mark_built
