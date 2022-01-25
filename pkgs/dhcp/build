@@ -1,3 +1,4 @@
 
 version=v1
 depends="busybox"
+file_location=$BUILD_DIR
