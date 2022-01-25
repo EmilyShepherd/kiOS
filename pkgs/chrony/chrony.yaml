@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: chrony
+  namespace: node-services
+spec:
+  containers:
+  - image: emilyls/chrony:4.2
+    imagePullPolicy: Always
+    name: chrony
+    securityContext:
+      runAsNonRoot: true
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+        add:
+          - SYS_TIME
+  # Does not strictly _require_ the host network to function as
+  # expected, however as this is node critical, it is important that it
+  # runs even if the CNI network is not yet ready.
+  hostNetwork: true
+  priorityClassName: system-node-critical
+  tolerations:
+  - operator: Exists
