@@ -13,6 +13,9 @@ spec:
     # Currently we require running as root but this may change
     securityContext:
       allowPrivilegeEscalation: false
+    env:
+    - name: INTERFACE
+      value: eth0
   hostNetwork: true
   priorityClassName: system-node-critical
   tolerations:

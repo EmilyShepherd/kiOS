@@ -3,7 +3,6 @@
 #
 BB=/bin/busybox
 currenthostname=$($BB cat /proc/sys/kernel/hostname)
-hostinterface=$($BB cat /run/dhcp/interface)
 
 # The dhcp client is only designed to obtain the host IP address (if you
 # want to use extra networking, run a seperate dhcp client in a pod on
@@ -62,9 +61,9 @@ case $1 in
 
   init)
     [ -n "$currenthostname" ] && hostname="-F $currenthostname"
-    [ -n "$hostinterface" ] && hostinterface="-i $hostinterface"
+    [ -n "$INTERFACE" ] && INTERFACE="-i $INTERFACE"
     $BB mkdir -p /run/dhcp
-    exec $BB udhcpc -fs $0 $hostname $hostinterface -p /run/dhcp/pid
+    exec $BB udhcpc -fs $0 $hostname $INTERFACE -p /run/dhcp/pid
   ;;
 
   *)
