@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: chrony
-  namespace: node-services
+  namespace: kube-node-lease
 spec:
   containers:
   - image: emilyls/chrony:4.2
