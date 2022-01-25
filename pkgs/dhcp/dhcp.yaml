@@ -14,6 +14,12 @@ spec:
     # Currently we require running as root but this may change
     securityContext:
       allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+        add:
+        - NET_ADMIN
+        - NET_RAW
     env:
     - name: INTERFACE
       value: eth0
