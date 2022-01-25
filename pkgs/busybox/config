@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Busybox version: 1.34.1
-# Sun Jan 23 20:01:12 2022
+# Tue Jan 25 16:30:28 2022
 #
 CONFIG_HAVE_DOT_CONFIG=y
 
@@ -932,9 +932,9 @@ CONFIG_FEATURE_IP_NEIGH=y
 # CONFIG_NSLOOKUP is not set
 # CONFIG_FEATURE_NSLOOKUP_BIG is not set
 # CONFIG_FEATURE_NSLOOKUP_LONG_OPTIONS is not set
-CONFIG_NTPD=y
+# CONFIG_NTPD is not set
 # CONFIG_FEATURE_NTPD_SERVER is not set
-CONFIG_FEATURE_NTPD_CONF=y
+# CONFIG_FEATURE_NTPD_CONF is not set
 # CONFIG_FEATURE_NTP_AUTH is not set
 # CONFIG_PING is not set
 # CONFIG_PING6 is not set

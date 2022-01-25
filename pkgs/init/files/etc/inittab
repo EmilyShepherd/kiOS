@@ -1,5 +1,4 @@
 ::sysinit:/etc/init.d/rcS
 ::respawn:/etc/init.d/ip init
-::respawn:/bin/busybox ntpd -n
 ::respawn:/bin/crio
 ::respawn:/etc/init.d/kubelet
