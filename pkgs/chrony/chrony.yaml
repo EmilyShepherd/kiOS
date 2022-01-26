@@ -6,7 +6,6 @@ metadata:
 spec:
   containers:
   - image: emilyls/chrony:4.2
-    imagePullPolicy: Always
     name: chrony
     securityContext:
       runAsNonRoot: true

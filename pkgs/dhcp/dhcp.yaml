@@ -6,7 +6,6 @@ metadata:
 spec:
   containers:
   - image: emilyls/dhcp:v1
-    imagePullPolicy: Always
     name: busybox
     volumeMounts:
     - mountPath: /etc
