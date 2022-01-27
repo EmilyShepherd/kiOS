@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubeadm
+spec:
+  containers:
+  - image: emilyls/kubeadm:v1
+    args:
+    - init
+    - --skip-phases=preflight
+    name: kubeadm
+    volumeMounts:
+    - mountPath: /etc/kubernetes
+      name: k8s-config
+    - mountPath: /var/lib/kubelet
+      name: kubelet-config
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+  # We need this so that kubeadm can work pre CNI setup, and also so
+  # that it can correctly see the IP address that the kube-apiserver
+  # will be listening on
+  hostNetwork: true
+  priorityClassName: system-node-critical
+  restartPolicy: OnFailure
+  tolerations:
+  - operator: Exists
+  volumes:
+  - hostPath:
+      path: /etc/kubernetes
+      type: DirectoryOrCreate
+    name: k8s-config
+  - hostPath:
+      path: /var/lib/kubelet
+      type: DirectoryOrCreate
+    name: kubelet-config
