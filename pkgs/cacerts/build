@@ -1,0 +1,12 @@
+
+version=2021-10-26
+url=https://curl.se/ca/cacert-${version}.pem
+checksum=ae31ecb3c6e9ff3154cb7a55f017090448f88482f0e94ac927c0c67a1f33b9cf
+
+build() {
+  for dir in $BUILD_DIR $INITRD
+  do
+    mkdir -p ${dir}/etc/ssl/
+    cp ../srcpkg ${dir}/etc/ssl/ca-bundle.pem
+  done
+}
