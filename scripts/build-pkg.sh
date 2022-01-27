@@ -40,15 +40,17 @@ run_cmd() {
 }
 
 extract() {
-  case $url in
-    *.bz2)
-      extract=j ;;
-    *.gz)
-      extract=z ;;
-    *.xz)
-      extract=J ;;
-  esac
   mkdir -p src
+  case $url in
+    *.tar.bz2)
+      extract=j ;;
+    *.tar.gz)
+      extract=z ;;
+    *.tar.xz)
+      extract=J ;;
+    *)
+      return ;;
+  esac
   tar -x$extract -C src --strip-components 1 -f srcpkg
 }
 
