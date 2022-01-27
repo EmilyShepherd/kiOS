@@ -1,0 +1,4 @@
+
+version=v1
+depends="cni-plugins"
+file_location=$BUILD_DIR

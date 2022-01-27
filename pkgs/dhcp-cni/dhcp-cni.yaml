@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dhcp-cni
+spec:
+  initContainers:
+  - image: emilyls/dhcp-cni:v1
+    name: dhcp-install
+    args:
+    - init
+    env:
+    - name: BRIDGE
+      value: cni0
+    - name: BRIDGE_WITH
+      value: eth0
+    volumeMounts:
+    - mountPath: /host/opt/cni/bin
+      name: cni-bin
+    - mountPath: /host/etc/cni/net.d
+      name: cni-etc
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+        add:
+        - NET_ADMIN
+  containers:
+  - image: emilyls/dhcp-cni:v1
+    name: dhcp-ipam
+    volumeMounts:
+    - mountPath: /host/run
+      name: run
+    - mountPath: /host/var/run/netns
+      name: netns
+      mountPropagation: HostToContainer
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+        add:
+        - NET_ADMIN
+        - NET_RAW
+        # Required for setns
+        - SYS_ADMIN
+  - image: emilyls/dhcp:v1
+    name: dhcp-host
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+        add:
+        - NET_ADMIN
+        - NET_RAW
+    volumeMounts:
+    - mountPath: /etc
+      name: host-etc
+    env:
+    - name: INTERFACE
+      value: cni0
+  hostNetwork: true
+  priorityClassName: system-node-critical
+  tolerations:
+  - operator: Exists
+  volumes:
+  - hostPath:
+      path: /opt/cni/bin
+      type: DirectoryOrCreate
+    name: cni-bin
+  - hostPath:
+      path: /etc/cni/net.d
+      type: DirectoryOrCreate
+    name: cni-etc
+  - hostPath:
+      path: /run
+      type: Directory
+    name: run
+  - hostPath:
+      path: /var/run/netns
+      type: Directory
+    name: netns
+  - hostPath:
+      path: /etc/
+      type: Directory
+    name: host-etc

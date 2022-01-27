@@ -1,0 +1,17 @@
+{
+  "cniVersion": "1.0.0",
+  "name": "default",
+  "plugins": [
+    {
+      "type": "bridge",
+      "ipam": {
+        "type": "dhcp"
+      }
+    },
+    {
+      "type": "portmap",
+      "capabilities": {"portMappings": true},
+      "externalSetMarkChain": "KUBE-MARK-MASQ"
+    }
+  ]
+}
