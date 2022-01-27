@@ -1,5 +1,5 @@
 
-depends="initramfs-files"
+depends="system"
 
 build() {
   cd ${INITRD}
