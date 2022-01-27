@@ -1,0 +1,14 @@
+
+version=2.63
+url=https://mirrors.edge.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-${version}.tar.xz
+checksum=0c637b8f44fc7d8627787e9cf57f15ac06c1ddccb53e41feec5496be3466f77f
+type=make
+
+pre_build() {
+  export BUILD_CC=$(which gcc)
+  export BUILD_LD=$(which ld)
+
+  mkdir -p ${BUILD_DIR}/usr
+  ln -sf lib ${BUILD_DIR}/lib64
+  ln -sf ../include ${BUILD_DIR}/usr/include
+}
