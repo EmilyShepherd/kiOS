@@ -1,0 +1,14 @@
+
+version=2.1.0
+url=https://github.com/lloyd/yajl/archive/refs/tags/${version}.tar.gz
+checksum=510a13e0be57cd4ba99e60ac806a3635854af51316d3131d3742a90298ccde38
+type=make
+
+pre_build() {
+  # Need tp manually call configure because of its non standard flags
+  ./configure -p /
+}
+
+post_build() {
+  mv ${BUILD_DIR}/share/pkgconfig/yajl.pc ${BUILD_DIR}/lib/pkgconfig/
+}
