@@ -1,3 +1,2 @@
 ::sysinit:/etc/init.d/rcS
-::respawn:/bin/crio
 ::respawn:/etc/init.d/kubelet

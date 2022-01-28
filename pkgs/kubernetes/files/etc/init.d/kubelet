@@ -12,6 +12,8 @@ wait_for_file() {
   while ! test -e $1; do $BB sleep 1; done
 }
 
+/bin/crio >/var/log/crio.log 2>&1 &
+
 wait_for_file $CRIO_SOCK
 
 # If there is no config for the kubelet, we have to start up in
@@ -32,6 +34,7 @@ fi
 
 . /var/lib/kubelet/kubeadm-flags.env
 
-exec kubelet $KUBELET_KUBEADM_ARGS \
+kubelet $KUBELET_KUBEADM_ARGS \
   --config $KUBELET_CONFIG \
-  --kubeconfig /etc/kubernetes/kubelet.conf
+  --kubeconfig /etc/kubernetes/kubelet.conf \
+  >/var/log/kubelet.log 2>&1
