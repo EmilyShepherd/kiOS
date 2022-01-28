@@ -1,4 +1,4 @@
 
-depends="init musl busybox cri-o runc iptables conmon conntrack-tools kubernetes cacerts"
+depends="init musl busybox cri-o crun iptables conmon conntrack-tools kubernetes cacerts"
 provides="initramfs-files"
 
