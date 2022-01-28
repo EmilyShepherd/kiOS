@@ -81,7 +81,7 @@ set_machineid() {
 
 for arg in $($BB cat /proc/cmdline)
 do
-  $BB echo $arg | read -d'=' param value
+  echo $arg | read -d'=' param value
   case $param in
     ki.bootpart) BOOTPART=$value ;;
     ki.datapart) DATAPART=$value ;;
@@ -98,10 +98,10 @@ mount_data
 set_hostname
 set_machineid
 
-$BB ip link set dev lo up
-$BB ip link set dev eth0 up
+$BB iplink set dev lo up
+$BB iplink set dev eth0 up
 
-$BB echo 1 > /proc/sys/net/ipv4/ip_forward
+echo 1 > /proc/sys/net/ipv4/ip_forward
 
 for archive in $BOOTSTRAP
 do
