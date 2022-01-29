@@ -13,7 +13,7 @@ build() {
   export KUBE_LINUX_ARM64_CC=$CC
   export CC=
   export GOARCH=
-  export GOFLAGS='-tags=providerless,dockerless'
+  export GOFLAGS='-trimpath -tags=providerless,dockerless'
   export KUBE_BUILD_PLATFORMS="linux/arm64"
   hack/make-rules/build.sh cmd/kubelet cmd/kubeadm
 
