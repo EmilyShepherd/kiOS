@@ -5,7 +5,6 @@ export PATH=/bin
 export BB=$PATH/busybox
 BOOTPART=/dev/mmcblk1p1
 DATAPART=/dev/mmcblk1p2
-CONFIGDIR=etc
 BOOTSTRAP=bootstrap.tar.xz
 
 _mount() {
@@ -20,15 +19,19 @@ _bmount() {
   _mount $1 --bind $2
 }
 
+_cond_bmount() {
+  test -d $2 && _mount $1 --bind $2
+}
+
 tmpmount() {
   _mount $1 -o rw,nosuid,nodev -t tmpfs tmp
 }
 
-mount_boot() {
-  _mount /boot -o rw $BOOTPART
-  _bmount /lib/modules /boot/kernel/modules
-  _bmount /etc/ssl/certs /boot/$CONFIGDIR/ssl
-  _bmount /etc/kubernetes /boot/$CONFIGDIR/kubernetes
+mount_static() {
+  _mount /static -o ro $BOOTPART
+  _bmount /boot /static/boot
+  _cond_bmount /lib/modules /static/boot/modules
+  _cond_bmount /etc/ssl/certs /static/ssl
 }
 
 mount_cgroups() {
@@ -63,21 +66,12 @@ wait_for_devices() {
 mount_data() {
   _mount /var/lib -o rw $DATAPART
   _bmount /var/log /var/lib/log
-}
-
-set_hostname() {
-  local hostname=boot/$CONFIGDIR/hostname
-  test -f $hostname && $BB cat > /proc/sys/kernel/hostname
+  _bmount /etc/kubernetes /var/lib/kubernetes
+  test -d /static/manifests && cp -r /static/manifests /etc/kubernetes/
 }
 
 set_machineid() {
-  local machineid=boot/$CONFIGDIR/machineid
-  if test -f $machineid
-  then
-    $BB cat $machineid > /etc/machine-id
-  else
-    $BB cat /proc/device-tree/serial-number > /etc/machine-id
-  fi
+  $BB cat /proc/device-tree/serial-number > /etc/machine-id
 }
 
 for arg in $($BB cat /proc/cmdline)
@@ -86,16 +80,11 @@ do
   case $param in
     ki.bootpart) BOOTPART=$value ;;
     ki.datapart) DATAPART=$value ;;
-    ki.configdir) CONFIGDIR=$value ;;
     ki.bootstrap) BOOTSTRAP="$BOOTSTRAP $value" ;;
   esac
 done
 
 mount_fs
-wait_for_devices
-mount_boot
-mount_data
-set_hostname
 set_machineid
 
 # This directory needs to exist before kubelet starts, as it will use it
@@ -106,6 +95,10 @@ $BB iplink set dev lo up
 $BB iplink set dev eth0 up
 
 echo 1 > /proc/sys/net/ipv4/ip_forward
+
+wait_for_devices
+mount_static
+mount_data
 
 for archive in $BOOTSTRAP
 do
