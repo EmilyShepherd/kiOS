@@ -21,12 +21,15 @@ package systemd
 
 import (
 	"time"
+	"syscall"
 
 	"github.com/fsnotify/fsnotify"
 	"k8s.io/klog/v2"
 )
 
-type Inhibitor struct {}
+type Inhibitor struct {
+	isShuttingDown bool
+}
 
 func NewDBusCon() (*Inhibitor, error) {
 	return &Inhibitor{}, nil
@@ -57,7 +60,7 @@ func (bus *Inhibitor) CurrentInhibitDelay() (time.Duration, error) {
 // signature, but this is effectively worthless and is not checked again
 // anywhere.
 func (bus *Inhibitor) InhibitShutdown() (InhibitLock, error) {
-	return InhibitLock(1), nil
+	return InhibitLock(0), nil
 }
 
 // Called by the NodeShutdownManager when it has finished killing all
@@ -69,6 +72,9 @@ func (bus *Inhibitor) InhibitShutdown() (InhibitLock, error) {
 // sure you do NOT kick off a shutdown without checking one is in
 // progress first!
 func (bus *Inhibitor) ReleaseInhibitLock(lock InhibitLock) error {
+	if bus.isShuttingDown {
+		syscall.Kill(1, syscall.SIGUSR2)
+	}
 	return nil
 }
 
@@ -94,10 +100,11 @@ func (bus *Inhibitor) MonitorShutdown() (<-chan bool, error) {
 				}
 				if event.Name == systemShutdownFile {
 					if event.Op&fsnotify.Create == fsnotify.Create {
-						shutdownChan <- true
+						bus.isShuttingDown = true
 					} else if event.Op&fsnotify.Remove == fsnotify.Remove {
-						shutdownChan <- false
+						bus.isShuttingDown = false
 					}
+					shutdownChan <- bus.isShuttingDown
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {
