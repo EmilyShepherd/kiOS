@@ -98,6 +98,10 @@ mount_data
 set_hostname
 set_machineid
 
+# This directory needs to exist before kubelet starts, as it will use it
+# to recieve graceful shutdown orders.
+$BB mkdir -p /run/system
+
 $BB iplink set dev lo up
 $BB iplink set dev eth0 up
 
