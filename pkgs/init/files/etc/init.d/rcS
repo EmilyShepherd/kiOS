@@ -92,7 +92,6 @@ do
 done
 
 mount_fs
-mount_cgroups
 wait_for_devices
 mount_boot
 mount_data
