@@ -62,6 +62,7 @@ wait_for_devices() {
 
 mount_data() {
   _mount /var/lib -o rw $DATAPART
+  _bmount /var/log /var/lib/log
 }
 
 set_hostname() {
