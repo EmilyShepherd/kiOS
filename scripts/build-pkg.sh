@@ -94,7 +94,7 @@ do_build() {
   export CC=$(which ${TARGET}-gcc)
   export CXX=$(which ${TARGET}-g++)
   export STRIP=$(which ${TARGET}-strip)
-  export CFLAGS="-isystem ${BUILD_DIR}/include -O2"
+  export CFLAGS="-isystem ${BUILD_DIR}/include -${optimise:-O2}"
   export LDFLAGS="-w -s"
 
   cd src
