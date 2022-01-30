@@ -1,7 +1,10 @@
-kiOS
+KiOS
 ====
 
-A Small Operating System designed to run Kubernetes on a Raspberry Pi 4.
+A slim operating system tailored to run Kubernetes nodes with minimal
+overhead and fast boot times.
+
+
 
 
 ## Installation
