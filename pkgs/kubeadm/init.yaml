@@ -1,12 +1,14 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: kubeadm
+  name: init
+  namespace: kube-node-lease
 spec:
   containers:
   - image: emilyls/kubeadm:v1
     args:
     - init
+    - --config=/etc/kubeadm.yaml
     - --skip-phases=preflight
     name: kubeadm
     volumeMounts:
@@ -14,6 +16,8 @@ spec:
       name: k8s-config
     - mountPath: /var/lib/kubelet
       name: kubelet-config
+    - mountPath: /etc/kubeadm.yaml
+      name: kubeadm-config
     securityContext:
       allowPrivilegeEscalation: false
       capabilities:
@@ -23,7 +27,7 @@ spec:
   # that it can correctly see the IP address that the kube-apiserver
   # will be listening on
   hostNetwork: true
-  priorityClassName: system-node-critical
+  priorityClassName: system-cluster-critical
   restartPolicy: OnFailure
   tolerations:
   - operator: Exists
@@ -36,3 +40,7 @@ spec:
       path: /var/lib/kubelet
       type: DirectoryOrCreate
     name: kubelet-config
+  - hostPath:
+      path: /static/kubeadm.yaml
+      type: File
+    name: kubeadm-config

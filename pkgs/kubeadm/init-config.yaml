@@ -8,6 +8,17 @@ kind: ClusterConfiguration
 clusterName: kios
 imageRepository: docker.io/emilyls
 kubernetesVersion: 1.23.1
+# Example configuration to support static token auth (nice for "quick
+# 'n easy cluster control plane init)
+apiServer:
+  extraArgs:
+    token-auth-file: /etc/kubernetes/tokens
+  extraVolumes:
+  - name: token-file
+    hostPath: /static/tokens
+    mountPath: /etc/kubernetes/tokens
+    readOnly: true
+    pathType: File
 ---
 apiVersion: kubelet.config.k8s.io/v1beta1
 kind: KubeletConfiguration
