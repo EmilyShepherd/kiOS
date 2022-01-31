@@ -23,13 +23,12 @@ if ! test -f $KUBELET_CONFIG
 then
   kubelet --container-runtime remote \
     --container-runtime-endpoint unix:///var/run/crio/crio.sock \
-    --pod-manifest-path=/etc/kubernetes/manifests
+    --pod-manifest-path=/etc/kubernetes/manifests &
 
   kubeletpid=$!
 
   wait_for_file $KUBELET_CONFIG
-
-  kill $kubletpid
+  kill $kubeletpid
 fi
 
 kubelet \
