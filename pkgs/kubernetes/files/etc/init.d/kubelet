@@ -32,9 +32,9 @@ then
   kill $kubletpid
 fi
 
-. /var/lib/kubelet/kubeadm-flags.env
-
-kubelet $KUBELET_KUBEADM_ARGS \
+kubelet \
   --config $KUBELET_CONFIG \
   --kubeconfig /etc/kubernetes/kubelet.conf \
+  --container-runtime remote \
+  --container-runtime-endpoint unix:///var/run/crio/crio.sock \
   >/var/log/kubelet.log 2>&1
