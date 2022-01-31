@@ -21,6 +21,8 @@ wait_for_file $CRIO_SOCK
 # bootstrap the cluster.
 if ! test -f $KUBELET_CONFIG
 then
+  $BB cp /static/init.yaml /etc/kubernetes/manifests/
+
   kubelet --container-runtime remote \
     --container-runtime-endpoint unix:///var/run/crio/crio.sock \
     --pod-manifest-path=/etc/kubernetes/manifests &
