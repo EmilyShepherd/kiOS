@@ -28,7 +28,7 @@ tmpmount() {
 }
 
 mount_static() {
-  _mount /static -o ro $BOOTPART
+  _mount /static -o ro,nodev,nosuid,noexec $BOOTPART
   _bmount /boot /static/boot
   _cond_bmount /lib/modules /static/boot/modules
   _cond_bmount /etc/ssl/certs /static/ssl
