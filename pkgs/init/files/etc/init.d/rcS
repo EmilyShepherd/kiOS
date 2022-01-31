@@ -67,7 +67,7 @@ mount_data() {
   _mount /var/lib -o rw $DATAPART
   _bmount /var/log /var/lib/log
   _bmount /etc/kubernetes /var/lib/kubernetes
-  test -d /static/manifests && cp -r /static/manifests /etc/kubernetes/
+  test -d /static/manifests && $BB cp -r /static/manifests /etc/kubernetes/
 }
 
 set_machineid() {
