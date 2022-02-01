@@ -36,6 +36,7 @@ fi
 kubelet \
   --config $KUBELET_CONFIG \
   --kubeconfig /etc/kubernetes/kubelet.conf \
+  --bootstrap-kubeconfig /etc/kubernetes/bootstrap-kubelet.conf \
   --container-runtime remote \
   --container-runtime-endpoint unix:///var/run/crio/crio.sock \
   >/var/log/kubelet.log 2>&1
