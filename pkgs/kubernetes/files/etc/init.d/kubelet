@@ -16,11 +16,15 @@ wait_for_file() {
 
 wait_for_file $CRIO_SOCK
 
-# If there is no config for the kubelet, we have to start up in
-# standalone mode. The default installation includes a static pod to
-# bootstrap the cluster.
-if ! test -f $KUBELET_CONFIG
+if test -f $KUBELET_CONFIG
 then
+  # Make sure our init pods does _not_ run for subsequent boots of the
+  # node.
+  $BB rm /etc/kubernetes/manifests/init.yaml
+else
+  # If there is no config for the kubelet, we have to start up in
+  # standalone mode. The default installation includes a static pod to
+  # bootstrap the cluster.
   $BB cp /static/init.yaml /etc/kubernetes/manifests/
 
   kubelet --container-runtime remote \
