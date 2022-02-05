@@ -5,5 +5,8 @@ type=make
 binaries="/bin/sh /sbin/modprobe /usr/bin/nsenter /bin/mount /bin/umount"
 
 pre_build() {
-  sed "s#BUILD_DIR#${BUILD_DIR}#" ../config > .config
+  if ! test -f .config
+  then
+    sed "s#BUILD_DIR#${BUILD_DIR}#" ../config > .config
+  fi
 }

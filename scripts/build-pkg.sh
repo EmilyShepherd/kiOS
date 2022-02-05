@@ -20,7 +20,6 @@ build_configure() {
 }
 
 build_make() {
-  if test -f ../config; then cp ../config ./.config; fi
   make -j 19 ${make_target}
   make ${install_target:-install}
 }
