@@ -9,7 +9,7 @@ CRIO_SOCK=/var/run/crio/crio.sock
 KUBELET_CONFIG=/var/lib/kubelet/config.yaml
 
 wait_for_file() {
-  while ! test -e $1; do $BB sleep 1; done
+  while ! test -e $1; do $BB usleep 50; done
 }
 
 /bin/crio >/var/log/crio.log 2>&1 &
