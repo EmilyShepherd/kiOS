@@ -4,6 +4,9 @@ metadata:
   name: init
   namespace: kube-node-lease
 spec:
+  initContainers:
+  - name: wait-for-time
+    image: emilyls/wait-for-time:v1
   containers:
   - image: emilyls/kubeadm:v1
     args:
@@ -18,11 +21,11 @@ spec:
       name: kubelet-config
     - mountPath: /etc/kubeadm.yaml
       name: kubeadm-config
-    securityContext:
-      allowPrivilegeEscalation: false
-      capabilities:
-        drop:
-        - ALL
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
   # We need this so that kubeadm can work pre CNI setup, and also so
   # that it can correctly see the IP address that the kube-apiserver
   # will be listening on
