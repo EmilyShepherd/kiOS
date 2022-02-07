@@ -122,16 +122,16 @@ copy_files() {
 process_elf() {
   for lib in $(readelf -d ${BUILD_DIR}/$1 | grep NEEDED | grep -o '\[.*\]' | tr '[]' ' ')
   do
-    if ! test -f ${INITRD}/lib/$lib
+    if ! test -f ${BIN_TARGET}/lib/$lib
     then
-      cp -L ${BUILD_DIR}/lib/$lib ${INITRD}/lib/
+      cp -L ${BUILD_DIR}/lib/$lib ${BIN_TARGET}/lib/
       process_elf lib/$lib
     fi
   done
 }
 
 copy_binaries() {
-  for bin in $binaries
+  for bin in $@
   do
     path=${BUILD_DIR}/$bin
     if test -e $path
@@ -142,8 +142,8 @@ copy_binaries() {
       then
         cp $path ${INITRD}/bin/
       else
-        ln -fs $(basename $(readlink $path)) ${INITRD}/bin/$(basename $bin)
-        cp -L $(dirname $path)/$(readlink $path) ${INITRD}/bin/
+        ln -fs $(basename $(readlink $path)) ${BIN_TARGET}/bin/$(basename $bin)
+        cp -L $(dirname $path)/$(readlink $path) ${BIN_TARGET}/bin/
       fi
     fi
   done
@@ -217,6 +217,6 @@ build_dependencies
 prepare_workspace
 do_build
 copy_files
-copy_binaries
+BIN_TARGET=${INITRD} copy_binaries $initrd_binaries
 build_container
 mark_built

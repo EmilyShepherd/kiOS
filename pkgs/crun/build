@@ -5,7 +5,7 @@ checksum=8e1035c209a22a8784acd6b7b880f9c988ad0b9358f3d05e745412966e2ce546
 type=configure
 configure_flags="--disable-systemd --disable-embedded-yajl"
 depends="libcap libyajl argp-standalone libseccomp"
-binaries="/bin/crun"
+initrd_binaries="/bin/crun"
 
 pre_build() {
   export CFLAGS="$CFLAGS $(pkg-config --cflags yajl)"
