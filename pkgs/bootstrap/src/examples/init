@@ -1,0 +1,12 @@
+#:emilyls/init
+# Test example
+
+hostname = "test"
+
+[network]
+  #dns = ["8.8.8.8", "8.8.4.4"]
+  dns = "8.8.8.8"
+  dns = "8.8.4.4"
+
+  [[network.dhcp]]
+    if = "eth0"
