@@ -1,30 +1,40 @@
-KiOS
+kiOS
 ====
 
 A slim operating system tailored to run Kubernetes nodes with minimal
 overhead and fast boot times.
 
+## Core Features
 
+kiOS is a distribution of Linux, designed to run (and be run by)
+Kubernetes. It has the following design features:
 
+- All system services, including cluster init, are run as static
+  kubernetes pods - kubelet is used in place of traditional init systems
+  like openrc or runsv to monitor / restart these services.
+- The system attempts to be relatively unopinionated; system pod
+  manifests the standard location and can be configured during runtime
+  or on startup, in the same way you would configure any other k8s pod.
+- kiOS is designed to bootstrap itself as a node or master by reading a
+  single "init" file from the boot partition - interactive configuration
+  is not required (or, indeed, supported!).
+- Under the hood, containers are run with [cri-o][crio] and
+  [crun][crun].
+- The system treats its boot partition as read only by default, so kiOS
+  can be run on a system with a slow or read only (eg flash) boot
+  device, using another drive for data storage.
 
-## Installation
+## Raspberry Pi 4
 
-*Requires `aarch64-linux-musl-*` cross compilers*
+kiOS is currently only tailored for running on the raspberry pi 4 (in 64
+bit mode), however further flavours may be added at some point.
 
-1. Build the boot partition:
+By default, kiOS bridges the host network with all containers, giving
+them their own L2 access to the physical network. DHCP is used to
+obtain IP addresses for both the host and any containers.
 
-```
-./scripts/build-pkg.sh bootpart
-```
+Chrony is deployed as an NTP client, and is setup to access the generic
+ntp server pool.
 
-2. Format an SD with two partitions, the first ~250M vfat, the second
-can be the remainder of the drive and should be ext2, ext3, or ext4.
-
-3. Copy .build/bootpart/* into the first partition. **Do not change the
-file structure**. The second partition can be left empty.
-
-4. You can now boot the pi from the SD card. Currently, once the system
-is booted once, you need to turn it off, and pull the admin kubeconfig
-from it in order to access the cluster. It will be in the first
-partition, under `etc/kubernetes/admin.conf`. This process will be
-improved soon.
+[crio]: https://github.com/cri-o/cri-o
+[crun]: https://github.com/containers/crun
