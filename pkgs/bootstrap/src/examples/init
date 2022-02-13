@@ -6,12 +6,9 @@
 [network]
   hostname = "test"
 
-  nameservers = [
-    "8.8.8.8",
-    "8.8.4.4",
-    "2001:4860:4860::8888",
-    "2001:4860:4860::8844"
-  ]
+  # The special "google" keyword will use the Google nameservers.
+  # Otherwise, this is a list of IP addresses.
+  nameservers = ["google"]
 
 # Use [[pod.dhcp]] blocks to spin up dhcp clients to aquire IP addresses
 # for interfaces.

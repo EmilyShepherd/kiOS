@@ -20,13 +20,24 @@ struct DHCPPod {
 FILE *resolv;
 struct DHCPPod dhcp = { "", "", 0 };
 
+static void add_nameserver(const char *server) {
+  fprintf(resolv, "nameserver %s\n", server);
+}
+
 void root(struct Value *val) {
   if (strcmp(val->key, "network.hostname") == 0) {
     REQUIRE(STRING);
     sethostname(val->string.value, val->string.length);
   } else if (strcmp(val->key, "network.nameservers") == 0) {
     REQUIRE(STRING);
-    fprintf(resolv, "nameserver %s\n", val->string.value);
+    if (strcmp(val->string.value, "google") == 0) {
+      add_nameserver("2001:4860:4860::8888");
+      add_nameserver("2001:4860:4860::8844");
+      add_nameserver("8.8.8.8");
+      add_nameserver("8.8.4.4");
+    } else {
+      add_nameserver(val->string.value);
+    }
   }
 }
 
