@@ -11,6 +11,9 @@
     printf("[ERROR] %s has an unexpected value\n", val->key); \
   }
 
+#define RESOLV_FILE "/etc/resolv.conf"
+#define MANIFEST_DIR "/etc/kubernetes/manifests"
+
 struct DHCPPod {
   char interface[10];
   char bridge[10];
@@ -62,10 +65,11 @@ void run_dhcp() {
   }
 
   char file[NAME_MAX];
-  sprintf(file, "/etc/kubernetes/manifests/dhcpd-%s.yaml", dhcp.interface);
+  sprintf(file, "%s/dhcpd-%s.yaml", MANIFEST_DIR, dhcp.interface);
   FILE *fp = fopen(file, "w");
-
-  if (!dhcp.cni) {
+  if (!fp) {
+    printf("[ERROR] Cannot create manifest file\n");
+  } else if (!dhcp.cni) {
     fprintf(fp, DHCP_MANIFEST, dhcp.interface, dhcp.interface);
   } else {
     if (dhcp.bridge[0] == 0) {
@@ -95,7 +99,11 @@ cb obj(char *name) {
 
 int main(int argc, char **argv) {
   char *file = argv[1];
-  resolv = fopen("/etc/resolv.conf", "w");
+  resolv = fopen(RESOLV_FILE, "w");
+  if (!resolv) {
+    printf("[ERROR] Cannot open resolv.conf file\n");
+    return 1;
+  }
 
   struct TomlParser parser;
   toml_parser_init(&parser, file);
