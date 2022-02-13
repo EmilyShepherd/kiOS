@@ -1,0 +1,25 @@
+##
+# Example configuration file
+
+# The "network" settings are initial defaults. If you define a DHCP pod,
+# they can override these values with dhcp server provided values.
+[network]
+  hostname = "test"
+
+  nameservers = [
+    "8.8.8.8",
+    "8.8.4.4",
+    "2001:4860:4860::8888",
+    "2001:4860:4860::8844"
+  ]
+
+# Use [[pod.dhcp]] blocks to spin up dhcp clients to aquire IP addresses
+# for interfaces.
+[[pod.dhcp]]
+  # The physical interface to use.
+  interface = "eth0"
+
+  # Optionally, setting cni=true causes this interface to be bridged
+  # with the pod networks, and dhcp to be used to obtain pod IP
+  # addresses also.
+  cni = true
