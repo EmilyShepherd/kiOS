@@ -20,3 +20,4 @@
   # with the pod networks, and dhcp to be used to obtain pod IP
   # addresses also.
   cni = true
+  bridge = "cni0"

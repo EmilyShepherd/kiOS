@@ -106,8 +106,6 @@ enum Status parse_value(struct TomlParser *p, char c, char *path) {
     stretchy_value(&value.string);
 
     (*p->callback)(&value);
-
-    stretchy_destroy(&value.string);
   } else if (c == '[') {
     SCAN_OVER_CHARS(IS_WHITESPACE || IS_NEWLINE);
     if (c == ']') {

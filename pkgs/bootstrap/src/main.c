@@ -15,13 +15,14 @@
 #define MANIFEST_DIR "/etc/kubernetes/manifests"
 
 struct DHCPPod {
-  char interface[10];
-  char bridge[10];
+  char *interface;
+  char *bridge;
   int cni;
+  int enabled;
 };
 
 FILE *resolv;
-struct DHCPPod dhcp = { "", "", 0 };
+struct DHCPPod dhcp = { NULL, NULL, 0, 0 };
 
 static void add_nameserver(const char *server) {
   fprintf(resolv, "nameserver %s\n", server);
@@ -42,25 +43,31 @@ void root(struct Value *val) {
       add_nameserver(val->string.value);
     }
   }
+  if (val->type == STRING) {
+    free(val->string.value);
+  }
 }
 
 void dhcp_value(struct Value *val) {
   if (strcmp(val->key, "interface") == 0) {
     REQUIRE(STRING);
-    strcpy(dhcp.interface, val->string.value);
+    dhcp.interface = val->string.value;
   } else if (strcmp(val->key, "cni") == 0) {
     REQUIRE(BOOLEAN);
     dhcp.cni = val->integer;
   } else if (strcmp(val->key, "bridge") == 0) {
     REQUIRE(STRING);
-    strcpy(dhcp.bridge, val->string.value);
+    dhcp.bridge = val->string.value;
   } else {
     printf("[ERROR] Unknown value for dhcp: %s\n", val->key);
+    if (val->type == STRING) {
+      free(val->string.value);
+    }
   }
 }
 
 void run_dhcp() {
-  if (dhcp.interface[0] == 0) {
+  if (dhcp.enabled == 0) {
     return;
   }
 
@@ -72,9 +79,6 @@ void run_dhcp() {
   } else if (!dhcp.cni) {
     fprintf(fp, DHCP_MANIFEST, dhcp.interface, dhcp.interface);
   } else {
-    if (dhcp.bridge[0] == 0) {
-      strcpy(dhcp.bridge, "cni0");
-    }
     fprintf(fp, DHCP_CNI_MANIFEST,
         dhcp.interface, dhcp.bridge,
         dhcp.interface, dhcp.bridge,
@@ -82,15 +86,22 @@ void run_dhcp() {
     );
   }
 
-  dhcp.interface[0] = 0;
-  dhcp.bridge[0] = 0;
+  if (dhcp.interface != NULL) {
+    free(dhcp.interface);
+    dhcp.interface = NULL;
+  }
+  if (dhcp.bridge != NULL) {
+    free(dhcp.bridge);
+    dhcp.bridge = NULL;
+  }
   dhcp.cni = 0;
+  dhcp.enabled = 0;
 }
 
 cb obj(char *name) {
   if (strcmp("pod.dhcp", name) == 0) {
     run_dhcp();
-    strcpy(dhcp.interface, "eth0");
+    dhcp.enabled = 1;
     return &dhcp_value;
   } else {
     printf("[ERROR] Unknown table type %s\n", name);
