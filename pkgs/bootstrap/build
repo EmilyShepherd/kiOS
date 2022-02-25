@@ -1,3 +1,4 @@
 
+version=v1
 type=make
 depends="wait-for-time"
