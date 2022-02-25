@@ -10,6 +10,15 @@
   # Otherwise, this is a list of IP addresses.
   nameservers = ["google"]
 
+[join]
+  master = "https://192.168.1.70"
+  token = "abc.1234"
+  discovery_hash = "aaaaaa"
+
+[control_plane]
+  enabled = true
+  api.admin_token = "admin"
+
 # Use [[pod.dhcp]] blocks to spin up dhcp clients to aquire IP addresses
 # for interfaces.
 [[pod.dhcp]]

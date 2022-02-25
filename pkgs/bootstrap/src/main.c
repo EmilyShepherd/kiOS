@@ -2,15 +2,19 @@
 #include <string.h>
 #include <unistd.h>
 #include <linux/limits.h>
+#include <wait_for_time.h>
 #include "toml.h"
 #include "manifests/dhcp.h"
 #include "manifests/dhcp-cni.h"
+#include "manifests/kubeadm-config.h"
 
 #define REQUIRE(expected)                                     \
   if (val->type != expected) {                                \
     printf("[ERROR] %s has an unexpected value\n", val->key); \
   }
 
+#define TOKENS_FILE "/etc/kubernetes/tokens"
+#define KUBEADM_FILE "/tmp/kubeadm.yaml"
 #define RESOLV_FILE "/etc/resolv.conf"
 #define MANIFEST_DIR "/etc/kubernetes/manifests"
 
@@ -21,8 +25,34 @@ struct DHCPPod {
   int enabled;
 };
 
+struct ControlPlane {
+  int enabled;
+  char *admin_token;
+};
+
 FILE *resolv;
 struct DHCPPod dhcp = { NULL, NULL, 0, 0 };
+struct ControlPlane cp = {0, NULL};
+
+const char *CONTROL_PLANE_ARGS[] = {
+  "kubeadm",
+  "init",
+  "--config",
+  KUBEADM_FILE,
+  "--skip-phases=preflight",
+  NULL
+};
+
+char const *JOIN_ARGS[] = {
+  "kubeadm",
+  "join",
+  NULL,
+  "--token",
+  NULL,
+  "--discovery-token-ca-cert-hash",
+  NULL,
+  NULL
+};
 
 static void add_nameserver(const char *server) {
   fprintf(resolv, "nameserver %s\n", server);
@@ -42,6 +72,25 @@ void root(struct Value *val) {
     } else {
       add_nameserver(val->string.value);
     }
+  } else if (strcmp(val->key, "join.master") == 0) {
+    REQUIRE(STRING);
+    JOIN_ARGS[2] = val->string.value;
+    return;
+  } else if (strcmp(val->key, "join.token") == 0) {
+    REQUIRE(STRING);
+    JOIN_ARGS[4] = val->string.value;
+    return;
+  } else if (strcmp(val->key, "join.discovery_hash") == 0) {
+    REQUIRE(STRING);
+    JOIN_ARGS[6] = val->string.value;
+    return;
+  } else if (strcmp(val->key, "control_plane.enabled") == 0) {
+    REQUIRE(BOOLEAN);
+    cp.enabled = val->integer;
+  } else if (strcmp(val->key, "control_plane.api.admin_token") == 0) {
+    REQUIRE(STRING);
+    cp.admin_token = val->string.value;
+    return;
   }
   if (val->type == STRING) {
     free(val->string.value);
@@ -125,5 +174,26 @@ int main(int argc, char **argv) {
   fclose(resolv);
   run_dhcp();
 
-  return 0;
+  const char **args;
+  if (!cp.enabled) {
+    args = JOIN_ARGS;
+  } else {
+    args = CONTROL_PLANE_ARGS;
+    FILE *tokens = fopen(TOKENS_FILE, "w");
+    fprintf(tokens, TOKEN_CONFIG, cp.admin_token);
+    fclose(tokens);
+
+    FILE *kubeadm = fopen(KUBEADM_FILE, "w");
+    fprintf(kubeadm, KUBEADM_CONFIG);
+    fclose(kubeadm);
+  }
+
+  wait_for_sensible_time();
+
+  execv("/bin/kubeadm", (char * const*)args);
+
+  // Shouldn't reach here
+  printf("[ERROR] Couldn't run kubeadm!\n");
+
+  return 1;
 }
