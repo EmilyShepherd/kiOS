@@ -134,6 +134,7 @@ void run_dhcp() {
         dhcp.bridge
     );
   }
+  fclose(fp);
 
   if (dhcp.interface != NULL) {
     free(dhcp.interface);
