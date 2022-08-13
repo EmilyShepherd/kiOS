@@ -10,7 +10,6 @@ const char *KUBEADM_CONFIG =
 "apiVersion: kubeadm.k8s.io/v1beta3\n"
 "kind: ClusterConfiguration\n"
 "clusterName: kios\n"
-"imageRepository: docker.io/emilyls\n"
 "kubernetesVersion: 1.23.1\n"
 "# Example configuration to support static token auth (nice for quick\n"
 "# 'n easy cluster control plane init)\n"
