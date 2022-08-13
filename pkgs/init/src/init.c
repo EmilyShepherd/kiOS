@@ -46,6 +46,14 @@ int main(int argc, char **argv) {
   bind_mount("/srv/log", "/var/log", MS_NODEV | MS_NOEXEC | MS_NOSUID);
   bind_mount("/var/lib/kubernetes", "/etc/kubernetes", MS_NODEV | MS_NOEXEC | MS_NOSUID);
 
+  char hostname[256];
+  FILE *fp = fopen("/srv/hostname", "r");
+  if (fp) {
+    if (fgets(&hostname, 256, fp)) {
+      sethostname(hostname, strlen(hostname));
+    }
+  }
+
   return 0;
 }
 
