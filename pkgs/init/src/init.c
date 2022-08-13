@@ -1,4 +1,6 @@
 
+#include <net/if.h>
+#include <sys/socket.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
 #include <sys/inotify.h>
@@ -28,9 +30,13 @@
   mkmount(source, target, 0, flags | MS_BIND, 0)
 
 static void mount_fs();
+static void bring_if_up(const char *);
 void wait_for_path(const char* file);
 
 int main(int argc, char **argv) {
+  bring_if_up("lo");
+  bring_if_up("eth0");
+
   mount_fs();
 
   char *bootpart = DEFAULT_BOOTPART;
@@ -55,6 +61,15 @@ int main(int argc, char **argv) {
   }
 
   return 0;
+}
+
+static void bring_if_up(const char *iff) {
+  int ip = socket(PF_INET, SOCK_DGRAM, 0);
+  struct ifreq ifr;
+  strncpy(&ifr.ifr_name, iff, 16);
+  ioctl(ip, SIOCGIFFLAGS, &ifr);
+  ifr.ifr_flags |= IFF_UP;
+  ioctl(ip, SIOCSIFFLAGS, &ifr);
 }
 
 void wait_for_path(const char *path) {
