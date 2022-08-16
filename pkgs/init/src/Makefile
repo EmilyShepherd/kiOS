@@ -5,4 +5,4 @@ init: init.c
 .PHONY: install
 
 install: init
-	cp $^ $(DESTDIR)/bin/init-new
+	cp $^ $(DESTDIR)/init

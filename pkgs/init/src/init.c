@@ -1,4 +1,5 @@
 
+#include <signal.h>
 #include <fcntl.h>
 #include <net/if.h>
 #include <sys/socket.h>
@@ -30,6 +31,12 @@
 #define bind_mount(source, target, flags) \
   mkmount(source, target, 0, flags | MS_BIND, 0)
 
+#define CRIO_SOCK "/var/run/crio/crio.sock"
+#define CRIO_LOG "/var/log/crio.log"
+#define KUBELET_LOG "/var/log/kubelet.log"
+#define KUBELET_CONFIG "/var/lib/kubelet/config.yaml"
+#define INIT_MANIFEST "/var/etc/kubernetes/manifests/init.yaml"
+
 static void mount_fs();
 static void bring_if_up(const char *);
 void wait_for_path(const char* file);
@@ -37,6 +44,65 @@ void wait_for_path(const char* file);
 static int fexists(const char *path) {
   struct stat _;
   return !stat(path, &_);
+}
+
+static pid_t start_exe(const char *exe, const char *log, char * const *argv) {
+  pid_t pid;
+  pid = fork();
+
+  if (pid != 0) {
+    return pid; /* Parent */
+  }
+
+  /* Child */
+  int fd = open(log, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+  dup2(fd, 1);
+  dup2(fd, 2);
+  close(fd);
+
+  execv(exe, argv);
+}
+
+static void start_container_runtime(void) {
+  // wait_for_path only works when the directory the expected file will
+  // be in already exists (it does not recursively check up). Ensure
+  // that the directory exists here.
+  mkdir("/var/run/crio", 0600);
+  char const *nullArgs[] = {"/bin/crio", NULL};
+  pid_t crio = start_exe("/bin/crio", CRIO_LOG, nullArgs);
+  wait_for_path(CRIO_SOCK);
+
+  if (fexists(KUBELET_CONFIG)) {
+    unlink(INIT_MANIFEST);
+  } else {
+    char const *initArgs[] = {
+      "/bin/kubelet",
+      "--container-runtime", "remote",
+      "--container-runtime-endpoint", "unix:///var/run/crio/crio.sock",
+      "--pod-manifest-path=/etc/kubernetes/manifests",
+      NULL
+    };
+    pid_t initkubelet = start_exe("/bin/kubelet", KUBELET_LOG, initArgs);
+
+    wait_for_path(KUBELET_CONFIG);
+    kill(initkubelet, SIGTERM);
+    waitpid(initkubelet, NULL, 0);
+  }
+
+  char * const kubeletArgs[] = {
+    "/bin/kubelet",
+    "--config", KUBELET_CONFIG,
+    "--kubeconfig", "/etc/kubernetes/kubelet.conf",
+    "--bootstrap-kubeconfig", "/etc/kubernetes/bootstrap-kubelet.conf",
+    "--container-runtime", "remote",
+    "--container-runtime-endpoint", "unix:///var/run/crio/crio.sock",
+    NULL
+  };
+  pid_t kubelet = start_exe("/bin/kubelet", KUBELET_LOG, kubeletArgs);
+
+  while (1) {
+    wait();
+  }
 }
 
 int main(int argc, char **argv) {
@@ -84,7 +150,9 @@ int main(int argc, char **argv) {
     }
   }
 
-  return 0;
+
+  putenv("PATH=/bin");
+  start_container_runtime();
 }
 
 static void bring_if_up(const char *iff) {

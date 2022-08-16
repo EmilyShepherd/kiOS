@@ -1,3 +1,0 @@
-::sysinit:/bin/init-new
-::respawn:/etc/init.d/kubelet
-::shutdown:/sbin/umount -a -r
