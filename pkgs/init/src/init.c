@@ -33,6 +33,11 @@ static void mount_fs();
 static void bring_if_up(const char *);
 void wait_for_path(const char* file);
 
+static int fexists(const char *path) {
+  struct stat _;
+  return !stat(path, &_);
+}
+
 int main(int argc, char **argv) {
   bring_if_up("lo");
   bring_if_up("eth0");
@@ -73,10 +78,8 @@ static void bring_if_up(const char *iff) {
 }
 
 void wait_for_path(const char *path) {
-  struct stat _;
-
   // If the file exists, we are good to go
-  if (!stat(path, &_)) {
+  if (fexists(path)) {
     return;
   }
 
@@ -107,7 +110,7 @@ void wait_for_path(const char *path) {
 
   // We'll check again just incase the drive appeared while we set up
   // inotify
-  if (!stat(path, &_)) {
+  if (fexists(path)) {
     goto end;
   }
 
