@@ -1,4 +1,5 @@
 
+#include <fcntl.h>
 #include <net/if.h>
 #include <sys/socket.h>
 #include <sys/mount.h>
@@ -39,6 +40,24 @@ static int fexists(const char *path) {
 }
 
 int main(int argc, char **argv) {
+  char *console;
+  console = getenv("CONSOLE");
+  if (!console) {
+    console = getenv("console");
+  }
+
+  if (console) {
+    int fd = open(console, O_RDWR | O_NONBLOCK | O_NOCTTY);
+    if (fd >= 0) {
+      dup2(fd, STDIN_FILENO);
+      dup2(fd, STDOUT_FILENO);
+      dup2(fd, STDERR_FILENO);
+      close(fd);
+    }
+  }
+
+  printf("Kios Init\n");
+
   bring_if_up("lo");
   bring_if_up("eth0");
 
