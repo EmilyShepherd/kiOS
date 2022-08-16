@@ -5,5 +5,7 @@ url=github
 checksum=76286480065d4cf9b24610c159c683710fe9c8b9f753518f804f22bbb59796a8
 #url=https://github.com/containers/conmon/releases/download/${version}/conmon-arm.zip
 type=make
+make_target="bin/conmon"
+install_target="install.bin"
 depends="glib libseccomp"
 initrd_binaries="/bin/conmon"
