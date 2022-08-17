@@ -1,10 +1,10 @@
-version=v1.23.0
+version=v1.24.2
 project=kubernetes-sigs
 url=github
 type="make"
 make_target=binaries
 install_target=install.bin
-checksum=2fbbd732335961dfb2c276e8b48cc96ced70e770c664f949a7b72a9263158f15
+checksum=11bbb79f73062e49487335174c86ccfb7a76bceac2cd20942ac824889f697846
 depends="libseccomp"
 initrd_binaries="/bin/crio /bin/pinns"
 

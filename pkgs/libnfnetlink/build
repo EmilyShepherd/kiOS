@@ -1,8 +1,0 @@
-
-version=1.0.1
-type=netfilter
-checksum=f270e19de9127642d2a11589ef2ec97ef90a649a74f56cf9a96306b04817b51a
-
-pre_build() {
-  find -type f | xargs sed -i 's/u_int/uint/g'
-}

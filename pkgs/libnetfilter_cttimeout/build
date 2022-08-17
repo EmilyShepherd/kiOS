@@ -1,5 +1,0 @@
-
-type=netfilter
-version=1.0.0
-checksum=aeab12754f557cba3ce2950a2029963d817490df7edb49880008b34d7ff8feba
-depends="libmnl"
