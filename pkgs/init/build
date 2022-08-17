@@ -1,3 +1,6 @@
 
 type=make
-initrd_binaries="/init"
+
+post_build() {
+  cp ${BUILD_DIR}/init ${INITRD}/init
+}
