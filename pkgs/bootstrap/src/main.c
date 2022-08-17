@@ -62,6 +62,15 @@ void root(struct Value *val) {
   if (strcmp(val->key, "network.hostname") == 0) {
     REQUIRE(STRING);
     sethostname(val->string.value, val->string.length);
+
+    // Write the hostname back to /etc/hostname.
+    // Init will pick this up and set the hostname in the host uts
+    // namespace prior to relaunching kubelet.
+    FILE *hostname = fopen("/etc/hostname", "w");
+    if (hostname) {
+      fprintf(hostname, val->string.value);
+      fclose(hostname);
+    }
   } else if (strcmp(val->key, "network.nameservers") == 0) {
     REQUIRE(STRING);
     if (strcmp(val->string.value, "google") == 0) {

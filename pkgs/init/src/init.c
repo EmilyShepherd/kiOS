@@ -6,7 +6,7 @@
 #include <sys/mount.h>
 #include <sys/stat.h>
 #include <sys/inotify.h>
-#include <linux/limits.h>
+#include <limits.h>
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -63,6 +63,17 @@ static pid_t start_exe(const char *exe, const char *log, char * const *argv) {
   execv(exe, argv);
 }
 
+static void set_hostname_from_file(void) {
+  char hostname[HOST_NAME_MAX];
+  FILE *fp = fopen("/etc/hostname", "r");
+  if (fp) {
+    if (fgets(&hostname, HOST_NAME_MAX, fp)) {
+      sethostname(hostname, strlen(hostname));
+    }
+    fclose(fp);
+  }
+}
+
 static void start_container_runtime(void) {
   // wait_for_path only works when the directory the expected file will
   // be in already exists (it does not recursively check up). Ensure
@@ -86,6 +97,12 @@ static void start_container_runtime(void) {
 
     wait_for_path(KUBELET_CONFIG);
     kill(initkubelet, SIGTERM);
+
+    // Kubelet normally shuts down pretty quickly, but on the off change
+    // we are waiting, we'll do our required admin first before blocking
+    // on waiting for it.
+    set_hostname_from_file();
+
     waitpid(initkubelet, NULL, 0);
   }
 
@@ -141,15 +158,6 @@ int main(int argc, char **argv) {
   bind_mount("/srv", "/var/lib", 0);
   bind_mount("/srv/log", "/var/log", MS_NODEV | MS_NOEXEC | MS_NOSUID);
   bind_mount("/var/lib/kubernetes", "/etc/kubernetes", MS_NODEV | MS_NOEXEC | MS_NOSUID);
-
-  char hostname[256];
-  FILE *fp = fopen("/srv/hostname", "r");
-  if (fp) {
-    if (fgets(&hostname, 256, fp)) {
-      sethostname(hostname, strlen(hostname));
-    }
-  }
-
 
   putenv("PATH=/bin");
   start_container_runtime();
