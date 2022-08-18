@@ -193,7 +193,7 @@ mark_built() {
 }
 
 build_container() {
-  if test -f $pkgpath/Dockerfile
+  if test -f $pkgpath/Containerfile
   then
     cd $BUILD_DIR
     image=docker.io/emilyls/$pkg:$version
@@ -201,7 +201,7 @@ build_container() {
       --no-cache --squash \
       --platform=linux/arm64/v8 \
       -t $image \
-      -f $pkgpath/Dockerfile .
+      -f $pkgpath/Containerfile .
   fi
 }
 
