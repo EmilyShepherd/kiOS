@@ -11,5 +11,5 @@ COPY /etc/passwd /etc/group /etc/
 
 USER 999:999
 
-ENTRYPOINT ["/bin/chronyd", "-d"]
+ENTRYPOINT ["/bin/chronyd", "-Ud"]
 
