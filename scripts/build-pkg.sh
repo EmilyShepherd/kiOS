@@ -76,6 +76,9 @@ prepare_workspace() {
   if ! test -d src
   then
     extract
+
+    # Apply Patches if there are any
+    patch -p1 -d src < *.patch || true
   fi
 }
 

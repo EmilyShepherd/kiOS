@@ -1,4 +1,4 @@
-FROM k8s.gcr.io/build-image/setcap:bullseye-v1.0.0
+FROM --platform=$BUILDPLATFORM k8s.gcr.io/build-image/setcap:bullseye-v1.0.0
 
 ADD /sbin/chronyd /bin/chronyd
 RUN setcap cap_sys_time=+ep /bin/chronyd
