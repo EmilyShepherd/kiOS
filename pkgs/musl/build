@@ -1,7 +1,7 @@
 
-version=1.1.24
+version=1.2.3
 type=configure
 url=http://www.musl-libc.org/releases/${pkg}-${version}.tar.gz
-checksum=1370c9a812b2cf2a7d92802510cca0058cc37e66a7bedd70051f0a34015022a3
+checksum=7d5b0b6062521e4627e099e4c9dc8248d32a30285e959b7eecaa780cf8cfd4a4
 configure_test=config.mak
 files="/lib/ld-musl-aarch64.so.1"
