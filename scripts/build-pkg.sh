@@ -27,7 +27,7 @@ build_make() {
 build_meson() {
   if ! test -d _build
   then
-    meson _build -Dprefix="/" --cross-file ${PROJROOT}/scripts/aarch64
+    meson _build -Dprefix="/" --cross-file ${PROJROOT}/scripts/aarch64 $meson_flags
   fi
 
   ninja -C _build
