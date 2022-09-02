@@ -1,7 +1,7 @@
 
-version=1.4.1
+version=1.5
 url=https://github.com/containers/crun/releases/download/${version}/crun-${version}.tar.xz
-checksum=8e1035c209a22a8784acd6b7b880f9c988ad0b9358f3d05e745412966e2ce546
+checksum=8e7e1636adb3cc12d45cdf4ddfd0503604950d0d2868a0bfa9666b90d0a8d9d7
 type=configure
 configure_flags="--disable-systemd --disable-embedded-yajl"
 depends="libcap libyajl argp-standalone libseccomp"
