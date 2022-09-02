@@ -51,6 +51,7 @@ char const *JOIN_ARGS[] = {
   NULL,
   "--discovery-token-ca-cert-hash",
   NULL,
+  "--skip-phases=preflight",
   NULL
 };
 
