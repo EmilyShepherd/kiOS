@@ -6,13 +6,22 @@ BUILT_PACKAGES=$(pwd)/.build/built
 BUILD_DIR=$(pwd)/.build/root
 INITRD=$(pwd)/.build/initrd
 BOOTPART=$(pwd)/.build/bootpart
-TARGET=aarch64-linux-musl
+
+case ${HOST:-arm} in
+  amd|x86)
+    export ARCH=amd64
+    export AARCH=x86_64
+    ;;
+  arm)
+    export ARCH=arm64
+    export AARCH=aarch64
+esac
 
 build_configure() {
   if ! test -f ${configure_test:-Makefile}
   then
     ./${configure_cmd:-configure} --prefix=$PREFIX \
-      --host=aarch64-unknown-linux-gnu \
+      --host=${AARCH}-unknown-linux-gnu \
       --with-sysroot=${BUILD_DIR} \
       $configure_flags
   fi
@@ -27,7 +36,7 @@ build_make() {
 build_meson() {
   if ! test -d _build
   then
-    meson _build -Dprefix="/" --cross-file ${PROJROOT}/scripts/aarch64 $meson_flags
+    meson _build -Dprefix="/" --cross-file ${PROJROOT}/scripts/${AARCH} $meson_flags
   fi
 
   ninja -C _build
@@ -83,10 +92,10 @@ prepare_workspace() {
 }
 
 do_build() {
-  export GOARCH=arm64
+  export TARGET=${AARCH}-linux-musl
   export CGO_ENABLED=1
-  export ARCH=arm64
-  export CROSS_COMPILE=aarch64-linux-musl-
+  export GOARCH=${ARCH}
+  export CROSS_COMPILE=${TARGET}-
   export PREFIX=""
   export DESTDIR=$BUILD_DIR
   export PKG_CONFIG_SYSTEM_LIBRARY_PATH=${BUILD_DIR}/lib

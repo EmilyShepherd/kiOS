@@ -11,11 +11,12 @@ pre_build() {
 
 build() {
   export KUBE_LINUX_ARM64_CC=$CC
+  export KUBE_LINUX_AMD64_CC=$CC
   export CC=
   export GOARCH=
   export GOFLAGS='-trimpath -tags=providerless,dockerless'
-  export KUBE_BUILD_PLATFORMS="linux/arm64"
+  export KUBE_BUILD_PLATFORMS="linux/${ARCH}"
   hack/make-rules/build.sh cmd/kubelet cmd/kubeadm
 
-  cp _output/local/bin/linux/arm64/* ${BUILD_DIR}/bin/
+  cp _output/local/bin/linux/${ARCH}/* ${BUILD_DIR}/bin/
 }
