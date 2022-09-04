@@ -1,8 +1,8 @@
 
-version=v5.10
+version=v5.19
 project=torvalds
 url=github
-checksum=85eaf2c340ff369fefb281ef4afebfc394412b8c0a3b4ff8aadcbe1ebefc3aa4
+checksum=
 install_target="zinstall modules_install dtbs_install"
 type=make
 
