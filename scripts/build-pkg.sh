@@ -205,10 +205,10 @@ build_container() {
   if test -f $pkgpath/Containerfile
   then
     cd $BUILD_DIR
-    image=docker.io/emilyls/$pkg:$version
+    image=docker.io/emilyls/$pkg:$version-$ARCH
     podman build \
       --no-cache --squash \
-      --platform=linux/arm64/v8 \
+      --platform=linux/${ARCH} \
       -t $image \
       -f $pkgpath/Containerfile .
   fi
