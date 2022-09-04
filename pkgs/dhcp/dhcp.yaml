@@ -1,27 +1,32 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: dhcpd
+  name: dhcpcd
   namespace: kube-node-lease
 spec:
   containers:
-  - image: emilyls/dhcp:v1
-    name: busybox
+  - image: emilyls/dhcp:9.4.0
+    args:
+      - eth0
+    name: dhcpcd
     volumeMounts:
     - mountPath: /etc
       name: config
+    - mountPath: /var/run/dhcpcd
+      name: runtime
+      subPath: run
+    - mountPath: /var/db/dhcpcd
+      name: runtime
+      subPath: db
     # Currently we require running as root but this may change
     securityContext:
-      allowPrivilegeEscalation: false
+      privileged: true
       capabilities:
         drop:
         - ALL
         add:
         - NET_ADMIN
         - NET_RAW
-    env:
-    - name: INTERFACE
-      value: eth0
   hostNetwork: true
   priorityClassName: system-node-critical
   tolerations:
@@ -31,3 +36,5 @@ spec:
       path: /etc
       type: Directory
     name: config
+  - emptyDir: {}
+    name: runtime

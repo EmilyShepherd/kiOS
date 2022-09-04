@@ -45,10 +45,12 @@ spec:
         - NET_RAW
         # Required for setns
         - SYS_ADMIN
-  - image: emilyls/dhcp:v1
+  - image: emilyls/dhcp:9.4.0
     name: dhcp-host
+    args:
+    - cni0
     securityContext:
-      allowPrivilegeEscalation: false
+      privileged: true
       capabilities:
         drop:
         - ALL
@@ -58,9 +60,12 @@ spec:
     volumeMounts:
     - mountPath: /etc
       name: host-etc
-    env:
-    - name: INTERFACE
-      value: cni0
+    - mountPath: /var/run/dhcpcd
+      name: runtime
+      subPath: run
+    - mountPath: /var/db/dhcpcd
+      name: runtime
+      subPath: db
   hostNetwork: true
   priorityClassName: system-node-critical
   tolerations:
@@ -86,3 +91,5 @@ spec:
       path: /etc/
       type: Directory
     name: host-etc
+  - emptyDir: {}
+    name: runtime

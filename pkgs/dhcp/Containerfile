@@ -1,8 +1,9 @@
 FROM docker.io/emilyls/musl:1.2.3
 
-COPY /bin/busybox /bin/
-COPY /sbin/dhcpc /sbin/
+COPY /bin/dhcpcd /bin/
 
-ENTRYPOINT ["/sbin/dhcpc"]
-CMD ["init"]
+VOLUME /var/run/dhcpcd
+VOLUME /var/db/dhcpcd
+
+ENTRYPOINT ["/bin/dhcpcd", "-B"]
 
