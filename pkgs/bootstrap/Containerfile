@@ -1,4 +1,4 @@
-FROM docker.io/emilyls/musl:1.1.24
+FROM docker.io/emilyls/musl:1.2.3
 
 COPY /bin/bootstrap /bin/kubeadm /bin/
 
