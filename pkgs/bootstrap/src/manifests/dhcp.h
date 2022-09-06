@@ -13,6 +13,7 @@ const char *DHCP_MANIFEST =
 "  - image: emilyls/dhcp:v1\n"
 "    name: busybox\n"
 "    args:\n"
+"    - -p\n"
 "    - %s\n"
 "    volumeMounts:\n"
 "    - mountPath: /etc\n"

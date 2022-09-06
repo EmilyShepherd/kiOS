@@ -66,6 +66,7 @@ const char *DHCP_CNI_MANIFEST =
 "      name: runtime\n"
 "      subPath: db\n"
 "    args:\n"
+"    - -p\n"
 "    - %s\n"
 "  hostNetwork: true\n"
 "  priorityClassName: system-node-critical\n"
