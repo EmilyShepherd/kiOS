@@ -6,6 +6,7 @@
 #include "toml.h"
 #include "manifests/dhcp.h"
 #include "manifests/dhcp-cni.h"
+#include "manifests/chrony.h"
 #include "manifests/kubeadm-config.h"
 
 #define REQUIRE(expected)                                     \
@@ -184,6 +185,12 @@ int main(int argc, char **argv) {
   toml_parse(&parser);
   fclose(resolv);
   run_dhcp();
+
+  // Write the chrony manifest (NB: it is important this happens _after_
+  // resolv.conf is written).
+  FILE *chrony = fopen(CHRONY_FILE, "w");
+  fprintf(chrony, CHRONY_MANIFEST);
+  fclose(chrony);
 
   const char **args;
   if (!cp.enabled) {
