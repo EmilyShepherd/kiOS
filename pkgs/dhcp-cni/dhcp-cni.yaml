@@ -7,13 +7,10 @@ spec:
   initContainers:
   - image: emilyls/dhcp-cni:v1
     name: dhcp-install
-    args:
-    - init
-    env:
-    - name: BRIDGE
-      value: cni0
-    - name: BRIDGE_WITH
-      value: eth0
+    command:
+    - /init
+    - cni0
+    - eth0
     volumeMounts:
     - mountPath: /host/opt/cni/bin
       name: cni-bin

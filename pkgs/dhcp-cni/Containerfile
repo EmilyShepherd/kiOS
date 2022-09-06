@@ -1,9 +1,8 @@
 FROM docker.io/emilyls/musl:1.2.3
 
-COPY /bin/busybox /bin/
-COPY /entrypoint.sh /
+COPY /bin/dhcp-cni-init /init
 COPY /default.conflist /etc/cni/net.d/
 COPY /bin/dhcp /bin/portmap /bin/bridge /opt/cni/bin
 
-ENTRYPOINT ["/bin/busybox", "sh", "/entrypoint.sh"]
+ENTRYPOINT ["/opt/cni/bin/dhcp", "daemon", "-hostprefix", "host"]
 

@@ -139,8 +139,8 @@ void run_dhcp() {
     fprintf(fp, DHCP_MANIFEST, dhcp.interface, dhcp.interface);
   } else {
     fprintf(fp, DHCP_CNI_MANIFEST,
-        dhcp.interface, dhcp.bridge,
-        dhcp.interface, dhcp.bridge,
+        dhcp.bridge, dhcp.interface,
+        dhcp.bridge, dhcp.interface,
         dhcp.bridge
     );
   }
