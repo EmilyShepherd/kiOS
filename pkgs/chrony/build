@@ -6,5 +6,5 @@ file_location=$BUILD_DIR
 
 pre_build() {
   export PREFIX=$DESTDIR
-  configure_flags="--sysconfigdir=$DESTDIR/etc --chronyvardir=$DESTDIR/var/"
+  configure_flags="--sysconfigdir=$DESTDIR/etc --chronyvardir=$DESTDIR/var/ --without-libcap"
 }
