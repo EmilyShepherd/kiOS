@@ -26,6 +26,8 @@ const char *KUBEADM_CONFIG =
 "apiVersion: kubelet.config.k8s.io/v1beta1\n"
 "kind: KubeletConfiguration\n"
 "cgroupDriver: cgroupfs\n"
+"shutdownGracePeriod: 30s\n"
+"shutdownGracePeriodCriticalPods: 10s\n"
 ;
 
 const char *TOKEN_CONFIG = "%s,admin,admin,system:masters";
