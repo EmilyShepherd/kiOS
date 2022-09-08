@@ -121,6 +121,7 @@ copy_files() {
     for location in ${file_location:-$BUILD_DIR $INITRD}
     do
       cp -r files/* ${location}/
+      find ${location} -name .gitkeep -delete
     done
   fi
 

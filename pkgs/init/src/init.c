@@ -18,18 +18,14 @@
 #define DEFAULT_BOOTPART "/dev/mmcblk1p1"
 #define DEFAULT_DATAPART "/dev/mmcblk1p2"
 
-#define mkmount(source, target, type, flags, data) \
-  mkdir(target, 0777); \
-  mount(source, target, type, flags, data)
-
 #define init_mount(type, target, flags) \
-  mkmount(type, target, type, flags | MS_NOSUID | MS_NOEXEC, 0)
+  mount(type, target, type, flags | MS_NOSUID | MS_NOEXEC, 0)
 
 #define tmp_mount(target) \
   init_mount("tmpfs", target, MS_NODEV)
 
 #define bind_mount(source, target, flags) \
-  mkmount(source, target, 0, flags | MS_BIND, 0)
+  mount(source, target, 0, flags | MS_BIND, 0)
 
 #define CRIO_SOCK "/var/run/crio/crio.sock"
 #define CRIO_LOG "/var/log/crio.log"
@@ -149,15 +145,13 @@ int main(int argc, char **argv) {
   char *bootpart = DEFAULT_BOOTPART;
   char *datapart = DEFAULT_DATAPART;
   wait_for_path(bootpart);
-  mkmount(bootpart, "/static", "vfat", STATIC_FLAGS, 0);
-  bind_mount("/static/boot", "/boot", STATIC_FLAGS);
-  bind_mount("/static/boot/modules", "/lib/modules", STATIC_FLAGS);
+  mkdir("/tmp/bootpart", 0500);
+  mount(bootpart, "/tmp/bootpart", "vfat", STATIC_FLAGS, 0);
+  bind_mount("/tmp/bootpart/boot/modules", "/lib/modules", STATIC_FLAGS);
 
   wait_for_path(datapart);
-  mkmount(datapart, "/srv", "ext2", 0, 0);
-  bind_mount("/srv", "/var/lib", 0);
-  bind_mount("/srv/log", "/var/log", MS_NODEV | MS_NOEXEC | MS_NOSUID);
-  bind_mount("/var/lib/kubernetes", "/etc/kubernetes", MS_NODEV | MS_NOEXEC | MS_NOSUID);
+  mount(datapart, "/var/lib", "ext2", 0, 0);
+  bind_mount("/var/lib/log", "/var/log", MS_NODEV | MS_NOEXEC | MS_NOSUID);
 
   putenv("PATH=/bin");
   start_container_runtime();
@@ -231,7 +225,9 @@ static void mount_fs() {
   init_mount("proc", "/proc", MS_NODEV);
   init_mount("sysfs", "/sys", MS_NODEV);
   init_mount("devtmpfs", "/dev", 0);
+  mkdir("/dev/pts", 0755);
   init_mount("devpts", "/dev/pts", 0);
+  mkdir("/sys/kernel/security", 0755);
   init_mount("securityfs", "/sys/kernel/security", 0);
 
   // Sensible tmpfs mounts
@@ -241,7 +237,6 @@ static void mount_fs() {
   // This directory is used by the kubelet to watch for shutdown events
   mkdir("/run/system", 0777);
 
-  mkdir("/var", 0777);
   tmp_mount("/var/cache");
   tmp_mount("/var/tmp");
   tmp_mount("/var/run");
@@ -249,6 +244,7 @@ static void mount_fs() {
 
   // Mount the cgroup file systems
   // When k8s supports cgroupv2 we can drop almost all of this
+  mkdir("/sys/fs/cgroup", 0755);
   tmp_mount("/sys/fs/cgroup");
   char line[50];
   FILE *fp = fopen("/proc/cgroups", "r");
@@ -276,7 +272,7 @@ static void mount_fs() {
     // At the "enabled" col
     // If the cgroup is enabled, we can mount it
     if (line[i] == '1') {
-      mkdir(path, 0777);
+      mkdir(path, 0555);
       mount("cgroup", path, "cgroup", 0, cgroup);
     }
   }
