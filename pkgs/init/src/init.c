@@ -84,7 +84,6 @@ static void start_container_runtime(void) {
   } else {
     char const *initArgs[] = {
       "/bin/kubelet",
-      "--container-runtime", "remote",
       "--container-runtime-endpoint", "unix:///var/run/crio/crio.sock",
       "--pod-manifest-path=/etc/kubernetes/manifests",
       NULL
@@ -107,7 +106,6 @@ static void start_container_runtime(void) {
     "--config", KUBELET_CONFIG,
     "--kubeconfig", "/etc/kubernetes/kubelet.conf",
     "--bootstrap-kubeconfig", "/etc/kubernetes/bootstrap-kubelet.conf",
-    "--container-runtime", "remote",
     "--container-runtime-endpoint", "unix:///var/run/crio/crio.sock",
     NULL
   };
