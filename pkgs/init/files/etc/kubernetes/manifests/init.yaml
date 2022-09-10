@@ -14,6 +14,8 @@ spec:
       name: k8s-config
     - mountPath: /var/lib/kubelet
       name: kubelet-config
+    - mountPath: /var/lib/pki
+      name: pki
     - mountPath: /run/config
       name: config
       readOnly: true
@@ -45,6 +47,10 @@ spec:
       path: /var/lib/kubelet
       type: DirectoryOrCreate
     name: kubelet-config
+  - hostPath:
+      path: /var/lib/pki
+      type: DirectoryOrCreate
+    name: pki
   - hostPath:
       path: /tmp/bootpart/init.toml
       type: File

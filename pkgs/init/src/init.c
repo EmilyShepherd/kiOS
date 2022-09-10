@@ -80,26 +80,26 @@ static void start_container_runtime(void) {
   wait_for_path(CRIO_SOCK);
 
   if (fexists(KUBELET_CONFIG)) {
-    unlink(INIT_MANIFEST);
-  } else {
-    char const *initArgs[] = {
-      "/bin/kubelet",
-      "--container-runtime-endpoint", "unix:///var/run/crio/crio.sock",
-      "--pod-manifest-path=/etc/kubernetes/manifests",
-      NULL
-    };
-    pid_t initkubelet = start_exe("/bin/kubelet", KUBELET_LOG, initArgs);
-
-    wait_for_path(KUBELET_CONFIG);
-    kill(initkubelet, SIGTERM);
-
-    // Kubelet normally shuts down pretty quickly, but on the off change
-    // we are waiting, we'll do our required admin first before blocking
-    // on waiting for it.
-    set_hostname_from_file();
-
-    waitpid(initkubelet, NULL, 0);
+    unlink(KUBELET_CONFIG);
   }
+
+  char const *initArgs[] = {
+    "/bin/kubelet",
+    "--container-runtime-endpoint", "unix:///var/run/crio/crio.sock",
+    "--pod-manifest-path=/etc/kubernetes/manifests",
+    NULL
+  };
+  pid_t initkubelet = start_exe("/bin/kubelet", KUBELET_LOG, initArgs);
+
+  wait_for_path(KUBELET_CONFIG);
+  kill(initkubelet, SIGTERM);
+
+  // Kubelet normally shuts down pretty quickly, but on the off change
+  // we are waiting, we'll do our required admin first before blocking
+  // on waiting for it.
+  set_hostname_from_file();
+
+  waitpid(initkubelet, NULL, 0);
 
   char * const kubeletArgs[] = {
     "/bin/kubelet",
