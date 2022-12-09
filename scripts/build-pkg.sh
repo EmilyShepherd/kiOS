@@ -87,7 +87,7 @@ prepare_workspace() {
     extract
 
     # Apply Patches if there are any
-    patch -p1 -d src < *.patch || true
+    cat *.patch | patch -p1 -d src || true
   fi
 }
 
