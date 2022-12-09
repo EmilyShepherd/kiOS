@@ -1,0 +1,105 @@
+From 535afb39efa483142553e21114ce9b0ecd1799c8 Mon Sep 17 00:00:00 2001
+From: Emily Shepherd <emily@redcoat.dev>
+Date: Mon, 5 Dec 2022 00:13:25 +0000
+Subject: [PATCH] Update Allocate method to reuse lease if present
+
+Previously, the Allocate method of the daemon always created a new Lease
+object. However, as both the CNI ADD and CHECK commands call Allocate,
+and CHECK can be called multiple times, this resulted in multiple Lease
+objects being created per pod.
+
+Each of these leases was long lived with its own maintain() loop -
+however the daemon only kept track of the most recent one, meaning any
+old lease objects remained running forever (and held open their NetNS
+files). After a long enough period, this resulted in the system crashing
+out with "too many files" or a similar error limits-related error.
+
+This commit updates the behaviour of Allocate() to first check if a
+Lease already exists for the given clientID. If none is found, one is
+created as before. If a Lease is found, a new Check() mechanism is
+called, which simply wakes up the maintain() loop to cause it to check
+the status of the lease.
+
+This may fix #329.
+
+Signed-off-by: Emily Shepherd <emily@redcoat.dev>
+---
+ plugins/ipam/dhcp/daemon.go | 20 ++++++++++++++------
+ plugins/ipam/dhcp/lease.go  |  9 +++++++++
+ 2 files changed, 23 insertions(+), 6 deletions(-)
+
+diff --git a/plugins/ipam/dhcp/daemon.go b/plugins/ipam/dhcp/daemon.go
+index a201f01..fe28fac 100644
+--- a/plugins/ipam/dhcp/daemon.go
++++ b/plugins/ipam/dhcp/daemon.go
+@@ -80,12 +80,20 @@ func (d *DHCP) Allocate(args *skel.CmdArgs, result *current.Result) error {
+ 	}
+ 
+ 	clientID := generateClientID(args.ContainerID, conf.Name, args.IfName)
+-	hostNetns := d.hostNetnsPrefix + args.Netns
+-	l, err := AcquireLease(clientID, hostNetns, args.IfName,
+-		optsRequesting, optsProviding,
+-		d.clientTimeout, d.clientResendMax, d.broadcast)
+-	if err != nil {
+-		return err
++
++	// If we already have an active lease for this clientID, do not create
++	// another one
++	l := d.getLease(clientID)
++	if l != nil {
++		l.Check()
++	} else {
++		hostNetns := d.hostNetnsPrefix + args.Netns
++		l, err = AcquireLease(clientID, hostNetns, args.IfName,
++			optsRequesting, optsProviding,
++			d.clientTimeout, d.clientResendMax, d.broadcast)
++		if err != nil {
++			return err
++		}
+ 	}
+ 
+ 	ipn, err := l.IPNet()
+diff --git a/plugins/ipam/dhcp/lease.go b/plugins/ipam/dhcp/lease.go
+index a64931b..7827efc 100644
+--- a/plugins/ipam/dhcp/lease.go
++++ b/plugins/ipam/dhcp/lease.go
+@@ -67,6 +67,7 @@ type DHCPLease struct {
+ 	broadcast     bool
+ 	stopping      uint32
+ 	stop          chan struct{}
++	check         chan bool
+ 	wg            sync.WaitGroup
+ 	// list of requesting and providing options and if they are necessary / their value
+ 	optsRequesting map[dhcp4.OptionCode]bool
+@@ -150,6 +151,7 @@ func AcquireLease(
+ 	l := &DHCPLease{
+ 		clientID:       clientID,
+ 		stop:           make(chan struct{}),
++		check:          make(chan bool),
+ 		timeout:        timeout,
+ 		resendMax:      resendMax,
+ 		broadcast:      broadcast,
+@@ -200,6 +202,10 @@ func (l *DHCPLease) Stop() {
+ 	l.wg.Wait()
+ }
+ 
++func (l *DHCPLease) Check() {
++	l.check <- true
++}
++
+ func (l *DHCPLease) getOptionsWithClientId() dhcp4.Options {
+ 	opts := make(dhcp4.Options)
+ 	opts[dhcp4.OptionClientIdentifier] = []byte(l.clientID)
+@@ -334,6 +340,9 @@ func (l *DHCPLease) maintain() {
+ 		select {
+ 		case <-time.After(sleepDur):
+ 
++		case <-l.check:
++			log.Printf("%v: Checking lease", l.clientID)
++
+ 		case <-l.stop:
+ 			if err := l.release(); err != nil {
+ 				log.Printf("%v: failed to release DHCP lease: %v", l.clientID, err)
+-- 
+2.38.1
+
