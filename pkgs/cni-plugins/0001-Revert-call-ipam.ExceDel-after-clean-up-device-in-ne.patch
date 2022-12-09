@@ -1,0 +1,59 @@
+From caf9e6fef9fc8a23e16231fe0166498175656e90 Mon Sep 17 00:00:00 2001
+From: Emily Shepherd <emily@redcoat.dev>
+Date: Fri, 9 Dec 2022 23:40:55 +0000
+Subject: [PATCH] Revert "call ipam.ExceDel after clean up device in netns"
+
+This reverts commit 7aa07efe29ef131d7d65ea48bc4dcb6bf67c1272.
+
+Signed-off-by: Emily Shepherd <emily@redcoat.dev>
+---
+ plugins/main/bridge/bridge.go | 18 +++++-------------
+ 1 file changed, 5 insertions(+), 13 deletions(-)
+
+diff --git a/plugins/main/bridge/bridge.go b/plugins/main/bridge/bridge.go
+index f1bdd8d..5471ae2 100644
+--- a/plugins/main/bridge/bridge.go
++++ b/plugins/main/bridge/bridge.go
+@@ -640,17 +640,14 @@ func cmdDel(args *skel.CmdArgs) error {
+ 
+ 	isLayer3 := n.IPAM.Type != ""
+ 
+-	ipamDel := func() error {
+-		if isLayer3 {
+-			if err := ipam.ExecDel(n.IPAM.Type, args.StdinData); err != nil {
+-				return err
+-			}
++	if isLayer3 {
++		if err := ipam.ExecDel(n.IPAM.Type, args.StdinData); err != nil {
++			return err
+ 		}
+-		return nil
+ 	}
+ 
+ 	if args.Netns == "" {
+-		return ipamDel()
++		return nil
+ 	}
+ 
+ 	// There is a netns so try to clean up. Delete can be called multiple times
+@@ -672,16 +669,11 @@ func cmdDel(args *skel.CmdArgs) error {
+ 		// https://github.com/kubernetes/kubernetes/issues/43014#issuecomment-287164444
+ 		_, ok := err.(ns.NSPathNotExistErr)
+ 		if ok {
+-			return ipamDel()
++			return nil
+ 		}
+ 		return err
+ 	}
+ 
+-	// call ipam.ExecDel after clean up device in netns
+-	if err := ipamDel(); err != nil {
+-		return err
+-	}
+-
+ 	if n.MacSpoofChk {
+ 		sc := link.NewSpoofChecker("", "", uniqueID(args.ContainerID, args.IfName))
+ 		if err := sc.Teardown(); err != nil {
+-- 
+2.38.1
+
