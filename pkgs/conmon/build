@@ -1,9 +1,8 @@
 
-version=v2.1.3
+version=v2.1.5
 project=containers
 url=github
-checksum=145b5aa1c5d1d9977ad0d15a53c11aad1e65e8233f7e0fd176ac85f67d6d6fbe
-#url=https://github.com/containers/conmon/releases/download/${version}/conmon-arm.zip
+checksum=ee3179ee2b9a9107acec00eb546062cf7deb847f135a3b81503d22b0d226b3ed
 type=make
 make_target="bin/conmon"
 install_target="install.bin"

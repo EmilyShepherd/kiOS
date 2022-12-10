@@ -1,8 +1,8 @@
 
 url=github
 project=kubernetes
-version=v1.25.0
-checksum=80d560410896686b9c1f71f4fb9b5f8e8328d297d4d87bb0a545f766870f8f41
+version=v1.25.4
+checksum=bf6ae12df9da5aed9f724bd7b44a55d0a96e7e387c28055314bc1ac7b137401b
 initrd_binaries="/bin/kubelet"
 
 pre_build() {

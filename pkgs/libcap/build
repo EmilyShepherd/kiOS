@@ -1,7 +1,7 @@
 
-version=2.63
+version=2.66
 url=https://mirrors.edge.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-${version}.tar.xz
-checksum=0c637b8f44fc7d8627787e9cf57f15ac06c1ddccb53e41feec5496be3466f77f
+checksum=15c40ededb3003d70a283fe587a36b7d19c8b3b554e33f86129c059a4bb466b2
 type=make
 
 pre_build() {
