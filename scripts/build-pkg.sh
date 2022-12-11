@@ -106,7 +106,7 @@ do_build() {
   export CXX=$(which ${TARGET}-g++)
   export STRIP=$(which ${TARGET}-strip)
   export CFLAGS="-isystem ${BUILD_DIR}/include -${optimise:-O2}"
-  export LDFLAGS="-w -s -L${BUILD_DIR}/lib"
+  export LDFLAGS="-w -s -L${BUILD_DIR}/lib -Xlinker -rpath-link=${BUILD_DIR}/lib"
 
   cd src
   run_cmd pre_build || true
