@@ -2,7 +2,6 @@
 version=1.8.7
 type=netfilter
 checksum=c109c96bb04998cd44156622d36f8e04b140701ec60531a10668cfdff5e8d8f0
-configure_flags="--disable-nftables"
+configure_flags="--disable-nftables --enable-static --disable-shared"
 initrd_binaries="/sbin/iptables /sbin/ip6tables /sbin/iptables-save /sbin/iptables-restore"
-files="/lib/xtables"
 
