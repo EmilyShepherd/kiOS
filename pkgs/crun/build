@@ -3,11 +3,12 @@ version=1.7.2
 url=https://github.com/containers/crun/releases/download/${version}/crun-${version}.tar.xz
 checksum=dfce0fdf042c7de84e8672369f54f723c2f788d2bde076a4c6edf530e6306b5a
 type=configure
-configure_flags="--disable-systemd --disable-embedded-yajl"
-depends="libcap libyajl argp-standalone libseccomp"
+configure_flags="--disable-systemd --enable-embedded-yajl"
+depends="libcap argp-standalone libseccomp"
 initrd_binaries="/bin/crun"
 
 pre_build() {
-  export CFLAGS="$CFLAGS $(pkg-config --cflags yajl)"
-  export LDFLAGS="$LDFLAGS $(pkg-config --libs yajl)"
+  # crun expects the yajl headers to exist in the system's include
+  # directory.
+  cp -r libocispec/yajl/src/headers/yajl ${BUILD_DIR}/include/yajl
 }
