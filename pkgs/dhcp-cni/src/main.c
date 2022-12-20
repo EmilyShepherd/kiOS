@@ -24,7 +24,6 @@ int main(int argc, char **argv) {
   ioctl(ip, SIOCSIFFLAGS, &ifr);
 
   cp("/host/opt/cni/bin/dhcp");
-  cp("/host/opt/cni/bin/portmap");
   cp("/host/opt/cni/bin/bridge");
   cp("/host/etc/cni/net.d/default.conflist");
 
