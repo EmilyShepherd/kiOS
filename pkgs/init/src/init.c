@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
   bind_mount("/tmp/bootpart/boot/modules", "/lib/modules", STATIC_FLAGS);
 
   wait_for_path(datapart);
-  mount(datapart, "/var/lib", "ext2", 0, 0);
+  mount(datapart, "/var/lib", "ext4", 0, 0);
   bind_mount("/var/lib/log", "/var/log", MS_NODEV | MS_NOEXEC | MS_NOSUID);
 
   putenv("PATH=/bin");
