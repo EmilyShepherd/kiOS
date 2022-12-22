@@ -7,6 +7,7 @@ install_target=install.bin
 checksum=54576c4a01e3a405a07c362d5f520780708c198a1a1a3ad7bd22bfaccec5ba12
 depends="libseccomp conmon"
 initrd_binaries="/bin/crio /bin/pinns"
+file_location=$DATAPART
 
 pre_build() {
   export BINDIR=${BUILD_DIR}/bin

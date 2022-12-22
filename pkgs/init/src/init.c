@@ -10,13 +10,13 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define STATIC_FLAGS MS_NODEV | MS_RDONLY | MS_NOSUID | MS_NOEXEC
 
 #define INOTIFY_BUFFER_SIZE sizeof(struct inotify_event) + NAME_MAX + 1
 
-#define DEFAULT_BOOTPART "/dev/mmcblk1p1"
-#define DEFAULT_DATAPART "/dev/mmcblk1p2"
+#define DEFAULT_DATAPART "/dev/sda"
 
 #define init_mount(type, target, flags) \
   mount(type, target, type, flags | MS_NOSUID | MS_NOEXEC, 0)
@@ -140,16 +140,18 @@ int main(int argc, char **argv) {
 
   mount_fs();
 
-  char *bootpart = DEFAULT_BOOTPART;
-  char *datapart = DEFAULT_DATAPART;
-  wait_for_path(bootpart);
-  mkdir("/tmp/bootpart", 0500);
-  mount(bootpart, "/tmp/bootpart", "vfat", STATIC_FLAGS, 0);
-  bind_mount("/tmp/bootpart/boot/modules", "/lib/modules", STATIC_FLAGS);
+  char *datapart = getenv("datapart");
+  if (!datapart) {
+    datapart = DEFAULT_DATAPART;
+  }
 
   wait_for_path(datapart);
-  mount(datapart, "/var/lib", "ext4", 0, 0);
-  bind_mount("/var/lib/log", "/var/log", MS_NODEV | MS_NOEXEC | MS_NOSUID);
+  mount(datapart, "/tmp", "ext4", 0, 0);
+  bind_mount("/tmp/modules", "/lib/modules", STATIC_FLAGS);
+  bind_mount("/tmp/log", "/var/log", MS_NODEV | MS_NOEXEC | MS_NOSUID);
+  bind_mount("/tmp/lib", "/var/lib", 0);
+  bind_mount("/tmp/etc", "/etc", MS_NODEV | MS_NOEXEC | MS_NOSUID);
+  umount("/tmp");
 
   putenv("PATH=/bin");
   start_container_runtime();

@@ -6,6 +6,7 @@ BUILT_PACKAGES=$(pwd)/.build/built
 BUILD_DIR=$(pwd)/.build/root
 INITRD=$(pwd)/.build/initrd
 BOOTPART=$(pwd)/.build/bootpart
+DATAPART=$(pwd)/.build/datapart
 
 case ${HOST:-arm} in
   amd|x86)
@@ -223,7 +224,7 @@ fi
 
 pkg=$1
 
-mkdir -p $BUILD_DIR $BUILT_PACKAGES ${INITRD}/{bin,lib} ${BOOTPART}
+mkdir -p $BUILD_DIR $BUILT_PACKAGES ${INITRD}/{bin,lib} ${BOOTPART} ${DATAPART}
 
 load_pkg
 build_dependencies
