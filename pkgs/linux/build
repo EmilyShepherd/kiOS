@@ -13,6 +13,11 @@ pre_build() {
   mkdir -p $INSTALL_PATH
   rm -rf ${INSTALL_PATH}/*
 
+  if test "${ARCH}" == "amd64"
+  then
+    export ARCH=x86_64
+  fi
+
   if ! test -f .config
   then
     cp ../config .config
