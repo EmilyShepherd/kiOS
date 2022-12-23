@@ -79,21 +79,19 @@ static void start_container_runtime(void) {
   pid_t crio = start_exe("/bin/crio", CRIO_LOG, nullArgs);
   wait_for_path(CRIO_SOCK);
 
-  if (fexists(KUBELET_CONFIG)) {
-    unlink(KUBELET_CONFIG);
+  if (!fexists(KUBELET_CONFIG)) {
+    char const *initArgs[] = {
+      "/bin/kubelet",
+      "--container-runtime-endpoint", "unix:///var/run/crio/crio.sock",
+      "--pod-manifest-path=/etc/kubernetes/manifests",
+      NULL
+    };
+    pid_t initkubelet = start_exe("/bin/kubelet", KUBELET_LOG, initArgs);
+
+    wait_for_path(KUBELET_CONFIG);
+    kill(initkubelet, SIGTERM);
+    waitpid(initkubelet, NULL, 0);
   }
-
-  char const *initArgs[] = {
-    "/bin/kubelet",
-    "--container-runtime-endpoint", "unix:///var/run/crio/crio.sock",
-    "--pod-manifest-path=/etc/kubernetes/manifests",
-    NULL
-  };
-  pid_t initkubelet = start_exe("/bin/kubelet", KUBELET_LOG, initArgs);
-
-  wait_for_path(KUBELET_CONFIG);
-  kill(initkubelet, SIGTERM);
-  waitpid(initkubelet, NULL, 0);
 
   char * const kubeletArgs[] = {
     "/bin/kubelet",
