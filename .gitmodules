@@ -1,0 +1,3 @@
+[submodule "pkgs/argp-standalone/src"]
+	path = pkgs/argp-standalone/src
+	url = https://github.com/argp-standalone/argp-standalone.git
