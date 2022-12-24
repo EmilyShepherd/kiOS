@@ -4,3 +4,6 @@
 [submodule "pkgs/libcap/src"]
 	path = pkgs/libcap/src
 	url = https://git.kernel.org/pub/scm/libs/libcap/libcap.git
+[submodule "pkgs/busybox/src"]
+	path = pkgs/busybox/src
+	url = https://github.com/mirror/busybox.git
