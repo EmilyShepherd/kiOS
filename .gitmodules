@@ -7,3 +7,6 @@
 [submodule "pkgs/busybox/src"]
 	path = pkgs/busybox/src
 	url = https://github.com/mirror/busybox.git
+[submodule "pkgs/chrony/src"]
+	path = pkgs/chrony/src
+	url = https://github.com/mlichvar/chrony.git

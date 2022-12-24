@@ -1,6 +1,4 @@
 version=4.3
-url=https://download.tuxfamily.org/chrony/chrony-${version}.tar.gz
-checksum=273f9fd15c328ed6f3a5f6ba6baec35a421a34a73bb725605329b1712048db9a
 type=configure
 file_location=$BUILD_DIR
 
