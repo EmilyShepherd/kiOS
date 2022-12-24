@@ -10,3 +10,6 @@
 [submodule "pkgs/chrony/src"]
 	path = pkgs/chrony/src
 	url = https://github.com/mlichvar/chrony.git
+[submodule "pkgs/cni-plugins/src"]
+	path = pkgs/cni-plugins/src
+	url = https://github.com/containernetworking/plugins.git

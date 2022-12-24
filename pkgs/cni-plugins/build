@@ -1,10 +1,4 @@
 
-pkg=plugins
-project=containernetworking
-url=github
-version=v1.1.1
-checksum=c86c44877c47f69cd23611e22029ab26b613f620195b76b3ec20f589367a7962
-
 build() {
   mkdir -p ./bin
 
