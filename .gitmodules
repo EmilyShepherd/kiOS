@@ -13,3 +13,6 @@
 [submodule "pkgs/cni-plugins/src"]
 	path = pkgs/cni-plugins/src
 	url = https://github.com/containernetworking/plugins.git
+[submodule "pkgs/cri-o/src"]
+	path = pkgs/cri-o/src
+	url = https://github.com/cri-o/cri-o
