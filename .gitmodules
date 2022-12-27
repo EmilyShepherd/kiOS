@@ -16,3 +16,6 @@
 [submodule "pkgs/cri-o/src"]
 	path = pkgs/cri-o/src
 	url = https://github.com/cri-o/cri-o
+[submodule "pkgs/crun/src"]
+	path = pkgs/crun/src
+	url = https://github.com/containers/crun
