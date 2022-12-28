@@ -31,3 +31,6 @@
 [submodule "pkgs/musl/src"]
 	path = pkgs/musl/src
 	url = https://git.musl-libc.org/git/musl
+[submodule "pkgs/kubernetes/src"]
+	path = pkgs/kubernetes/src
+	url = https://github.com/kubernetes/kubernetes.git
