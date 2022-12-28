@@ -25,3 +25,6 @@
 [submodule "pkgs/iptables/src"]
 	path = pkgs/iptables/src
 	url = https://git.netfilter.org/iptables
+[submodule "pkgs/libseccomp/src"]
+	path = pkgs/libseccomp/src
+	url = https://github.com/seccomp/libseccomp.git
