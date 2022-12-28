@@ -19,3 +19,6 @@
 [submodule "pkgs/crun/src"]
 	path = pkgs/crun/src
 	url = https://github.com/containers/crun
+[submodule "pkgs/dhcp/src"]
+	path = pkgs/dhcp/src
+	url = https://github.com/NetworkConfiguration/dhcpcd.git
