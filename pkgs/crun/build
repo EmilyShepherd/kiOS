@@ -1,10 +1,18 @@
 
 type=configure
 configure_flags="--disable-systemd --enable-embedded-yajl"
-depends="libcap argp-standalone libseccomp"
+depends="libseccomp"
 initrd_binaries="/bin/crun"
 
 pre_build() {
+  export BUILD_CC=$(which gcc)
+  export BUILD_LD=$(which ld)
+
+  cd ..
+  (cd argp-standalone && build_meson)
+  make -C libcap/libcap lib=lib prefix=/ install-static-cap
+  cd src
+
   ./autogen.sh
 
   # crun expects the yajl headers to exist in the system's include

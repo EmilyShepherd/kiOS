@@ -1,8 +1,8 @@
 [submodule "pkgs/argp-standalone/src"]
-	path = pkgs/argp-standalone/src
+	path = pkgs/crun/argp-standalone
 	url = https://github.com/argp-standalone/argp-standalone.git
 [submodule "pkgs/libcap/src"]
-	path = pkgs/libcap/src
+	path = pkgs/crun/libcap
 	url = https://git.kernel.org/pub/scm/libs/libcap/libcap.git
 [submodule "pkgs/busybox/src"]
 	path = pkgs/busybox/src
