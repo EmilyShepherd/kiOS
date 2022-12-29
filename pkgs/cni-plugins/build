@@ -1,8 +1,0 @@
-
-build() {
-  mkdir -p ./bin
-
-  ./build_linux.sh
-
-  cp bin/* ${BUILD_DIR}/bin/
-}

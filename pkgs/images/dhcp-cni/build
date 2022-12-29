@@ -1,0 +1,17 @@
+
+version=v1
+file_location=$BUILD_DIR
+type=make
+
+pre_build() {
+  cd ../cni-plugins
+  cat ../*.patch | patch -p1
+
+  mkdir -p ./bin
+
+  ./build_linux.sh
+
+  cp bin/* ${BUILD_DIR}/bin/
+
+  cd ../src
+}

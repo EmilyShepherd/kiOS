@@ -1,7 +1,7 @@
 
 type=configure
 configure_flags="--disable-systemd --enable-embedded-yajl"
-depends="libseccomp"
+depends="lib/libseccomp"
 initrd_binaries="/bin/crun"
 
 pre_build() {

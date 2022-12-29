@@ -1,7 +1,7 @@
 type="make"
 make_target=binaries
 install_target=install.bin
-depends="libseccomp conmon"
+depends="lib/libseccomp conmon"
 initrd_binaries="/bin/crio /bin/pinns"
 file_location=$DATAPART
 

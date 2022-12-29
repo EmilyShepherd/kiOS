@@ -86,9 +86,6 @@ prepare_workspace() {
   if ! test -d src
   then
     extract
-
-    # Apply Patches if there are any
-    cat *.patch | patch -p1 -d src || true
   fi
 }
 
@@ -166,7 +163,7 @@ copy_binaries() {
 build_dependencies() {
   for dep in $depends
   do
-    if ! ( test -f $BUILT_PACKAGES/$dep || $0 $dep )
+    if ! ( test -f $BUILT_PACKAGES/${dep/\//_} || $0 $dep )
     then
       echo "ERROR: $pkg requires $dep but it could not be automatically built"
       exit 1
@@ -199,7 +196,7 @@ load_pkg() {
 mark_built() {
   for built in $provides $pkg
   do
-    touch ${BUILT_PACKAGES}/$built
+    touch ${BUILT_PACKAGES}/${built/\//_}
   done
 }
 
