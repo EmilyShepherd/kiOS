@@ -1,0 +1,6 @@
+
+build() {
+  mkdir -p ${BOOTPART}/boot
+  cp start4.elf fixup4.dat ${BOOTPART}/
+  cp -r overlays ${BOOTPART}/boot/
+}

@@ -34,3 +34,9 @@
 [submodule "pkgs/kubernetes/src"]
 	path = pkgs/bin/kubernetes/src
 	url = https://github.com/kubernetes/kubernetes.git
+[submodule "pkgs/linux/src"]
+	path = pkgs/boot/linux/src
+	url = https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+[submodule "pkgs/rpi-firmware/src"]
+	path = pkgs/boot/rpi-firmware/src
+	url = https://github.com/raspberrypi/rpi-firmware.git
