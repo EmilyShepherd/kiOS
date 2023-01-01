@@ -1,6 +1,0 @@
-
-version=2.75.0
-url=https://download.gnome.org/sources/glib/2.75/glib-${version}.tar.xz
-checksum=6dde8e55cc4a2c83d96797120b08bcffb5f645b2e212164ae22d63c40e0e6360
-type=meson
-meson_flags="-Dtests=false"

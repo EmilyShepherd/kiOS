@@ -40,3 +40,9 @@
 [submodule "pkgs/rpi-firmware/src"]
 	path = pkgs/boot/rpi-firmware/src
 	url = https://github.com/raspberrypi/rpi-firmware.git
+[submodule "pkgs/conmon/src"]
+	path = pkgs/bin/conmon/src
+	url = https://github.com/containers/conmon.git
+[submodule "pkgs/glib/src"]
+	path = pkgs/lib/glib/src
+	url = https://gitlab.gnome.org/GNOME/glib.git
