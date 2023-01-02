@@ -1,12 +1,6 @@
 
-version=2022-10-11
-url=https://curl.se/ca/cacert-${version}.pem
-checksum=2cff03f9efdaf52626bd1b451d700605dc1ea000c5da56bd0fc59f8f43071040
 
 build() {
-  for dir in $BUILD_DIR $DATAPART
-  do
-    mkdir -p ${dir}/etc/ssl/
-    cp ../srcpkg ${dir}/etc/ssl/ca-bundle.pem
-  done
+  mkdir -p ${DATAPART}/etc/ssl
+  curl -o ${DATAPART}/etc/ssl/ca-bundle.pem https://curl.se/ca/cacert.pem
 }

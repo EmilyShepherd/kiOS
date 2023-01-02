@@ -48,47 +48,6 @@ run_cmd() {
   test "$(type -t $1)" == "function" && $1
 }
 
-extract() {
-  mkdir -p src
-  case $url in
-    *.tar.bz2)
-      extract=j ;;
-    *.tar.gz)
-      extract=z ;;
-    *.tar.xz)
-      extract=J ;;
-    *)
-      return ;;
-  esac
-  tar -x$extract -C src --strip-components 1 -f srcpkg
-}
-
-prepare_workspace() {
-  cd $pkgpath
-
-  if test -z "$url"
-  then
-    mkdir -p src
-    return
-  fi
-
-  if test -n "$CLEAN"
-  then
-    rm -rf src
-  fi
-
-  if ! test -f srcpkg || ! test $(sha256sum srcpkg | head -c 64) == "$checksum"
-  then
-    rm -rf src
-    curl -L $url -o srcpkg
-  fi
-
-  if ! test -d src
-  then
-    extract
-  fi
-}
-
 do_build() {
   export TARGET=${AARCH}-linux-musl
   export CGO_ENABLED=1
@@ -178,19 +137,6 @@ load_pkg() {
   then
     . $pkgpath/build
   fi
-
-  case $type in
-    netfilter)
-      url=http://www.netfilter.org/projects/${pkg}/files/${pkg}-${version}.tar.bz2
-      type=configure
-      ;;
-  esac
-
-  case $url in
-    github)
-      url=https://github.com/${project}/${pkg}/archive/refs/tags/${version}.tar.gz
-      ;;
-  esac
 }
 
 mark_built() {
@@ -225,7 +171,8 @@ mkdir -p $BUILD_DIR $BUILT_PACKAGES ${INITRD}/{bin,lib} ${BOOTPART} ${DATAPART}
 
 load_pkg
 build_dependencies
-prepare_workspace
+
+cd $pkgpath
 do_build
 copy_files
 BIN_TARGET=${INITRD} copy_binaries $initrd_binaries
