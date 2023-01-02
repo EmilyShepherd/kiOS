@@ -1,3 +1,0 @@
-
-depends="lib/musl bin/init bin/busybox bin/cri-o bin/crun bin/iptables bin/kubernetes"
-
