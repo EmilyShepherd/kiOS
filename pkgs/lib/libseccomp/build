@@ -1,6 +1,11 @@
 
 type=configure
 
+build_make() {
+  cd src
+  make install-libLTLIBRARIES
+}
+
 pre_build() {
   ./autogen.sh
 }
