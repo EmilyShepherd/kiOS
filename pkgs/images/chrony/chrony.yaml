@@ -16,12 +16,6 @@ spec:
           - ALL
         add:
           - SYS_TIME
-    volumeMounts:
-    - mountPath: /var/run/chrony
-      name: run
-  volumes:
-  - emptyDir: {}
-    name: run
   # Does not strictly _require_ the host network to function as
   # expected, however as this is node critical, it is important that it
   # runs even if the CNI network is not yet ready.
