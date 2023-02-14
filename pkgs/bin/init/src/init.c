@@ -108,6 +108,22 @@ static void start_container_runtime(void) {
   }
 }
 
+/**
+ * Enable IP Forwarding
+ *
+ * Although kiOS tries to be relatively unopinionated, enabling ip
+ * forwarding is almost always a requirement for Pod / Service
+ * Networking to work as expected, so we will set that sysctl here so as
+ * to not require another service to set it. This is only set at boot,
+ * so its value can be overriden at runtime by a sufficiently privileged
+ * service, if required.
+ */
+void enable_ip_forwarding(void) {
+  FILE *fp = fopen("/proc/sys/net/ipv4/ip_forward", "w");
+  fputs("1", fp);
+  fclose(fp);
+}
+
 int main(int argc, char **argv) {
   char *console;
   console = getenv("CONSOLE");
@@ -131,6 +147,7 @@ int main(int argc, char **argv) {
   bring_if_up("eth0");
 
   mount_fs();
+  enable_ip_forwarding();
 
   char *datapart = getenv("datapart");
   if (!datapart) {
