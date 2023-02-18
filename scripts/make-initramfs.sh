@@ -14,11 +14,11 @@ fi
 
 (
   cd .build/initrd
-  find . | cpio -oH newc -R +0:+0 > ../../initramfs.cpio
+  find . | cpio -oH newc -R +0:+0 > ../initramfs.cpio
 )
 
 if test "$1" == compressed
 then
-  cat initramfs.cpio | zstd -T16 -22 --ultra > initramfs.cpio.zstd
+  cat .build/initramfs.cpio | zstd -T16 -22 --ultra > .build/initramfs.cpio.zstd
 fi
 
