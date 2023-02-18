@@ -21,7 +21,7 @@ pre_build() {
 }
 
 post_build() {
-  mkdir -p ${BOOTPART}/kernel
+  mkdir -p ${BOOTPART}/boot
   cp ${INSTALL_PATH}/vmlinuz* ${BOOTPART}/boot/kernel8.img
   cp -r ${BUILD_DIR}/lib/modules ${BOOTPART}/boot/
   find ${INSTALL_PATH} -name '*.dtb' | xargs -I{} cp {} ${BOOTPART}/boot/
