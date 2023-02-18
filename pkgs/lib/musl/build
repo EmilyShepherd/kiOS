@@ -2,3 +2,9 @@
 version=1.2.3
 type=configure
 configure_test=config.mak
+
+# We also need to copy across the dynamic linker symlink to our libc
+# library, otherwise programs will fail to run!
+post_build() {
+  cp -P ${BUILD_DIR}/lib/ld-* ${INITRD}/lib/
+}
