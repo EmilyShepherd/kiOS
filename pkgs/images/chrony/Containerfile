@@ -8,7 +8,7 @@ RUN echo $TARGETPLATFORM
 
 FROM --platform=${TARGETPLATFORM} docker.io/emilyls/musl:1.2.3
 
-COPY --from=0 /bin/chronyd /bin/
+COPY --from=0 --chown=999:999 /bin/chronyd /bin/
 COPY /etc/chrony.conf /etc/chrony.conf
 COPY /etc/passwd /etc/group /etc/
 
