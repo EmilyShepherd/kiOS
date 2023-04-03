@@ -4,6 +4,9 @@ type=configure
 build_make() {
   cd src
   make install-libLTLIBRARIES
+
+  cd ../include
+  make install
 }
 
 pre_build() {
