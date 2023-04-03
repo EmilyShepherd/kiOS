@@ -1,5 +1,5 @@
 
-version=v1
+version=v1.2.0
 file_location=$BUILD_DIR
 type=make
 

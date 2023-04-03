@@ -5,7 +5,7 @@ metadata:
   namespace: kube-node-lease
 spec:
   initContainers:
-  - image: emilyls/dhcp-cni:v1
+  - image: emilyls/dhcp-cni:v1.2.0
     name: dhcp-install
     command:
     - /init
@@ -24,7 +24,7 @@ spec:
         add:
         - NET_ADMIN
   containers:
-  - image: emilyls/dhcp-cni:v1
+  - image: emilyls/dhcp-cni:v1.2.0
     name: dhcp-ipam
     volumeMounts:
     - mountPath: /host/run
