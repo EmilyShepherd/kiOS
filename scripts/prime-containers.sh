@@ -8,4 +8,4 @@ images=(
   docker.io/emilyls/bootstrap:v1
 )
 
-podman --root .build/datapart/containers/storage pull --platform=linux/arm64 "${images[@]}"
+podman --root .build/datapart/lib/containers/storage pull --platform=linux/arm64 "${images[@]}"
