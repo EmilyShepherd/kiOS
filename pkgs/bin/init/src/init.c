@@ -33,7 +33,9 @@
 #define KUBELET_CONFIG "/var/lib/kubelet/config.yaml"
 #define KUBELET_KUBECONFIG "/etc/kubernetes/kubelet.conf"
 #define KUBELET_BOOTSTRAP_KUBECONFIG "/etc/kubernetes/bootstrap-kubelet.conf"
-#define KUBELET_MAX_OPTIONS 4
+#define KUBELET_IMAGE_CREDENTIAL_PROVIDER_CONFIG "/etc/kubernetes/credential-providers.yaml"
+#define KUBELET_CREDENTIAL_PROVIDER_BIN_DIR "/usr/libexec/kubernetes/kubelet-plugins/credential-provider/exec"
+#define KUBELET_MAX_OPTIONS 6
 #define INIT_MANIFEST "/var/etc/kubernetes/manifests/init.yaml"
 
 /**
@@ -204,6 +206,13 @@ static void start_container_runtime(void) {
   // also.
   if (fexists(KUBELET_BOOTSTRAP_KUBECONFIG)) {
     SET_ARG("--bootstrap-kubeconfig", KUBELET_BOOTSTRAP_KUBECONFIG);
+  }
+
+  // If a credential provider config file exists, tell kubelet about it
+  // and also the path to credential provider binaries.
+  if (fexists(KUBELET_IMAGE_CREDENTIAL_PROVIDER_CONFIG)) {
+    SET_ARG("--image-credential-provider-config", KUBELET_IMAGE_CREDENTIAL_PROVIDER_CONFIG);
+    SET_ARG("--image-credential-provider-bin-dir", KUBELET_CREDENTIAL_PROVIDER_BIN_DIR);
   }
 
   pid_t kubelet = start_exe("/bin/kubelet", KUBELET_LOG, kubeletArgs);
