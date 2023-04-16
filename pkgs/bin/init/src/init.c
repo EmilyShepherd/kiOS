@@ -31,6 +31,9 @@
 #define CRIO_LOG "/var/log/crio.log"
 #define KUBELET_LOG "/var/log/kubelet.log"
 #define KUBELET_CONFIG "/var/lib/kubelet/config.yaml"
+#define KUBELET_KUBECONFIG "/etc/kubernetes/kubelet.conf"
+#define KUBELET_BOOTSTRAP_KUBECONFIG "/etc/kubernetes/bootstrap-kubelet.conf"
+#define KUBELET_MAX_OPTIONS 4
 #define INIT_MANIFEST "/var/etc/kubernetes/manifests/init.yaml"
 
 /**
@@ -150,6 +153,15 @@ end:
 }
 
 /**
+ * Convenience macro to update arguments to be passed to the kubelet
+ * daemon
+ */
+#define SET_ARG(flag, value) \
+  arg++; \
+  kubeletArgs[arg * 2 - 1] = flag; \
+  kubeletArgs[arg * 2] = value;
+
+/**
  * Start Container Runtime
  *
  * Starts up crio, waits for it to be ready, then starts up kubelet. If
@@ -167,28 +179,33 @@ static void start_container_runtime(void) {
   pid_t crio = start_exe("/bin/crio", CRIO_LOG, nullArgs);
   wait_for_path(CRIO_SOCK);
 
+  char * kubeletArgs[1 + 2 * KUBELET_MAX_OPTIONS + 1] = {
+    "/bin/kubelet",
+    "--container-runtime-endpoint", "unix:///var/run/crio/crio.sock",
+    "--pod-manifest-path", "/etc/kubernetes/manifests"
+  };
+
+
   if (!fexists(KUBELET_CONFIG)) {
-    char const *initArgs[] = {
-      "/bin/kubelet",
-      "--container-runtime-endpoint", "unix:///var/run/crio/crio.sock",
-      "--pod-manifest-path=/etc/kubernetes/manifests",
-      NULL
-    };
-    pid_t initkubelet = start_exe("/bin/kubelet", KUBELET_LOG, initArgs);
+    pid_t initkubelet = start_exe("/bin/kubelet", KUBELET_LOG, kubeletArgs);
 
     wait_for_path(KUBELET_CONFIG);
     kill(initkubelet, SIGTERM);
     waitpid(initkubelet, NULL, 0);
   }
 
-  char * const kubeletArgs[] = {
-    "/bin/kubelet",
-    "--config", KUBELET_CONFIG,
-    "--kubeconfig", "/etc/kubernetes/kubelet.conf",
-    "--bootstrap-kubeconfig", "/etc/kubernetes/bootstrap-kubelet.conf",
-    "--container-runtime-endpoint", "unix:///var/run/crio/crio.sock",
-    NULL
-  };
+  // We are keeping the first arg (container-runtime-endpoint). Others
+  // will be overridden from there when calling set_arg.
+  int arg = 1;
+  SET_ARG("--config", KUBELET_CONFIG);
+  SET_ARG("--kubeconfig", KUBELET_KUBECONFIG);
+
+  // If there is a bootstrap kubeconfig file, lets tell kubelet about it
+  // also.
+  if (fexists(KUBELET_BOOTSTRAP_KUBECONFIG)) {
+    SET_ARG("--bootstrap-kubeconfig", KUBELET_BOOTSTRAP_KUBECONFIG);
+  }
+
   pid_t kubelet = start_exe("/bin/kubelet", KUBELET_LOG, kubeletArgs);
 
   while (1) {
