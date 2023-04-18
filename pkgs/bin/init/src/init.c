@@ -193,6 +193,11 @@ static void start_container_runtime(void) {
 
     wait_for_path(KUBELET_CONFIG);
     kill(initkubelet, SIGTERM);
+
+    // Have another go at setting the hostname in case a bootstrap pod
+    // set it.
+    set_hostname_from_file();
+
     waitpid(initkubelet, NULL, 0);
   }
 
