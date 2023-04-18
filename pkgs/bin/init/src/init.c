@@ -191,6 +191,9 @@ static void start_container_runtime(void) {
   if (!fexists(KUBELET_CONFIG)) {
     pid_t initkubelet = start_exe("/bin/kubelet", KUBELET_LOG, kubeletArgs);
 
+    // As above, we must ensure that the kubelet directory exists so
+    // that wait_for_path can work.
+    mkdir("/var/lib/kubelet", 0600);
     wait_for_path(KUBELET_CONFIG);
     kill(initkubelet, SIGTERM);
 
