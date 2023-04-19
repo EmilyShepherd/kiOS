@@ -2,11 +2,10 @@
 type=configure
 
 build_make() {
-  cd src
-  make install-libLTLIBRARIES
 
-  cd ../include
-  make install
+  make install-pkgconfDATA
+  make -C src install-libLTLIBRARIES
+  make -C include install
 }
 
 pre_build() {
