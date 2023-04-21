@@ -176,7 +176,7 @@ static void start_container_runtime(void) {
   // wait_for_path only works when the directory the expected file will
   // be in already exists (it does not recursively check up). Ensure
   // that the directory exists here.
-  mkdir("/var/run/crio", 0600);
+  mkdir("/var/run/crio", 0700);
   char const *nullArgs[] = {"/bin/crio", NULL};
   pid_t crio = start_exe("/bin/crio", CRIO_LOG, nullArgs);
   wait_for_path(CRIO_SOCK);
@@ -187,13 +187,13 @@ static void start_container_runtime(void) {
     "--pod-manifest-path", "/etc/kubernetes/manifests"
   };
 
+  // As above, we must ensure that the kubelet directory exists so that
+  // wait_for_path can work.
+  mkdir("/var/lib/kubelet", 0700);
 
   if (!fexists(KUBELET_CONFIG)) {
     pid_t initkubelet = start_exe("/bin/kubelet", KUBELET_LOG, kubeletArgs);
 
-    // As above, we must ensure that the kubelet directory exists so
-    // that wait_for_path can work.
-    mkdir("/var/lib/kubelet", 0600);
     wait_for_path(KUBELET_CONFIG);
     kill(initkubelet, SIGTERM);
 
