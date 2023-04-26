@@ -1,6 +1,6 @@
 FROM docker.io/emilyls/musl:1.2.3
 
-COPY /bin/dhcpcd /bin/
+COPY /sbin/dhcpcd /bin/
 
 VOLUME /var/run/dhcpcd
 VOLUME /var/db/dhcpcd
