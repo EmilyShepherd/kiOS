@@ -40,8 +40,8 @@ build_meson() {
     meson _build -Dprefix="/" --cross-file ${PROJROOT}/scripts/${AARCH} $meson_flags
   fi
 
-  ninja -C _build
-  ninja -C _build install
+  ninja -C _build ${make_target}
+  ninja -C _build ${install_target:-install}
 }
 
 run_cmd() {
