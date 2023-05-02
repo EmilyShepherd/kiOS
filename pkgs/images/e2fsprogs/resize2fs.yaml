@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: resize-disk
+  namespace: kube-node-lease
+spec:
+  containers:
+  - image: emilyls/resize2fs:9.4.0
+    name: resize2fs
+    volumeMounts:
+    - mountPath: /etc
+      name: config
+    - mountPath: /var/run/dhcpcd
+      name: runtime
+      subPath: run
+    - mountPath: /var/db/dhcpcd
+      name: runtime
+      subPath: db
+    # Currently we require running as root but this may change
+    securityContext:
+      capabilities:
+        drop:
+        - ALL
+  priorityClassName: system-node-critical
+  tolerations:
+  - operator: Exists
+  volumes:
+  - hostPath:
+      path: /dev/datapart
+      type: BlockDevice
+    name: datapart

@@ -1,0 +1,6 @@
+FROM docker.io/emilyls/musl:1.2.3
+
+COPY /sbin/resize2fs /bin/
+
+ENTRYPOINT ["/bin/resize2fs"]
+

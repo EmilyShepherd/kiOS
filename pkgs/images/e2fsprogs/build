@@ -1,0 +1,3 @@
+version=v1
+type=configure
+configure_flags="--disable-uuid --disable-tls --disable-mmp --disable-tdb --disable-bmap-stats-ops --disable-rpath --disable-fuse2fs --disable-nls --disable-defrag --disable-imager --disable-debugfs --disable-backtrack"

@@ -46,3 +46,12 @@
 [submodule "pkgs/glib/src"]
 	path = pkgs/lib/glib/src
 	url = https://gitlab.gnome.org/GNOME/glib.git
+[submodule "pkgs/images/parted/util-linux"]
+	path = pkgs/images/parted/util-linux
+	url = https://github.com/util-linux/util-linux.git
+[submodule "pkgs/images/e2fsprogs/src"]
+	path = pkgs/images/e2fsprogs/src
+	url = https://github.com/tytso/e2fsprogs.git
+[submodule "pkgs/images/parted/src"]
+	path = pkgs/images/parted/src
+	url = https://git.savannah.gnu.org/git/parted.git

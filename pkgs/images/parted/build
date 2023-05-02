@@ -1,0 +1,14 @@
+type=configure
+configure_flags="--disable-device-mapper --without-readline --enable-static"
+
+pre_build() {
+  cd ../util-linux
+  meson _build -Dprefix="/" --cross-file "${PROJROOT}/scripts/${AARCH}"
+  ninja -C _build libuuid/libuuid.a
+  cp _build/libuuid/libuuid.a ${BUILD_DIR}/lib/
+  mkdir -p ${BUILD_DIR}/include/uuid
+  cp libuuid/src/*.h ${BUILD_DIR}/include/uuid/
+
+  cd ../src
+  ./bootstrap
+}
