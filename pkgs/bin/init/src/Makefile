@@ -11,3 +11,7 @@ $(CMD): $(OBJS)
 .PHONY: install
 install: $(CMD)
 	cp $^ $(DESTDIR)/init
+
+.PHONY: clean
+clean:
+	rm -rf $(CMD) $(OBJS)
