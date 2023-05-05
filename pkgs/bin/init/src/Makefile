@@ -1,6 +1,12 @@
 
-init: init.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+OBJS := $(patsubst %.c,%.o,$(wildcard *.c))
+CMD := init
+
+%.o: %.c
+	$(CC) -flto -c $(CFLAGS) -o $@ $<
+
+$(CMD): $(OBJS)
+	$(CC) -flto -O3 $(LDFLAGS) -o $@ $^
 
 .PHONY: install
 
