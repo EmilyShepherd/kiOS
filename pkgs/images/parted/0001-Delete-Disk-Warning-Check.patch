@@ -1,0 +1,48 @@
+From 987c4a559ec6bec357b9b14ebf7174557b61b982 Mon Sep 17 00:00:00 2001
+From: Emily Shepherd <emily@redcoat.dev>
+Date: Sat, 6 May 2023 00:02:44 +0100
+Subject: [PATCH] Delete Disk Warning Check
+
+This was causing the command to exit with a non zero value, which was
+preventing Kubernetes from moving onto the next container.
+---
+ parted/parted.c | 16 ----------------
+ 1 file changed, 16 deletions(-)
+
+diff --git a/parted/parted.c b/parted/parted.c
+index 3abb52f..6c7dc31 100644
+--- a/parted/parted.c
++++ b/parted/parted.c
+@@ -1880,21 +1880,6 @@ do_resizepart (PedDevice** dev, PedDisk** diskp)
+         if (!command_line_get_partition (_("Partition number?"), disk, &part))
+                 goto error;
+ 
+-        /* Save the optional End value if the partition is busy. */
+-        if (ped_partition_is_busy(part)) {
+-            if (command_line_get_word_count())
+-                end_size = command_line_pop_word();
+-        }
+-
+-        /* If the partition is busy this may clear the command_line and prompt the user */
+-        if (!_partition_warn_busy (part))
+-                goto error;
+-
+-        /* Push the End value back onto the command_line, if it exists */
+-        if (end_size) {
+-            command_line_push_word(end_size);
+-        }
+-
+         start = part->geom.start;
+         end = oldend = part->geom.end;
+         if (!command_line_get_sector (_("End?"), *dev, &end, &range_end, &end_input))
+@@ -1927,7 +1912,6 @@ error:
+         if (range_end != NULL)
+                 ped_geometry_destroy (range_end);
+         free(end_input);
+-        free(end_size);
+ 
+         return rc;
+ }
+-- 
+2.40.0
+

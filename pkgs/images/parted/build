@@ -11,5 +11,6 @@ pre_build() {
   cp libuuid/src/*.h ${BUILD_DIR}/include/uuid/
 
   cd ../src
+  cat ../*.patch | patch -p1
   ./bootstrap
 }
