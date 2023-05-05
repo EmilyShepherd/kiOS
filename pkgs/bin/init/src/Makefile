@@ -9,6 +9,5 @@ $(CMD): $(OBJS)
 	$(CC) -flto -O3 $(LDFLAGS) -o $@ $^
 
 .PHONY: install
-
-install: init
+install: $(CMD)
 	cp $^ $(DESTDIR)/init
