@@ -4,28 +4,24 @@ metadata:
   name: resize-disk
   namespace: kube-node-lease
 spec:
-  containers:
-  - image: emilyls/resize2fs:9.4.0
-    name: resize2fs
-    volumeMounts:
-    - mountPath: /etc
-      name: config
-    - mountPath: /var/run/dhcpcd
-      name: runtime
-      subPath: run
-    - mountPath: /var/db/dhcpcd
-      name: runtime
-      subPath: db
-    # Currently we require running as root but this may change
+  restartPolicy: Never
+  initContainers:
+  - image: emilyls/parted:v2
+    name: parted
     securityContext:
-      capabilities:
-        drop:
-        - ALL
-  priorityClassName: system-node-critical
-  tolerations:
-  - operator: Exists
-  volumes:
-  - hostPath:
-      path: /dev/datapart
-      type: BlockDevice
-    name: datapart
+      # Required to allow parted to open the block device
+      privileged: true
+    args:
+    - "-sf"
+    - /dev/nvme0n1
+    - resizepart
+    - "2"
+    - "100%"
+  containers:
+  - image: emilyls/resize2fs:v1
+    name: resize2fs
+    securityContext:
+      # Required to allow resize2fs to open the block device
+      privileged: true
+    args:
+    - /dev/nvme0n1p2
