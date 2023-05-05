@@ -1,3 +1,4 @@
+version=v2
 type=configure
 configure_flags="--disable-device-mapper --without-readline --enable-static"
 

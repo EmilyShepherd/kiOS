@@ -1,0 +1,7 @@
+FROM docker.io/emilyls/musl:1.2.3
+
+COPY /lib/libparted.so.2.0.5 /lib/libparted.so.2
+COPY /sbin/parted /bin/
+
+ENTRYPOINT ["/bin/parted"]
+
