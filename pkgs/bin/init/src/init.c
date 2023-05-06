@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <sys/inotify.h>
 #include <limits.h>
+#include <sys/wait.h>
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -83,7 +84,7 @@ static void set_hostname_from_file(void) {
   char hostname[HOST_NAME_MAX];
   FILE *fp = fopen("/etc/hostname", "r");
   if (fp) {
-    if (fgets(&hostname, HOST_NAME_MAX, fp)) {
+    if (fgets(hostname, HOST_NAME_MAX, fp)) {
       sethostname(hostname, strlen(hostname));
     }
     fclose(fp);
@@ -177,7 +178,7 @@ static void start_container_runtime(void) {
   // be in already exists (it does not recursively check up). Ensure
   // that the directory exists here.
   mkdir("/var/run/crio", 0700);
-  char const *nullArgs[] = {"/bin/crio", NULL};
+  char *nullArgs[] = {"/bin/crio", NULL};
   pid_t crio = start_exe("/bin/crio", CRIO_LOG, nullArgs);
   wait_for_path(CRIO_SOCK);
 
@@ -226,7 +227,7 @@ static void start_container_runtime(void) {
   pid_t kubelet = start_exe("/bin/kubelet", KUBELET_LOG, kubeletArgs);
 
   while (1) {
-    wait();
+    wait(0);
   }
 }
 
@@ -279,7 +280,7 @@ void start_console(void) {
 static void bring_if_up(const char *iff) {
   int ip = socket(PF_INET, SOCK_DGRAM, 0);
   struct ifreq ifr;
-  strncpy(&ifr.ifr_name, iff, 16);
+  strncpy(ifr.ifr_name, iff, 16);
   ioctl(ip, SIOCGIFFLAGS, &ifr);
   ifr.ifr_flags |= IFF_UP;
   ioctl(ip, SIOCSIFFLAGS, &ifr);
