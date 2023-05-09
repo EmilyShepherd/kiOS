@@ -6,7 +6,7 @@ CMD := init
 	$(CC) -flto -c $(CFLAGS) -o $@ $<
 
 $(CMD): $(OBJS)
-	$(CC) -flto -O3 $(LDFLAGS) -o $@ $^
+	$(CC) -flto $(CFLAGS) $(LDFLAGS) -o $@ $^
 
 .PHONY: install
 install: $(CMD)
