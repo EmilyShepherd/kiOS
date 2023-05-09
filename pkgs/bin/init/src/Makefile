@@ -1,4 +1,5 @@
 
+CFLAGS ?= -s -Os
 OBJS := $(patsubst %.c,%.o,$(wildcard *.c))
 CMD := init
 
