@@ -192,3 +192,54 @@ end:
   inotify_rm_watch(fd, watcher);
   close(fd);
 }
+
+/**
+ * Reads the next line of the mounts file and loads the relevant
+ * information about the mount (its id, parent id, and mount point). If
+ * the mount point is "/proc" - this will be skipped over.
+ */
+static void read_next(struct mountinfo *m, FILE *mounts) {
+  do {
+    fscanf(mounts, "%d %d %*d:%*d %*s %s", &m->id, &m->parent, m->mount);
+    while (fgetc(mounts) != '\n' && !feof(mounts)) ;;
+  } while (strcmp(m->mount, "/proc") == 0);
+}
+
+/**
+ * umount_all() is responsible for looping over all of the current mount
+ * points and unmounting them in a sensible order.
+ */
+void umount_all(void) {
+  FILE *mounts = fopen("/proc/self/mountinfo", "rb");
+  struct mountinfo current;
+  struct mountinfo cmp;
+  int skip = 0;
+
+  do {
+    for (int i = 0; i <= skip; i++) {
+      if (feof(mounts)) {
+        return;
+      }
+      read_next(&current, mounts);
+    }
+    while (!feof(mounts)) {
+      read_next(&cmp, mounts);
+      if (cmp.id == current.id) {
+        continue;
+      } else if (cmp.parent == current.id) {
+        current.id = cmp.id;
+        current.parent = cmp.parent;
+        strcpy(current.mount, cmp.mount);
+        rewind(mounts);
+      }
+    }
+    printf("Unmount %s...", current.mount);
+    if (umount(current.mount) != 0) {
+      printf("Err!\n");
+      skip++;
+    } else {
+      printf("Ok\n");
+    }
+    rewind(mounts);
+  } while (!feof(mounts));
+}

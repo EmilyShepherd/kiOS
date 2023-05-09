@@ -20,41 +20,48 @@ limitations under the License.
 package systemd
 
 import (
+	"net"
 	"time"
-	"syscall"
-
-	"github.com/fsnotify/fsnotify"
-	"k8s.io/klog/v2"
 )
 
 type Inhibitor struct {
 	isShuttingDown bool
+	conn           net.Conn
 }
 
+const (
+	systemSocket = "/run/system.sock"
+
+	cmdShutdown         = byte(1)
+	cmdContinueShutdown = byte(2)
+
+	eventShutdown = byte(1)
+)
+
 func NewDBusCon() (*Inhibitor, error) {
-	return &Inhibitor{}, nil
+	conn, err := net.Dial("unix", systemSocket)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Inhibitor{
+		conn: conn,
+	}, nil
 }
 
 type InhibitLock uint16
 
-const (
-	// The directory and file to look for shutdown events.
-	systemRunDir			 = "/run/system"
-	systemShutdownFile = systemRunDir + "/shutdown"
-)
-
 // The NodeShutdownManager checks the current system setting for grace.
-// As we do not actually have a way of setting this (and will just wait
-// for kubelet no matter what) let's just set an absurdly high figure to
-// keep the kubelet happy.
+// kiOS is designed to defer all pod grace decisions to kubelet itself,
+// so we just set an absurdly high figure to keep the kubelet happy.
 func (bus *Inhibitor) CurrentInhibitDelay() (time.Duration, error) {
 	duration := time.Duration(1000) * time.Second
 	return duration, nil
 }
 
 // Under systemd, the NodeShutdownManager needs to "request" an inhibit
-// lock. As this shim was built specifically for KiOS, we don't need to
-// bother with any of the overhead of actually checking anything.
+// lock. kiOS was designed with the expectation of a kubelet-inhibited
+// shutdown in mind, so does not require an inhibit mechanism.
 //
 // This will always return an "InhibitLock" in line with the method
 // signature, but this is effectively worthless and is not checked again
@@ -64,55 +71,33 @@ func (bus *Inhibitor) InhibitShutdown() (InhibitLock, error) {
 }
 
 // Called by the NodeShutdownManager when it has finished killing all
-// pods and is ready for the system to continue shutting down.
+// pods and is ready for the system to continue shutting down. This
+// notifies the system socket to continue the system shutdown.
 //
-// TODO: Call the init process from here to actually shut the system
-// down.
 // (NB: Looks like this is called also when refreshing the lock, so make
 // sure you do NOT kick off a shutdown without checking one is in
 // progress first!
 func (bus *Inhibitor) ReleaseInhibitLock(lock InhibitLock) error {
 	if bus.isShuttingDown {
-		syscall.Kill(1, syscall.SIGUSR2)
+		var cmd = []byte{cmdContinueShutdown}
+		bus.conn.Write(cmd)
 	}
 	return nil
 }
 
-// This watches the /run/system directory for a "shutdown" file. If it
-// created, this will trigger kubelet's Graceful Node Shutdown behaviour
-// and kill all the pods in a graceful way.
-// NB: Deleting the file will trigger kubelet to cancel the shutdown.
+// This listens on the system socket for shutdown events. If one is
+// received, this will trigger kubelet's Graceful Node Shutdown
+// behaviour and kill all the pods in a graceful way.
 func (bus *Inhibitor) MonitorShutdown() (<-chan bool, error) {
 	shutdownChan := make(chan bool, 1)
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		return nil, err
-	}
-	err = watcher.Add(systemRunDir)
 
 	go func() {
+		data := make([]byte, 1)
 		for {
-			select {
-			case event, ok := <-watcher.Events:
-				if !ok {
-					close(shutdownChan)
-					return
-				}
-				if event.Name == systemShutdownFile {
-					if event.Op&fsnotify.Create == fsnotify.Create {
-						bus.isShuttingDown = true
-					} else if event.Op&fsnotify.Remove == fsnotify.Remove {
-						bus.isShuttingDown = false
-					}
-					shutdownChan <- bus.isShuttingDown
-				}
-			case err, ok := <-watcher.Errors:
-				if !ok {
-					close(shutdownChan)
-					return
-				}
-				close(shutdownChan)
-				klog.ErrorS(err, "Watcher error")
+			bus.conn.Read(data)
+			if data[0] == eventShutdown {
+				bus.isShuttingDown = true
+				shutdownChan <- bus.isShuttingDown
 			}
 		}
 	}()
@@ -123,8 +108,7 @@ func (bus *Inhibitor) MonitorShutdown() (<-chan bool, error) {
 // Called as part of the NodeShutdownManager's init system if it
 // believes that the current system shutdown grace period is too low.
 //
-// No-op for the moment as we currently just give the kubelet as long as
-// it needs.
+// No-op as kiOS will always give the kubelet as long as it needs.
 func (bus *Inhibitor) OverrideInhibitDelay(inhibitDelayMax time.Duration) error {
 	return nil
 }
@@ -132,10 +116,9 @@ func (bus *Inhibitor) OverrideInhibitDelay(inhibitDelayMax time.Duration) error 
 // Stub for the NodeShutdownManager to call
 //
 // It seems odd that this method is exported - seems like it should be a
-// private method called by OverrideInhibitDelay so that the manager
+// private method called by OverrideibitDelay so that the manager
 // does not need to be aware of the implementation differences between
 // override and reload.
 func (bus *Inhibitor) ReloadLogindConf() error {
 	return nil
 }
-

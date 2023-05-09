@@ -12,8 +12,16 @@
 
 #define INOTIFY_BUFFER_SIZE sizeof(struct inotify_event) + NAME_MAX + 1
 
+struct mountinfo {
+  int id;
+  int parent;
+  char mount[PATH_MAX];
+};
+
 void mount_fs(void);
 void mount_datapart(void);
+void umount_all(void);
+
 void wait_for_path(const char *path);
 
 int fexists(const char *path);

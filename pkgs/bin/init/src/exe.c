@@ -7,6 +7,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+int should_restart_processes = 1;
 
 pid_t crio_pid;
 pid_t kubelet_pid;
@@ -112,7 +113,11 @@ void run_wait_loop() {
   while (1) {
     pid_t pid = wait(0);
 
-    if (pid == crio_pid) {
+    // Under normal circumstances, critical processes should always be
+    // restarted, however, this can be turned off for system shutdown.
+    if (should_restart_processes == 0) {
+      continue;
+    } else if (pid == crio_pid) {
       printf("WARNING: crio has exited! Restarting...\n");
       start_container_runtime();
     } else if (pid == kubelet_pid) {

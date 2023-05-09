@@ -1,6 +1,7 @@
 
 #include "include/exe.h"
 #include "include/fs.h"
+#include "include/socket.h"
 
 #include <net/if.h>
 #include <sys/socket.h>
@@ -99,6 +100,7 @@ int main(int argc, char **argv) {
 
   set_hostname_from_file();
   enable_ip_forwarding();
+  start_socket();
 
   wait_for_path(CRIO_SOCK);
 

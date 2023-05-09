@@ -12,6 +12,8 @@
 #define KUBELET_CREDENTIAL_PROVIDER_BIN_DIR "/usr/libexec/kubernetes/kubelet-plugins/credential-provider/exec"
 #define KUBELET_MAX_OPTIONS 6
 
+extern int should_restart_processes;
+
 void start_container_runtime(void);
 
 void start_kubelet(void);
