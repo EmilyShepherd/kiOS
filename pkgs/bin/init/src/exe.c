@@ -59,7 +59,6 @@ void start_container_runtime(void) {
   // wait_for_path only works when the directory the expected file will
   // be in already exists (it does not recursively check up). Ensure
   // that the directory exists here.
-  mkdir("/var/run/crio", 0700);
   char *nullArgs[] = {"/bin/crio", NULL};
   crio_pid = start_exe("/bin/crio", CRIO_LOG, nullArgs);
 }
@@ -74,10 +73,6 @@ void start_kubelet(void) {
     "/bin/kubelet",
     "--container-runtime-endpoint", "unix:///var/run/crio/crio.sock"
   };
-
-  // As above, we must ensure that the kubelet directory exists so that
-  // wait_for_path can work.
-  mkdir("/var/lib/kubelet", 0700);
 
   // We are keeping the first arg (container-runtime-endpoint). Others
   // will be overridden from there when calling set_arg.

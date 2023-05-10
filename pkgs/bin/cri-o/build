@@ -3,7 +3,6 @@ make_target=binaries
 install_target=install.bin
 depends="lib/libseccomp bin/conmon"
 initrd_binaries="/bin/crio /bin/pinns"
-file_location=$DATAPART
 
 pre_build() {
   export BINDIR=${BUILD_DIR}/bin

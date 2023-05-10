@@ -58,7 +58,10 @@ void mount_fs(void) {
   tmp_mount("/var/cache");
   tmp_mount("/var/tmp");
   tmp_mount("/var/run");
+  tmp_mount("/var/lib/kubelet");
   mount("tmpfs", "/var/run", "tmpfs", MS_SHARED, 0);
+  mkdir("/var/run/crio", 0700);
+  mkdir("/var/lib/kubelet/pods", 0700);
 
   // Mount the cgroup file systems
   // When k8s supports cgroupv2 we can drop almost all of this
@@ -122,10 +125,24 @@ void mount_datapart(void) {
 
   wait_for_path(datapart);
   mount(datapart, "/tmp", "ext4", 0, 0);
+
+  mkdir("/tmp/meta", 0700);
+  bind_mount("/tmp/meta", "/var/meta", MS_NODEV | MS_NOEXEC | MS_NOSUID);
+
+  mkdir("/var/meta/log", 0700);
+  bind_mount("/var/meta/log", "/var/log", 0);
+
+  mkdir("/var/meta/etc", 0700);
+  mkdir("/var/meta/.etc.work", 0700);
+  mount("etc", "/etc", "overlay", 0, "lowerdir=/etc,workdir=/var/meta/.etc.work,upperdir=/var/meta/etc");
+
+  mkdir("/tmp/data", 0700);
+  mkdir("/tmp/data/pods", 0700);
+  mkdir("/tmp/data/oci", 0700);
+  bind_mount("/tmp/data/pods", "/var/lib/kubelet/pods", 0);
+  bind_mount("/tmp/data/oci", "/var/lib/containers/storage", 0);
+
   bind_mount("/tmp/modules", "/lib/modules", STATIC_FLAGS);
-  bind_mount("/tmp/log", "/var/log", MS_NODEV | MS_NOEXEC | MS_NOSUID);
-  bind_mount("/tmp/lib", "/var/lib", 0);
-  bind_mount("/tmp/etc", "/etc", MS_NODEV | MS_NOEXEC | MS_NOSUID);
   umount("/tmp");
 }
 

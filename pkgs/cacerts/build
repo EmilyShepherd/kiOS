@@ -1,6 +1,6 @@
 
 
 build() {
-  mkdir -p ${DATAPART}/etc/ssl
-  curl -o ${DATAPART}/etc/ssl/ca-bundle.pem https://curl.se/ca/cacert.pem
+  mkdir -p ${INITRD}/etc/ssl
+  curl -o ${INITRD}/etc/ssl/ca-bundle.pem https://curl.se/ca/cacert.pem
 }

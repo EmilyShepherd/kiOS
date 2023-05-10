@@ -1,9 +1,8 @@
 
 type=make
-file_location=$DATAPART
 
 post_build() {
-  mkdir -p ${INITRD}/{bin,lib/modules,etc,proc,run,sys,tmp,var/cache,var/lib,var/log,var/run,var/tmp}
+  mkdir -p ${INITRD}/{bin,lib/modules,etc,proc,run,sys,tmp,var/cache,var/lib/kubelet/pods,var/log,var/run,var/tmp,var/meta,var/lib/containers/storage}
   ln -sf bin ${INITRD}/sbin
   cp ${BUILD_DIR}/init ${INITRD}/init
 }
