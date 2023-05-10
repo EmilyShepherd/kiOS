@@ -59,8 +59,21 @@ void start_container_runtime(void) {
   // wait_for_path only works when the directory the expected file will
   // be in already exists (it does not recursively check up). Ensure
   // that the directory exists here.
-  char *nullArgs[] = {"/bin/crio", NULL};
-  crio_pid = start_exe("/bin/crio", CRIO_LOG, nullArgs);
+  char *crioArgs[] = {
+    "/bin/crio",
+    "--runtimes", "crun:/bin/crun:/var/run/crun:oci",
+    "--no-pivot",
+    "--cgroup-manager", "cgroupfs",
+    "--default-runtime", "crun",
+    "--listen", "/var/run/crio/crio.sock",
+    "--root", "/var/lib/containers/storage",
+    "--runroot", "/var/lib/containers/storage",
+    "--conmon", "/bin/conmon",
+    "--conmon-cgroup", "pod",
+    "--pinns-path", "/bin/pinns",
+    NULL
+  };
+  crio_pid = start_exe("/bin/crio", CRIO_LOG, crioArgs);
 }
 
 void stop_kubelet(void) {
