@@ -1,6 +1,16 @@
 #
 # /etc/hosts: static lookup table for host names
 #
+# This file exists as it is a requirement for some binaries to have an
+# explict rule for localhost. It is possible to add custom static rules
+# to this file, however is is normally better to configure these at the
+# cluster DNS level.
+#
+# One usecase for this file can be to allow kiOS to bootstrap and start
+# pulling images down in an environment where a DNS server is not
+# available, or at a stage in the boot process that the DNS server has
+# not yet been determined.
+#
 
 #<ip-address>		<hostname.domain.org>	<hostname>
 127.0.0.1       localhost.localdomain localhost
