@@ -8,7 +8,7 @@ nodes with minimal overhead and fast boot times.
 
 kiOS does not include a conventional init system - instead it is
 designed to promptly launch the container runtime and then hand over
-control to kubernetes.
+control to the kubelet.
 
 As a result of this most system services (dhcpc, ntpc etc) run as Pods
 and are configured via standard kubernetes manifests.
@@ -20,12 +20,8 @@ and are configured via standard kubernetes manifests.
 kiOS doesn't have a large, complex or configurable early init system -
 no initrc, no runlevels, no service files. As soon as the userspace is
 ready, kiOS does a small amount of kubernetes-specific init, then
-immediately launch the container runtime and kubelet with minimal
+immediately launches the container runtime and kubelet with minimal
 blocking.
-
-On a Raspberry Pi 4 (in 64 bit mode), this allows kiOS to have the first
-containers running on the system within the first 12 seconds of kernel
-time.
 
 ### kiOS is secure
 
@@ -34,10 +30,9 @@ not even utility commands like echo, cat, ls etc). This reduces the
 attack vector as malicious scripts will not work on the host system - to
 attack kiOS, you'd need to get a binary into the system.
 
-The host's root filesystem is ephemeral - it only lives in RAM and is
-mounted as readonly, making injecting malicious binaries at runtime much
-harder for would-be attackers. kiOS' boot partition, which is just used
-at runtime for kernel modules, is also mounted as read only.
+The host's root filesystem is ephemeral - it only lives in RAM and most
+mounts are restrictive, making injecting malicious binaries at runtime
+much harder for would-be attackers.
 
 Finally, kiOS' simplicity makes hiding malicious binaries much
 harder, even if you were able to circumvent the protections above. kiOS
@@ -54,22 +49,12 @@ system services run as kubernetes pods. This even includes services that
 need to exist before networking is ready - for example the ntp (time) or
 dhcp clients - which run as static pods.
 
-The model of kubernetes running host level services is already well
-established with cluster CNI / CSI plugins. Installing services like AWS
-VPC CNI, or Calico, etc - run as pods, but have host level
-ramifications.
+**So, if you know how to create kubernetes pods, you know how to
+configure kiOS!**
 
-**So, if you know how to configure kubernetes, you know how to configure
-kiOS!**
+## Support
 
-## Raspberry Pi 4
+kiOS has build support for EFI boots on both amd64 (x86_64) and arm64
+(aarch64) systems. aarch64 support has not been tested in a while.
 
-kiOS is currently only tailored for running on the raspberry pi 4 (in 64
-bit mode), however further flavours may be added at some point.
-
-By default, kiOS bridges the host network with all containers, giving
-them their own L2 access to the physical network. DHCP is used to
-obtain IP addresses for both the host and any containers.
-
-Chrony is deployed as an NTP client, and is setup to access the generic
-ntp server pool.
+A version of AWS is bundled [here](https://github.com/EmilyShepherd/kios-aws).
