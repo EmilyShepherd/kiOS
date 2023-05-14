@@ -78,7 +78,6 @@ void start_container_runtime(void) {
 
 void stop_kubelet(void) {
   kill(kubelet_pid, SIGTERM);
-  waitpid(kubelet_pid, NULL, 0);
 }
 
 void start_kubelet(void) {

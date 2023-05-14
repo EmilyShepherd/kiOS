@@ -95,6 +95,11 @@ void client_thread(int *connection) {
         case CMD_CONTINUE_SHUTDOWN:
           do_shutdown();
           break;
+        case CMD_RESTART_KUBELET:
+          // It is good enough to simply stop the kubelet as the wait
+          // loop will notice and restart it for us.
+          stop_kubelet();
+          break;
       }
     }
     close(*connection);
