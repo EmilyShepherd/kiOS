@@ -5,7 +5,7 @@
 #define CRIO_SOCK "/var/run/crio/crio.sock"
 #define CRIO_LOG "/var/log/crio.log"
 #define KUBELET_LOG "/var/log/kubelet.log"
-#define KUBELET_CONFIG "/var/lib/kubelet/config.yaml"
+#define KUBELET_CONFIG "/etc/kubernetes/config.yaml"
 #define KUBELET_KUBECONFIG "/etc/kubernetes/kubelet.conf"
 #define KUBELET_BOOTSTRAP_KUBECONFIG "/etc/kubernetes/bootstrap-kubelet.conf"
 #define KUBELET_IMAGE_CREDENTIAL_PROVIDER_CONFIG "/etc/kubernetes/credential-providers.yaml"
