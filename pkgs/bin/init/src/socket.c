@@ -82,12 +82,12 @@ void do_shutdown(void) {
 /**
  * Runs a listener and processes any commands received
  */
-void client_thread(int *thread) {
+void client_thread(int *connection) {
   while (1) {
-    int client = connections[*thread] = accept(server_socket, NULL, NULL);
+    *connection = accept(server_socket, NULL, NULL);
     int ret;
     unsigned char cmd;
-    while ((ret = read(client, &cmd, sizeof(cmd))) > 0) {
+    while (read(*connection, &cmd, sizeof(cmd)) > 0) {
       switch (cmd) {
         case CMD_SHUTDOWN:
           soft_shutdown();
@@ -97,8 +97,8 @@ void client_thread(int *thread) {
           break;
       }
     }
-    close(client);
-    connections[*thread] = 0;
+    close(*connection);
+    *connection = 0;
   }
 }
 
@@ -117,7 +117,7 @@ void start_socket(void) {
   listen(server_socket, SYSTEM_SOCKET_CONNECTIONS);
   for (int i = 0; i < SYSTEM_SOCKET_CONNECTIONS; i++) {
     pthread_t thread;
-    pthread_create(&thread, NULL, (void *(*)(void *))&client_thread, &i);
+    pthread_create(&thread, NULL, (void *(*)(void *))&client_thread, &connections[i]);
   }
 }
 
