@@ -1,11 +1,13 @@
 
 #include "include/fs.h"
+#include "include/gpt.h"
 
-#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+char datapart[NAME_MAX + 5];
 
 /**
  * File Exists
@@ -118,10 +120,7 @@ void mount_fs(void) {
  * not accessible at runtime by init-created mounts.
  */
 void mount_datapart(void) {
-  char *datapart = getenv("datapart");
-  if (!datapart) {
-    datapart = DEFAULT_DATAPART;
-  }
+  determine_datapart(datapart);
 
   wait_for_path(datapart);
   mount(datapart, "/tmp", "ext4", 0, 0);

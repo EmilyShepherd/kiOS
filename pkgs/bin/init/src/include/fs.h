@@ -8,8 +8,6 @@
 
 #define STATIC_FLAGS MS_NODEV | MS_RDONLY | MS_NOSUID | MS_NOEXEC
 
-#define DEFAULT_DATAPART "/dev/sda"
-
 #define INOTIFY_BUFFER_SIZE sizeof(struct inotify_event) + NAME_MAX + 1
 
 struct mountinfo {
