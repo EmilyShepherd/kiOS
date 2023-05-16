@@ -1,0 +1,87 @@
+#!/bin/bash
+#
+# Small script which can used to create an ISO image for a working kiOS
+# distribution.
+#
+# This scripts expects the datapart and bootpart directories to already
+# contain all desired files.
+#
+set -e
+
+DATAPART_TYPE_UUID="97aac693-d920-465a-94fe-eb59fc86dfaa";
+BOOTPART_PATH=${EFI_PATH:-.build/bootpart}
+DATAPART_PATH=${DATAPART_PATH:-.build/datapart}
+
+#
+# Creates a blank zero'd file - useful for padding / pre-priming areas
+# of a disk that will contain partition tables.
+#
+make_blank_part() {
+  dd if=/dev/zero of=.iso/$1 bs=512 count=$2
+}
+
+#
+# Creates the boot partition by checking how big the bootpart directory
+# is in 1K blocks, then provisioning a vfat partition that size and
+# copying the contents into it.
+#
+make_boot_part() {
+  local efi_size=$(du -B 1024 --max-depth=0 ${BOOTPART_PATH} | cut -f1)
+  local boot_blocks=$(expr $efi_size + 70)
+  boot_lbas=$(expr $boot_blocks '*' 2)
+
+  mkfs.vfat -C .iso/boot -f1 ${boot_blocks}
+  mcopy -si .iso/boot ${BOOTPART_PATH}/* ::
+}
+
+#
+# Creates the data partition by checking how big the datapart directory
+# is in bytes, then provisioning an ext4 partition 1.5 that size, to
+# ensure a bit of slack at runtime.
+#
+make_data_part() {
+  local data_size=$(du --max-depth=0 ${DATAPART_PATH} | cut -f1)
+  local buffered_size=$(expr ${data_size} '*' 3 / 2)
+  mkfs.ext4 -j -d ${DATAPART_PATH} .iso/datapart ${buffered_size}
+}
+
+#
+# Creates a GPT disk by concatenating together the bootpart and datapart
+# files, then creating a GPT table with entries pointing to the correct
+# LBAs on the disk.
+#
+make_gpt_disk() {
+  make_blank_part start 2048
+  make_blank_part end 33
+
+  cat .iso/start .iso/boot .iso/datapart .iso/end > kios.img
+
+  {
+    echo g;                         # Create GPT Table
+
+    # Part 1
+    echo n;                         # New Partition:
+    echo 1;                         #   Part 1
+    echo 2048;                      #   Start LBA
+    echo +$(expr $boot_lbas - 1);   #   End  LBA
+    echo t;                         # Set type:
+    echo 1;                         #   EFI System
+
+    # Part 2
+    echo n;                         # New Partition:
+    echo 2;                         #   Part 2
+    echo $(expr $boot_lbas + 2048); #   Start LBA
+    echo -0;                        #   End LBA
+    echo t;                         # Set Type:
+    echo 2;                         #   Part 2
+    echo ${DATAPART_TYPE_UUID};     #   kiOS Data Partition
+
+    echo w;                         # Write and exit
+  } | fdisk kios.img
+}
+
+rm -rf .iso
+mkdir -p .iso
+make_boot_part
+make_data_part
+make_gpt_disk

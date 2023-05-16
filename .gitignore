@@ -1,2 +1,4 @@
 .build/
 srcpkg
+.iso
+kios.img
