@@ -46,6 +46,46 @@ make_data_part() {
 }
 
 #
+# Creates a partition table in the kios.img iso and sets up the two
+# partitions.
+#
+# Args:
+#   1 - The code for the type of table "o" for DOS/MBR, "g" for GPT
+#   2 - The command to use to create a new partition
+#   3 - The type identifier / code for an EFI partition
+#   4 - The type identifier / code for a kiOS data partition
+#
+make_table() {
+  local type="$1"
+  local new_cmd="$2"
+  local efi_type="$3"
+  local datapart_type="$4"
+
+  {
+    echo "${type}";                 # Create Table
+
+    # Part 1
+    echo "${new_cmd}";              # New Partition:
+    echo 1;                         #   Part 1
+    echo 2048;                      #   Start LBA
+    echo +$(expr $boot_lbas - 1);   #   End  LBA
+    echo t;                         # Set type:
+    echo "${efi_type}";             #   EFI System
+
+    # Part 2
+    echo "${new_cmd}";              # New Partition:
+    echo 2;                         #   Part 2
+    echo $(expr $boot_lbas + 2048); #   Start LBA
+    echo -0;                        #   End LBA
+    echo t;                         # Set Type:
+    echo 2;                         #   Part 2
+    echo "${datapart_type}";        #   kiOS Data Partition
+
+    echo w;                         # Write and exit
+  } | fdisk kios.img
+}
+
+#
 # Creates a GPT disk by concatenating together the bootpart and datapart
 # files, then creating a GPT table with entries pointing to the correct
 # LBAs on the disk.
@@ -56,32 +96,28 @@ make_gpt_disk() {
 
   cat .iso/start .iso/boot .iso/datapart .iso/end > kios.img
 
-  {
-    echo g;                         # Create GPT Table
+  make_table g n 1 "${DATAPART_TYPE_UUID}"
+}
 
-    # Part 1
-    echo n;                         # New Partition:
-    echo 1;                         #   Part 1
-    echo 2048;                      #   Start LBA
-    echo +$(expr $boot_lbas - 1);   #   End  LBA
-    echo t;                         # Set type:
-    echo 1;                         #   EFI System
+#
+# Creates a MBR/DOS disk by concatenating together the bootpart and
+# datapart files, then creating a MBR table with two primary partitions
+# pointing to the correct LBAs on the disk.
+#
+make_mbr_disk() {
+  make_blank_part start 2048
 
-    # Part 2
-    echo n;                         # New Partition:
-    echo 2;                         #   Part 2
-    echo $(expr $boot_lbas + 2048); #   Start LBA
-    echo -0;                        #   End LBA
-    echo t;                         # Set Type:
-    echo 2;                         #   Part 2
-    echo ${DATAPART_TYPE_UUID};     #   kiOS Data Partition
+  cat .iso/start .iso/boot .iso/datapart > kios.img
 
-    echo w;                         # Write and exit
-  } | fdisk kios.img
+  make_table o $'n\np' ef 83
 }
 
 rm -rf .iso
 mkdir -p .iso
 make_boot_part
 make_data_part
-make_gpt_disk
+
+case "$1" in
+  --mbr) make_mbr_disk ;;
+  *) make_gpt_disk ;;
+esac
