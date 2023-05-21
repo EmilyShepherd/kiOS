@@ -100,24 +100,25 @@ int main(int argc, char **argv) {
   start_console();
   printf("Kios Init\n");
 
-  // We want to enable networking as quickly as possible so that the
-  // kernel can be getting on with SLAAC, if available on the network,
-  // whilst we are busy with other things.
-  bring_if_up("lo");
-  bring_if_up("eth0");
-
   mount_fs();
   mount_datapart();
 
   putenv("PATH=/bin");
   start_container_runtime();
 
+  // Cri-o (started in the step above) typically takes ~3 seconds to
+  // start up on a modern machine, so we start it as soon as is
+  // reasonable to do so. All our other init steps are performed in that
+  // three second window.
+  bring_if_up("lo");
+  bring_if_up("eth0");
   set_hostname_from_file();
   enable_ip_forwarding();
   start_socket();
   signal(SIGTERM, &soft_shutdown);
   clear_cmd_line(argv);
 
+  // Now we are finished with our own setup, wait for crio to be ready.
   wait_for_path(CRIO_SOCK);
 
   if (!fexists(KUBELET_CONFIG)) {
