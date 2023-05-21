@@ -5,6 +5,7 @@ if test "$1" == "--system"
 then
   shift
   ./scripts/build-pkg.sh lib/musl
+  ./scripts/build-pkg.sh cacerts
 
   for bin in busybox conmon cri-o crun init iptables kubernetes
   do
