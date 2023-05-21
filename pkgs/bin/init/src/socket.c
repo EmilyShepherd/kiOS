@@ -41,8 +41,11 @@ void notify_all(unsigned char event) {
  * clients - it will trigger its own graceful shutdown process, which
  * shuts down pods according to their own rules. When finished, it will
  * notify the system socket that it should continue the shutdown.
+ *
+ * We have an int argument so that this function can be used as a signal
+ * handler (for shutdown signals). However we do not use this arg.
  */
-void soft_shutdown(void) {
+void soft_shutdown(int) {
   notify_all(EVENT_SHUTDOWN);
 }
 
@@ -90,7 +93,7 @@ void client_thread(int *connection) {
     while (read(*connection, &cmd, sizeof(cmd)) > 0) {
       switch (cmd) {
         case CMD_SHUTDOWN:
-          soft_shutdown();
+          soft_shutdown(0);
           break;
         case CMD_CONTINUE_SHUTDOWN:
           do_shutdown();

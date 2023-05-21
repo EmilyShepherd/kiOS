@@ -34,4 +34,11 @@ void notify_all(unsigned char);
  */
 void start_socket(void);
 
+/**
+ * Sends out a shutdown event to any current clients on the system
+ * socket. This is intended to be used for the kubelet graceful shutdown
+ * process.
+ */
+void soft_shutdown(int);
+
 #endif

@@ -4,6 +4,7 @@
 #include "include/socket.h"
 
 #include <net/if.h>
+#include <signal.h>
 #include <sys/socket.h>
 #include <string.h>
 #include <unistd.h>
@@ -101,6 +102,7 @@ int main(int argc, char **argv) {
   set_hostname_from_file();
   enable_ip_forwarding();
   start_socket();
+  signal(SIGTERM, &soft_shutdown);
 
   wait_for_path(CRIO_SOCK);
 
