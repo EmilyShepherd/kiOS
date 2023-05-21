@@ -42,7 +42,8 @@ make_boot_part() {
 make_data_part() {
   local data_size=$(du --max-depth=0 ${DATAPART_PATH} | cut -f1)
   local buffered_size=$(expr ${data_size} '*' 3 / 2)
-  mkfs.ext4 -j -d ${DATAPART_PATH} .iso/datapart ${buffered_size}
+
+  fakeroot mkfs.ext4 -j -d ${DATAPART_PATH} .iso/datapart ${buffered_size}
 }
 
 #
