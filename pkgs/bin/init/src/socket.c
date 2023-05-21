@@ -9,7 +9,6 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <sys/wait.h>
-#include <sys/mount.h>
 #include <pthread.h>
 #include <unistd.h>
 
