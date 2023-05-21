@@ -83,6 +83,19 @@ static void bring_if_up(const char *iff) {
   ioctl(ip, SIOCSIFFLAGS, &ifr);
 }
 
+/**
+ * Clears the process' command line and replaces it with "kiOS".
+ *
+ * This is a vanity move so that it shows up pleasantly in tools like
+ * "ps"
+ */
+static void clear_cmd_line(char **argv) {
+  strncpy(argv[0], "kiOS", strlen(argv[0]));
+  while (*++argv) {
+    memset(*argv, 0, strlen(*argv));
+  }
+}
+
 int main(int argc, char **argv) {
   start_console();
   printf("Kios Init\n");
@@ -103,6 +116,7 @@ int main(int argc, char **argv) {
   enable_ip_forwarding();
   start_socket();
   signal(SIGTERM, &soft_shutdown);
+  clear_cmd_line(argv);
 
   wait_for_path(CRIO_SOCK);
 
