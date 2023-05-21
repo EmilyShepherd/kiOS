@@ -9,7 +9,7 @@
 set -e
 
 DATAPART_TYPE_UUID="97aac693-d920-465a-94fe-eb59fc86dfaa";
-BOOTPART_PATH=${EFI_PATH:-.build/bootpart}
+BOOTPART_PATH=${BOOTPART_PATH:-.build/bootpart}
 DATAPART_PATH=${DATAPART_PATH:-.build/datapart}
 
 #
