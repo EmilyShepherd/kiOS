@@ -4,7 +4,6 @@
 #include "include/socket.h"
 
 #include <signal.h>
-#include <stdio.h>
 #include <string.h>
 #include <sys/reboot.h>
 #include <sys/socket.h>
@@ -69,8 +68,6 @@ void do_shutdown(void) {
 
   umount_all();
   sync();
-
-  sleep(30);
 
   pid_t pid = fork();
   if (pid == 0) {

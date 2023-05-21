@@ -249,12 +249,8 @@ void umount_all(void) {
         rewind(mounts);
       }
     }
-    printf("Unmount %s...", current.mount);
     if (umount(current.mount) != 0) {
-      printf("Err!\n");
       skip++;
-    } else {
-      printf("Ok\n");
     }
     rewind(mounts);
   } while (!feof(mounts));
