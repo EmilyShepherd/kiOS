@@ -73,9 +73,6 @@ void do_shutdown(void) {
     reboot(RB_POWER_OFF);
     // Kernel calls exit - shouldn't get here
   }
-
-  waitpid(pid, NULL, 0);
-  while (1) sleep(1);
 }
 
 /**
