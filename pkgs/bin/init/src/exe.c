@@ -1,6 +1,7 @@
 
 #include "include/exe.h"
 #include "include/fs.h"
+#include "include/kmsg.h"
 
 #include <stdio.h>
 #include <sys/stat.h>
@@ -125,10 +126,10 @@ void run_wait_loop() {
     if (should_restart_processes == 0) {
       continue;
     } else if (pid == crio_pid) {
-      printf("WARNING: crio has exited! Restarting...\n");
+      warn("crio has exited! Restarting...\n");
       start_container_runtime();
     } else if (pid == kubelet_pid) {
-      printf("WARNING: kubelet has exited! Restarting\n");
+      warn("kubelet has exited! Restarting\n");
       start_kubelet();
     }
   }

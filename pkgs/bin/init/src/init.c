@@ -1,6 +1,7 @@
 
 #include "include/exe.h"
 #include "include/fs.h"
+#include "include/kmsg.h"
 #include "include/socket.h"
 
 #include <net/if.h>
@@ -45,31 +46,6 @@ void enable_ip_forwarding(void) {
 }
 
 /**
- * Start Console
- *
- * Opens up the console character device, if specified by the CONSOLE/
- * console environment variable, and sets it up as the init process'
- * stdin, stdout, and stderr.
- */
-void start_console(void) {
-  char *console;
-  console = getenv("CONSOLE");
-  if (!console) {
-    console = getenv("console");
-  }
-
-  if (console) {
-    int fd = open(console, O_RDWR | O_NONBLOCK | O_NOCTTY);
-    if (fd >= 0) {
-      dup2(fd, STDIN_FILENO);
-      dup2(fd, STDOUT_FILENO);
-      dup2(fd, STDERR_FILENO);
-      close(fd);
-    }
-  }
-}
-
-/**
  * Bring Interface Up
  *
  * Updates the given interface name to be UP.
@@ -97,8 +73,7 @@ static void clear_cmd_line(char **argv) {
 }
 
 int main(int argc, char **argv) {
-  start_console();
-  printf("Kios Init\n");
+  notice("kiOS Init\n");
 
   mount_fs();
   mount_datapart();
