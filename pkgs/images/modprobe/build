@@ -1,0 +1,5 @@
+type=configure
+
+pre_build() {
+  ./autogen.sh
+}
