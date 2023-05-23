@@ -43,6 +43,7 @@ provided:
 with the api-server
 - /etc/kubernetes/credential-providers.yaml - CredentialProviderConfig file
 - /etc/kubernetes/manifests - Directory for static pod manifests
+- /etc/kubernets/node-labels - List of node labels to be added on initial node registration
 - /etc/cni/net.d - Directory for CNI (Container Networking) configuration
 - /etc/hostname - The name of the system
 
@@ -208,6 +209,24 @@ a DHCP Static Pod, a disk resizer (as the actual volume size at runtime
 often differs from the size of the original image), and an aws-specific
 "aws-bootstrap" container, which is responsible for reading instance
 metadata and bootstrapping the node.
+
+#### Node Label Files
+
+`/etc/kubernetes/node-labels`
+
+Kubelet supports automatically setting custom node labels on initial
+registration. These are not passed via the standard `config.yaml` file,
+so instead there is a kiOS-specific format:
+
+```yaml
+# Comments are allowed
+label-name: label-value
+
+# Blank lines and whitespace are ignored
+whitespace-example:       lots-of-spaces
+
+eol-comment: example # Comments at the end of the line are acceptable too
+```
 
 #### CNI Configuration
 
