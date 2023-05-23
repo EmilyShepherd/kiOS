@@ -1,0 +1,31 @@
+#
+# Node Labels
+# ===========
+#
+# This file contains a list of key: value pairs that will be added as
+# labels on the node's first registration with the api-server.
+#
+# Labels in the 'kubernetes.io' namespace must begin with an allowed
+# prefix:
+#
+#   - kubelet.kubernetes.io
+#   - node.kubernetes.io
+#
+# Or be in the specifically allowed set:
+#
+#   - beta.kubernetes.io/arch
+#   - beta.kubernetes.io/instance-type
+#   - beta.kubernetes.io/os
+#   - failure-domain.beta.kubernetes.io/region
+#   - failure-domain.beta.kubernetes.io/zone
+#   - kubernetes.io/arch
+#   - kubernetes.io/hostname
+#   - kubernetes.io/os
+#   - node.kubernetes.io/instance-type
+#   - topology.kubernetes.io/region
+#   - topology.kubernetes.io/zone
+#
+# Names in other label namespaces can be used without restriction from
+# the kubelet, but _may_ be restricted by the api-server.
+#
+
