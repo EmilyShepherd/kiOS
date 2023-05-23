@@ -1,6 +1,7 @@
 
 #include "include/exe.h"
 #include "include/fs.h"
+#include "include/kmsg.h"
 #include "include/socket.h"
 
 #include <signal.h>
@@ -44,6 +45,8 @@ void notify_all(unsigned char event) {
  * handler (for shutdown signals). However we do not use this arg.
  */
 void soft_shutdown(int) {
+  notice("System Shutdown Requested.");
+  info("Waiting for kubelet graceful shutdown");
   notify_all(EVENT_SHUTDOWN);
 }
 
@@ -57,6 +60,9 @@ void soft_shutdown(int) {
  * the process killing at this stage will be fairly abrupt.
  */
 void do_shutdown(void) {
+  info("Kubelet graceful shutdown complete");
+  warn("System shutting down");
+
   // Update the flag to ensure that crio and kubelet are not
   // automatically restarted while we shutdown.
   should_restart_processes = 0;

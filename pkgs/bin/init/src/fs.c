@@ -1,6 +1,7 @@
 
 #include "include/fs.h"
 #include "include/gpt.h"
+#include "include/kmsg.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -121,6 +122,8 @@ void mount_fs(void) {
  */
 void mount_datapart(void) {
   determine_datapart(datapart);
+  info("Using Datapart:");
+  info(datapart);
 
   wait_for_path(datapart);
   mount(datapart, "/tmp", "ext4", 0, 0);
