@@ -81,6 +81,70 @@ void stop_kubelet(void) {
   kill(kubelet_pid, SIGTERM);
 }
 
+/**
+ * Helper function which checks if the given character is an acceptable
+ * character in a node label
+ */
+static int is_label_char(char chr) {
+  return ('A' <= chr && chr <= 'Z')
+    ||   ('a' <= chr && chr <= 'z')
+    ||   ('0' <= chr && chr <= '9')
+    ||   (chr == '.')
+    ||   (chr == '_')
+    ||   (chr == '-')
+    ||   (chr == '/');
+}
+
+/**
+ * The reads the pseudo-yaml "node-labels" configuration file, and
+ * converts it into a command line string of node labels to be passed to
+ * the kubelet.
+ *
+ * This function only exists because kubelet _only_ supports receiving
+ * its labels via command line flag (not via the KubeletConfiguration
+ * file) so we have to have a custom file to specify it in kiOS.
+ *
+ * The format of this file is:
+ *
+ * ```
+ * # Comment
+ * label-name: label-value
+ *
+ * # Blank lines and white space are ignored
+ * another-label-name:         lots-of-whitespace
+ *
+ * final-label: foobar # Comments at the end of lines are fine too
+ * ```
+ */
+void populate_labels(char *labels) {
+  FILE *file = fopen(KUBELET_NODE_LABELS, "r");
+  if (!file) return;
+
+  char line[63 + 2 + 63];
+  int labels_idx = 0;
+  while (fgets(line, sizeof(line), file)) {
+    int i = 0;
+    int line_has_label = 0;
+    do {
+      if (line[i] == '#') {
+        break;
+      } else if (line[i] == ':') {
+        labels[labels_idx++] = '=';
+      } else if (is_label_char(line[i])) {
+        labels[labels_idx++] = line[i];
+        line_has_label = 1;
+      }
+    } while(line[++i]);
+
+    if (line_has_label) {
+      labels[labels_idx++] = ',';
+    }
+  }
+  if (labels_idx) {
+    labels[labels_idx - 1] = 0;
+  }
+}
+
 void start_kubelet(void) {
   char * kubeletArgs[1 + 2 * KUBELET_MAX_OPTIONS + 1] = {
     "/bin/kubelet",
@@ -90,6 +154,12 @@ void start_kubelet(void) {
   // We are keeping the first arg (container-runtime-endpoint). Others
   // will be overridden from there when calling set_arg.
   int arg = 1;
+
+  char labels[2000];
+  populate_labels(labels);
+  if (labels[0]) {
+    SET_ARG("--node-labels", labels);
+  }
 
   if (fexists(KUBELET_CONFIG)) {
     SET_ARG("--config", KUBELET_CONFIG);
