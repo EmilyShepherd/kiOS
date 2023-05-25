@@ -3,8 +3,8 @@
 #define _EXE_H 1
 
 #define CRIO_SOCK "/var/run/crio/crio.sock"
-#define CRIO_LOG "/var/log/crio.log"
-#define KUBELET_LOG "/var/log/kubelet.log"
+#define CRIO_LOG "/var/run/crio.log"
+#define KUBELET_LOG "/var/run/kubelet.log"
 #define KUBELET_CONFIG "/etc/kubernetes/config.yaml"
 #define KUBELET_NODE_LABELS "/etc/kubernetes/node-labels"
 #define KUBELET_KUBECONFIG "/etc/kubernetes/kubelet.conf"

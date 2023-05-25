@@ -29,8 +29,12 @@ pid_t start_exe(const char *exe, const char *log, char * const *argv) {
     return pid; /* Parent */
   }
 
+  if (!fexists(log)) {
+    mkfifo(log, 0700);
+  }
+
   /* Child */
-  int fd = open(log, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+  int fd = open(log, O_RDWR | O_NONBLOCK);
   dup2(fd, 1);
   dup2(fd, 2);
   close(fd);
