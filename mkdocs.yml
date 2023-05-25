@@ -1,0 +1,23 @@
+site_name: kiOS
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.top
+    - navigation.footer
+  palette:
+    primary: red
+    accent: red
+
+copyright: Copyright &copy; 2021 - 2023 Emily Shepherd
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - attr_list
+  - md_in_html
+  - pymdownx.tabbed:
+      alternate_style: true 
+  - pymdownx.tasklist:
+      custom_checkbox: true
