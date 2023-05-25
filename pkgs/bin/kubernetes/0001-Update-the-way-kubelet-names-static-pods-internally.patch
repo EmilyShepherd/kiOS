@@ -1,0 +1,189 @@
+From 1ba1808b67971c3aa324733e12a993d5ae9a3602 Mon Sep 17 00:00:00 2001
+From: Emily Shepherd <emily@redcoat.dev>
+Date: Thu, 25 May 2023 00:42:15 +0100
+Subject: [PATCH] Update the way kubelet names static pods internally
+
+Previously, static pods had their names appended with the node name upon
+creation to avoid collisions when creating mirror pods in the
+api-server. This logic makes sense, however it was causing static pods
+to be restarted whenever the hostname changed which is undesirable.
+
+This change updates kubelet to continue to refer static pods _locally_
+using their original, unappended, name. The node name is added only when
+speaking with the api server.
+---
+ pkg/kubelet/config/common.go         | 10 ----------
+ pkg/kubelet/container/runtime.go     |  7 ++++++-
+ pkg/kubelet/pod/mirror_client.go     | 12 ++++++++++++
+ pkg/kubelet/pod/pod_manager.go       |  5 ++++-
+ pkg/kubelet/status/status_manager.go |  3 +++
+ pkg/kubelet/types/pod_update.go      |  2 ++
+ 6 files changed, 27 insertions(+), 12 deletions(-)
+
+diff --git a/pkg/kubelet/config/common.go b/pkg/kubelet/config/common.go
+index 7dade01b9c3..130bb2bef52 100644
+--- a/pkg/kubelet/config/common.go
++++ b/pkg/kubelet/config/common.go
+@@ -20,7 +20,6 @@ import (
+ 	"crypto/md5"
+ 	"encoding/hex"
+ 	"fmt"
+-	"strings"
+ 
+ 	v1 "k8s.io/api/core/v1"
+ 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+@@ -48,11 +47,6 @@ const (
+ 	maxConfigLength = 10 * 1 << 20 // 10MB
+ )
+ 
+-// Generate a pod name that is unique among nodes by appending the nodeName.
+-func generatePodName(name string, nodeName types.NodeName) string {
+-	return fmt.Sprintf("%s-%s", name, strings.ToLower(string(nodeName)))
+-}
+-
+ func applyDefaults(pod *api.Pod, source string, isFile bool, nodeName types.NodeName) error {
+ 	if len(pod.UID) == 0 {
+ 		hasher := md5.New()
+@@ -60,7 +54,6 @@ func applyDefaults(pod *api.Pod, source string, isFile bool, nodeName types.Node
+ 		// DeepHashObject resets the hash, so we should write the pod source
+ 		// information AFTER it.
+ 		if isFile {
+-			fmt.Fprintf(hasher, "host:%s", nodeName)
+ 			fmt.Fprintf(hasher, "file:%s", source)
+ 		} else {
+ 			fmt.Fprintf(hasher, "url:%s", source)
+@@ -69,9 +62,6 @@ func applyDefaults(pod *api.Pod, source string, isFile bool, nodeName types.Node
+ 		klog.V(5).InfoS("Generated UID", "pod", klog.KObj(pod), "podUID", pod.UID, "source", source)
+ 	}
+ 
+-	pod.Name = generatePodName(pod.Name, nodeName)
+-	klog.V(5).InfoS("Generated pod name", "pod", klog.KObj(pod), "podUID", pod.UID, "source", source)
+-
+ 	if pod.Namespace == "" {
+ 		pod.Namespace = metav1.NamespaceDefault
+ 	}
+diff --git a/pkg/kubelet/container/runtime.go b/pkg/kubelet/container/runtime.go
+index ad59de4df1c..c7b09bd9c35 100644
+--- a/pkg/kubelet/container/runtime.go
++++ b/pkg/kubelet/container/runtime.go
+@@ -32,6 +32,7 @@ import (
+ 	"k8s.io/client-go/util/flowcontrol"
+ 	runtimeapi "k8s.io/cri-api/pkg/apis/runtime/v1"
+ 	"k8s.io/klog/v2"
++	kubetypes "k8s.io/kubernetes/pkg/kubelet/types"
+ 	"k8s.io/kubernetes/pkg/volume"
+ )
+ 
+@@ -619,9 +620,13 @@ func (p *Pod) IsEmpty() bool {
+ 
+ // GetPodFullName returns a name that uniquely identifies a pod.
+ func GetPodFullName(pod *v1.Pod) string {
++	name, ok := pod.Annotations[kubetypes.ConfigMirrorLocalName]
++	if !ok {
++		name = pod.Name
++	}
+ 	// Use underscore as the delimiter because it is not allowed in pod name
+ 	// (DNS subdomain format), while allowed in the container name format.
+-	return pod.Name + "_" + pod.Namespace
++	return name + "_" + pod.Namespace
+ }
+ 
+ // BuildPodFullName builds the pod full name from pod name and namespace.
+diff --git a/pkg/kubelet/pod/mirror_client.go b/pkg/kubelet/pod/mirror_client.go
+index 22ea62b1a31..78e5dfc9fee 100644
+--- a/pkg/kubelet/pod/mirror_client.go
++++ b/pkg/kubelet/pod/mirror_client.go
+@@ -19,6 +19,7 @@ package pod
+ import (
+ 	"context"
+ 	"fmt"
++	"strings"
+ 
+ 	v1 "k8s.io/api/core/v1"
+ 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+@@ -66,6 +67,11 @@ func NewBasicMirrorClient(apiserverClient clientset.Interface, nodeName string,
+ 	}
+ }
+ 
++// Generate a pod name that is unique among nodes by appending the nodeName.
++func (mc *basicMirrorClient) generatePodApiName(name string) string {
++	return fmt.Sprintf("%s-%s", name, strings.ToLower(string(mc.nodeName)))
++}
++
+ func (mc *basicMirrorClient) CreateMirrorPod(pod *v1.Pod) error {
+ 	if mc.apiserverClient == nil {
+ 		return nil
+@@ -78,7 +84,10 @@ func (mc *basicMirrorClient) CreateMirrorPod(pod *v1.Pod) error {
+ 		copyPod.Annotations[k] = v
+ 	}
+ 	hash := getPodHash(pod)
++	copyPod.Name = mc.generatePodApiName(pod.Name)
+ 	copyPod.Annotations[kubetypes.ConfigMirrorAnnotationKey] = hash
++	copyPod.Annotations[kubetypes.ConfigMirrorLocalName] = pod.Name
++	pod.Annotations[kubetypes.ConfigApiName] = copyPod.Name
+ 
+ 	// With the MirrorPodNodeRestriction feature, mirror pods are required to have an owner reference
+ 	// to the owning node.
+@@ -123,6 +132,9 @@ func (mc *basicMirrorClient) DeleteMirrorPod(podFullName string, uid *types.UID)
+ 		return false, err
+ 	}
+ 
++	// We need to convert the parsed name to its API form
++	name = mc.generatePodApiName(name)
++
+ 	var uidValue types.UID
+ 	if uid != nil {
+ 		uidValue = *uid
+diff --git a/pkg/kubelet/pod/pod_manager.go b/pkg/kubelet/pod/pod_manager.go
+index 2eeb4788af8..d1b446b76ea 100644
+--- a/pkg/kubelet/pod/pod_manager.go
++++ b/pkg/kubelet/pod/pod_manager.go
+@@ -186,6 +186,9 @@ func (pm *basicManager) updatePodsInternal(pods ...*v1.Pod) {
+ 			pm.mirrorPodByFullName[podFullName] = pod
+ 			if p, ok := pm.podByFullName[podFullName]; ok {
+ 				pm.translationByUID[mirrorPodUID] = kubetypes.ResolvedPodUID(p.UID)
++				// We also index the pod by its api name so that api-server exec
++				// or logs calls will find it
++				pm.podByFullName[kubecontainer.BuildPodFullName(pod.Name, pod.Namespace)] = p
+ 			}
+ 		} else {
+ 			resolvedPodUID := kubetypes.ResolvedPodUID(pod.UID)
+@@ -302,7 +305,7 @@ func (pm *basicManager) GetOrphanedMirrorPodNames() []string {
+ 
+ func (pm *basicManager) IsMirrorPodOf(mirrorPod, pod *v1.Pod) bool {
+ 	// Check name and namespace first.
+-	if pod.Name != mirrorPod.Name || pod.Namespace != mirrorPod.Namespace {
++	if kubecontainer.GetPodFullName(pod) != kubecontainer.GetPodFullName(mirrorPod) {
+ 		return false
+ 	}
+ 	hash, ok := getHashFromMirrorPod(mirrorPod)
+diff --git a/pkg/kubelet/status/status_manager.go b/pkg/kubelet/status/status_manager.go
+index c767e7dc41b..bfdd6595c98 100644
+--- a/pkg/kubelet/status/status_manager.go
++++ b/pkg/kubelet/status/status_manager.go
+@@ -545,6 +545,9 @@ func (m *manager) updateStatusInternal(pod *v1.Pod, status v1.PodStatus, forceUp
+ 		podName:      pod.Name,
+ 		podNamespace: pod.Namespace,
+ 	}
++	if kubetypes.IsStaticPod(pod) {
++		newStatus.podName = pod.Annotations[kubetypes.ConfigApiName]
++	}
+ 	m.podStatuses[pod.UID] = newStatus
+ 
+ 	select {
+diff --git a/pkg/kubelet/types/pod_update.go b/pkg/kubelet/types/pod_update.go
+index 6c7e236fc9a..905c1a02805 100644
+--- a/pkg/kubelet/types/pod_update.go
++++ b/pkg/kubelet/types/pod_update.go
+@@ -28,6 +28,8 @@ import (
+ const (
+ 	ConfigSourceAnnotationKey    = "kubernetes.io/config.source"
+ 	ConfigMirrorAnnotationKey    = v1.MirrorPodAnnotationKey
++	ConfigMirrorLocalName        = "kios.redcoat.dev/config.localname"
++	ConfigApiName                = "kios.redcoat.dev/config.apiname"
+ 	ConfigFirstSeenAnnotationKey = "kubernetes.io/config.seen"
+ 	ConfigHashAnnotationKey      = "kubernetes.io/config.hash"
+ )
+-- 
+2.40.0
+
