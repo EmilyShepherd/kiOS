@@ -55,9 +55,6 @@ void mount_fs(void) {
   tmp_mount("/run");
   tmp_mount("/tmp");
 
-  // This directory is used by the kubelet to watch for shutdown events
-  mkdir("/run/system", 0777);
-
   tmp_mount("/var/cache");
   tmp_mount("/var/tmp");
   tmp_mount("/var/run");
