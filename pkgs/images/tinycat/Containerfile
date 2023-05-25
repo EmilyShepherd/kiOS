@@ -1,0 +1,7 @@
+FROM docker.io/emilyls/musl:1.2.3
+
+COPY src/tinycat /bin/tinycat
+
+ENTRYPOINT ["/bin/tinycat"]
+
+CMD ["/in"]
