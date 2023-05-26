@@ -32,6 +32,21 @@ it:
 
 This partition should have an ext4 file system created with it.
 
+### Kernel Modules
+
+Depending on your setup, Kernel Modules are technically an optional
+extra as kiOS will function on EFI nvme based systems, with generic
+ethernet.
+
+However, it is quite likely that you will need to load some kernel
+modules, so it is suggest that the module archive is extracted to:
+
+```
+datapart:/modules
+```
+
+At runtime, kiOS will automatically mount this to `/lib/modules` which
+is where most systems expect kernel modules to live.
 
 ## Installing the EFI (Boot Partition)
 
