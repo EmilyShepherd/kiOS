@@ -134,6 +134,7 @@ void mount_datapart(void) {
   mkdir("/var/meta/etc", 0700);
   mkdir("/var/meta/.etc.work", 0700);
   mount("etc", "/etc", "overlay", 0, "lowerdir=/etc,workdir=/var/meta/.etc.work,upperdir=/var/meta/etc");
+  bind_mount("/etc/seccomp", "/var/lib/kubelet/seccomp", MS_NODEV | MS_NOEXEC | MS_NOSUID);
 
   mkdir("/tmp/data", 0700);
   mkdir("/tmp/data/pods", 0700);
