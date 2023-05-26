@@ -1,43 +1,58 @@
 # Static Pod Configuration
 
-Kubernetes supports running Pods on a node in one of two ways:
+The default location for static manifests is
+`/etc/kubernetes/manifests`. If any YAML files are found in this
+directory, kubelet will treat these as Pod manifests and run them
+accordingly.
 
-- Via the api-server
-- Via static pods
+??? question "What are Static Pods?"
+    Kubernetes supports running Pods on a node in one of two ways:
 
-Pods running via the api-server is the process that most users will
-likely be most familiar with - this is when you deploy manifests to a
-cluster via kubectl, helm, etc, and then workloads are dynamically
-scheduled onto nodes.
+    - Via the api-server
+    - Via static pods
 
-This is by far the preferred option, and should normally be used in most
-cases. However, kubelet supports running pods via "static" manifests -
-files stored directly on the node itself.
+    Pods running via the api-server is the process that most users will
+    likely be most familiar with - this is when you deploy manifests to a
+    cluster via kubectl, helm, etc, and then workloads are dynamically
+    scheduled onto nodes.
 
-There are a few use cases where this is useful:
+    This is by far the preferred option, and should normally be used in most
+    cases. However, kubelet supports running pods via "static" manifests -
+    files stored directly on the node itself.
 
-- If you are running kiOS as a standalone / embedded system, in which
-  case you want it to run its workloads independently from any control
-  plane.
-- Some services have to run _before_ the kubelet is able to communicate
-  with a cluster. Examples of these might be a DHCP client daemon (to
-  setup a network presence for the kubelet), or a "bootstrap" container,
-  which determines node configuration and sets up the kubelet.
+    There are a few use cases where this is useful:
 
-## Setup
-
-By default, kubelet is configured to look in `/etc/kubernetes/manifests`
-for any YAML files containing Pod Manifests. If these are found, kubelet
-will start running these.
+    - If you are running kiOS as a standalone / embedded system, in which
+    case you want it to run its workloads independently from any control
+    plane.
+    - Some services have to run _before_ the kubelet is able to communicate
+    with a cluster. Examples of these might be a DHCP client daemon (to
+    setup a network presence for the kubelet), or a "bootstrap" container,
+    which determines node configuration and sets up the kubelet.
 
 !!! warning
     Be aware that Static Pods cannot rely on the presence of a cluster.
     As a result, features such as ConfigMaps, Secrets, Services, etc are
     not supported.
 
-kiOS is strictly unopinionated about what pods should be run, so the
-choice of how to configure your static pods is largely up to you,
-however there are some useful patterns and examples listed below:
+!!! tip
+    Do not forget that Static Pods are exactly that: _Pods_. Any YAML
+    files in this directory should be `kind: Pod`. `DaemonSets`,
+    `Deployments`, `StatefulSets` etc not supported.
+
+kiOS is strictly unopinionated about what the pods you choose to run, so
+the choice of how to configure your static pods is largely up to you. Be
+aware that the kiOS base system does _not_ run any of the services you
+may normally take for granted - depending on your use cases, you may
+wish to run some / all / none of these as static (or api-server managed)
+pods:
+
+- a DHCP client (for obtaining IP addresses for the network)
+- udev (for automatically loading kernel modules based on devices
+  discovered / plugged into the system)
+- sshd (for remote access to the system)
+- agetty (for displaying an interactive shell to the user over serial
+  port / using a physical screen)
 
 ### Node Pod
 

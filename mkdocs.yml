@@ -1,15 +1,20 @@
-site_name: kiOS
+site_name: "kiOS: The Kubernetes OS"
 theme:
   name: material
   features:
     - navigation.tabs
     - navigation.top
     - navigation.footer
+    - navigation.indexes
   palette:
     primary: red
     accent: red
+  icon:
+    logo: fontawesome/solid/ship
 
 copyright: Copyright &copy; 2021 - 2023 Emily Shepherd
+repo_url: https://github.com/EmilyShepherd/kiOS
+repo_name: kiOS
 
 markdown_extensions:
   - admonition
@@ -21,3 +26,21 @@ markdown_extensions:
       alternate_style: true 
   - pymdownx.tasklist:
       custom_checkbox: true
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+
+
+nav:
+  - Home:
+    - index.md
+    - versioning.md
+    - distributions.md
+    - license.md
+  - Setup:
+    - setup/quick-start/location.md
+    - setup/quick-start/node-configuration.md
+    - setup/quick-start/static-pods.md
+  - Reference:
+    - technical/datapart.md
+

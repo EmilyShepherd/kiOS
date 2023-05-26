@@ -1,7 +1,16 @@
-# Welcome
+---
+title: Home
+---
 
-kiOS - the Kubernetes Operating System - is tailored to run Kubernetes
-nodes with minimal overhead and fast boot times.
+# kiOS - The Kubernetes Operating System
+
+<div style="text-align: center;" markdown>
+<img width=200 src="logo.svg" alt="kiOS" />
+</div>
+
+kiOS is a tiny operating system, distributed as a single EFI binary,
+tailored to running Kubernetes nodes with minimal overhead and fast boot
+times.
 
 ## Why kiOS?
 
