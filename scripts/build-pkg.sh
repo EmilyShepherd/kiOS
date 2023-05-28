@@ -19,7 +19,7 @@ case ${HOST:-arm} in
 esac
 
 build_configure() {
-  if ! test -f ${configure_test:-Makefile}
+  if test -n "$CLEAN" || ! test -f ${configure_test:-Makefile}
   then
     ./${configure_cmd:-configure} --prefix=$PREFIX \
       --host=${AARCH}-unknown-linux-gnu \
@@ -30,11 +30,17 @@ build_configure() {
 }
 
 build_make() {
+  test -n "$CLEAN" && make clean
   make -j 19 ${make_target}
   make ${install_target:-install}
 }
 
 build_meson() {
+  if test -n "$CLEAN"
+  then
+    rm -rf _build
+  fi
+
   if ! test -d _build
   then
     meson _build -Dprefix="/" --cross-file ${PROJROOT}/scripts/${AARCH} $meson_flags
