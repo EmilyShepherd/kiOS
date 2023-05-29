@@ -1,7 +1,7 @@
 
 case "$ARCH" in
   amd64) install_target="install modules_install" ;;
-  arm64) install_target="zinstall modules_instlal dtbs_install" ;;
+  arm64) install_target="zinstall modules_install dtbs_install" ;;
 esac
 type=make
 
@@ -24,17 +24,15 @@ pre_build() {
 }
 
 post_build() {
-  mkdir -p ${DATAPART}
+  mkdir -p ${DATAPART} ${BOOTPART}/EFI/Boot
   cp -r ${BUILD_DIR}/lib/modules ${DATAPART}/
 
   case "$ARCH" in
     x86_64)
-      mkdir -p ${BOOTPART}/EFI/Boot
       cp ${INSTALL_PATH}/vmlinuz ${BOOTPART}/EFI/Boot/Bootx64.efi
       ;;
     arm64)
-      mkdir -p ${BOOTPART}/boot
-      cp ${INSTALL_PATH}/vmlinuz* ${BOOTPART}/boot/kernel8.img
+      cp ${INSTALL_PATH}/vmlinux* ${BOOTPART}/EFI/Boot/BootAA64.efi
       find ${INSTALL_PATH} -name '*.dtb' | xargs -I{} cp {} ${BOOTPART}/boot/
       ;;
   esac
