@@ -41,9 +41,15 @@ nav:
     - distributions.md
     - license.md
   - Setup:
-    - setup/quick-start/location.md
-    - setup/quick-start/node-configuration.md
-    - setup/quick-start/static-pods.md
+    - Quick Start:
+      - Bare Metal:
+        - setup/quick-start/bare-metal/location.md
+        - setup/quick-start/bare-metal/node-configuration.md
+        - setup/quick-start/bare-metal/static-pods.md
+      - AWS:
+        - setup/quick-start/aws/index.md
+        - setup/quick-start/aws/migrate-from-eks.md
+        - setup/quick-start/aws/new-cluster.md
     - Hardening kiOS:
       - setup/hardening/image-signing.md
       - setup/hardening/seccomp.md
