@@ -5,12 +5,14 @@ title: Home
 # kiOS - The Kubernetes Operating System
 
 <div style="text-align: center;" markdown>
-<img width=200 src="logo.svg" alt="kiOS" />
-</div>
+  <img width=200 src="logo.svg" alt="kiOS" />
 
-kiOS is a tiny operating system, distributed as a single EFI binary,
-tailored to running Kubernetes nodes with minimal overhead and fast boot
-times.
+  kiOS is a tiny operating system, distributed as a single EFI binary,
+  tailored to running Kubernetes nodes with minimal overhead and fast boot
+  times.
+
+  [Get kiOS :material-download:][download]{ .md-button .md-button--primary }
+</div>
 
 ## Why kiOS?
 
@@ -50,3 +52,4 @@ dhcp clients - which run as static pods.
 
 !!! success "So, if you know how to create kubernetes pods, you know how to configure kiOS!"
 
+[download]: https://github.com/EmilyShepherd/kiOS/releases/download/v1.25.0-alpha3/kios-x86_64.efi
