@@ -54,6 +54,8 @@ nav:
       - setup/hardening/image-signing.md
       - setup/hardening/seccomp.md
   - Reference:
-    - technical/datapart.md
-    - technical/files.md
+    - reference/logs.md
+    - Technical:
+      - technical/datapart.md
+      - technical/files.md
 
