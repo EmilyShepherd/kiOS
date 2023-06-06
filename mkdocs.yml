@@ -42,6 +42,7 @@ nav:
     - license.md
   - Setup:
     - Quick Start:
+      - setup/quick-start/index.md
       - Bare Metal:
         - setup/quick-start/bare-metal/location.md
         - setup/quick-start/bare-metal/node-configuration.md

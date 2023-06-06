@@ -11,7 +11,7 @@ title: Home
   tailored to running Kubernetes nodes with minimal overhead and fast boot
   times.
 
-  [Get kiOS :material-download:][download]{ .md-button .md-button--primary }
+  [Install kiOS :octicons-arrow-right-16:](setup/quick-start){ .md-button .md-button--primary }
 </div>
 
 ## Why kiOS?
@@ -51,5 +51,3 @@ need to exist before networking is ready - for example the ntp (time) or
 dhcp clients - which run as static pods.
 
 !!! success "So, if you know how to create kubernetes pods, you know how to configure kiOS!"
-
-[download]: https://github.com/EmilyShepherd/kiOS/releases/download/v1.25.0-alpha3/kios-x86_64.efi
