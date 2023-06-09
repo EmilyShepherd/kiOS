@@ -20,7 +20,6 @@ repo_name: kiOS
 markdown_extensions:
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
   - attr_list
   - md_in_html
   - pymdownx.tabbed:
@@ -32,13 +31,18 @@ markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
-
-
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 nav:
   - Overview:
     - index.md
     - versioning.md
     - distributions.md
+    - Design Philosophy:
+      - design/init.md
   - Setup:
     - Quick Start:
       - setup/quick-start/index.md
