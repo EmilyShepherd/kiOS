@@ -11,7 +11,7 @@ title: Home
   tailored to running Kubernetes nodes with minimal overhead and fast boot
   times.
 
-  [Install kiOS :octicons-arrow-right-16:](setup/quick-start){ .md-button .md-button--primary }
+  [Install kiOS :octicons-arrow-right-16:](setup/quick-start/index.md){ .md-button .md-button--primary }
 </div>
 
 ## Why kiOS?
