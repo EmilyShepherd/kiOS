@@ -14,6 +14,18 @@ title: Home
   [Install kiOS :octicons-arrow-right-16:](setup/quick-start/index.md){ .md-button .md-button--primary }
 </div>
 
+!!! warning "kiOS is in alpha"
+    kiOS is in alpha; it and its documentation are evolving quickly. I
+    am doing my best to keep these docs reasonably up to date and
+    helpful, but gaps may exist!
+
+    If you are interested in the project and have a question, or think
+    something is missing, or want to discuss how best to test, feel free
+    to reach out to me directly either by raising an issue on [GitHub][gh]
+    or by emailing emily@redcoat.dev.
+
+[gh]: https://github.com/EmilyShepherd/kiOS/issues
+
 ## Why kiOS?
 
 ### kiOS is fast
