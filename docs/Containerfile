@@ -1,3 +1,10 @@
+FROM docker.io/squidfunk/mkdocs-material AS builder
+
+COPY mkdocs.yml /docs/
+COPY docs /docs/docs
+
+RUN mkdocs build
+
 FROM nginxinc/nginx-unprivileged:alpine
 
-COPY . /usr/share/nginx/html/
+COPY --from=builder /docs/site /usr/share/nginx/html/
