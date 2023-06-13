@@ -64,4 +64,5 @@ nav:
     - Technical:
       - technical/datapart.md
       - technical/files.md
+      - technical/system-socket.md
 
