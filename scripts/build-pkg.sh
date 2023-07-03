@@ -68,8 +68,12 @@ do_build() {
   export CC=$(which ${TARGET}-gcc)
   export CXX=$(which ${TARGET}-g++)
   export STRIP=$(which ${TARGET}-strip)
-  export CFLAGS="-flto -isystem ${BUILD_DIR}/include -${optimise:-O2}"
-  export LDFLAGS="-flto -w -s -L${BUILD_DIR}/lib -Xlinker -rpath-link=${BUILD_DIR}/lib"
+
+  local lto=""
+  test -z "${nolto}" && lto="-flto"
+
+  export CFLAGS="${lto} -isystem ${BUILD_DIR}/include -${optimise:-O2}"
+  export LDFLAGS="${lto} -w -s -L${BUILD_DIR}/lib -Xlinker -rpath-link=${BUILD_DIR}/lib"
 
   cd src
   run_cmd pre_build || true
