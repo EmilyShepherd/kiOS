@@ -147,6 +147,8 @@ void populate_labels(char *labels) {
   if (labels_idx) {
     labels[labels_idx - 1] = 0;
   }
+
+  fclose(file);
 }
 
 void start_kubelet(void) {
