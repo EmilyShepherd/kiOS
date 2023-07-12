@@ -78,6 +78,10 @@ int main(int argc, char **argv) {
   mount_fs();
   mount_datapart();
 
+  // The loopback device is required for crio to be able to listen on
+  // localhost
+  bring_if_up("lo");
+
   putenv("PATH=/bin");
   start_container_runtime();
 
@@ -85,7 +89,6 @@ int main(int argc, char **argv) {
   // start up on a modern machine, so we start it as soon as is
   // reasonable to do so. All our other init steps are performed in that
   // three second window.
-  bring_if_up("lo");
   bring_if_up("eth0");
   set_hostname_from_file();
   enable_ip_forwarding();
