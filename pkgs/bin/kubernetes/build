@@ -2,7 +2,7 @@
 initrd_binaries="/bin/kubelet"
 
 pre_build() {
-  cat ../*.patch | patch -p1
+  cat ../*.patch | patch -p1 -N
   cp ../inhibit_linux.go pkg/kubelet/nodeshutdown/systemd/
 }
 
