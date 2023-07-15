@@ -60,6 +60,7 @@ void mount_fs(void) {
   tmp_mount("/var/run");
   tmp_mount("/var/lib/kubelet");
   mount("tmpfs", "/var/run", "tmpfs", MS_SHARED, 0);
+  mount("tmpfs", "/var/lib/kubelet", "tmpfs", MS_SHARED, 0);
   mkdir("/var/run/crio", 0700);
   mkdir("/var/lib/kubelet/pods", 0700);
 
