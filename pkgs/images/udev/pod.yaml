@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: udev
+spec:
+  containers:
+  - image: emilyls/udev:v1-amd64
+    imagePullPolicy: Always
+    args:
+    - -D
+    name: eudev
+    volumeMounts:
+    - mountPath: /dev
+      name: host-dev
+    - mountPath: /etc/udev/rules.d
+      name: rules
+      readOnly: true
+    - mountPath: /run/udev
+      name: run
+    - mountPath: /sys
+      name: host-sys
+    lifecycle:
+      postStart:
+        exec:
+          command:
+          - /bin/udevadm
+          - trigger
+    # Currently we require running as root but this may change
+    securityContext:
+      privileged: true
+      capabilities:
+        add:
+        - ALL
+  hostNetwork: true
+  priorityClassName: system-node-critical
+  tolerations:
+  - operator: Exists
+  volumes:
+  - hostPath:
+      path: /dev
+      type: Directory
+    name: host-dev
+  - name: rules
+    configMap:
+      name: udev-rules
+  - name: host-sys
+    hostPath:
+      path: /sys
+      type: Directory
+  - name: run
+    emptyDir: {}

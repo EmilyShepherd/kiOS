@@ -1,0 +1,8 @@
+FROM --platform=${TARGETPLATFORM} docker.io/emilyls/musl:1.2.3
+
+COPY sbin/udevd /bin/udevd
+COPY bin/udevadm /bin/udevadm
+COPY etc/udev /etc/udev
+
+ENTRYPOINT ["/bin/udevd"]
+

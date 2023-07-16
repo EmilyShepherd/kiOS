@@ -1,0 +1,7 @@
+type=configure
+configure_flags="--disable-manpages --enable-hwdb"
+version=v1
+
+pre_build() {
+  autoreconf -f -s -i
+}

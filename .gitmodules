@@ -58,3 +58,6 @@
 [submodule "pkgs/images/modprobe/src"]
 	path = pkgs/images/modprobe/src
 	url = https://git.kernel.org/pub/scm/utils/kernel/kmod/kmod.git
+[submodule "pkgs/images/udev/src"]
+	path = pkgs/images/udev/src
+	url = https://github.com/eudev-project/eudev.git
