@@ -12,10 +12,12 @@
  * SHUTDOWN           Request a system shutdown
  * CONTINUE_SHUTDOWN  Continue the shutdown procedure by killing processes and umounting all file systems.
  * RESTART_KUBELET    Requests that the kubelet should be restarted
+ * RESTART_CRIO       Requests that the container runtime should be restarted
  */
 #define CMD_SHUTDOWN 0x01
 #define CMD_CONTINUE_SHUTDOWN 0x02
 #define CMD_RESTART_KUBELET 0x03
+#define CMD_RESTART_CRIO 0x04
 
 /**
  * Events send out by the system

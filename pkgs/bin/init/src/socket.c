@@ -102,6 +102,9 @@ void client_thread(int *connection) {
           // loop will notice and restart it for us.
           stop_kubelet();
           break;
+        case CMD_RESTART_CRIO:
+          stop_container_runtime();
+          break;
       }
     }
     close(*connection);

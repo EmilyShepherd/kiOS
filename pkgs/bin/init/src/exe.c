@@ -103,6 +103,10 @@ void stop_kubelet(void) {
   kill(kubelet_pid, SIGTERM);
 }
 
+void stop_container_runtime(void) {
+  kill(crio_pid, SIGTERM);
+}
+
 /**
  * Helper function which checks if the given character is an acceptable
  * character in a node label

@@ -16,6 +16,7 @@
 extern int should_restart_processes;
 
 void start_container_runtime(void);
+void stop_container_runtime(void);
 
 void start_kubelet(void);
 void stop_kubelet(void);
