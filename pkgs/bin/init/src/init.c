@@ -13,23 +13,6 @@
 #include <stdlib.h>
 
 /**
- * Set Hostname From File
- *
- * Checks to see if /etc/hostname exists and contains content - if it
- * does the hostname is updated.
- */
-static void set_hostname_from_file(void) {
-  char hostname[HOST_NAME_MAX];
-  FILE *fp = fopen("/etc/hostname", "r");
-  if (fp) {
-    if (fgets(hostname, HOST_NAME_MAX, fp)) {
-      sethostname(hostname, strlen(hostname));
-    }
-    fclose(fp);
-  }
-}
-
-/**
  * Enable IP Forwarding
  *
  * Although kiOS tries to be relatively unopinionated, enabling ip
@@ -90,7 +73,6 @@ int main(int argc, char **argv) {
   // reasonable to do so. All our other init steps are performed in that
   // three second window.
   bring_if_up("eth0");
-  set_hostname_from_file();
   enable_ip_forwarding();
   start_socket();
   signal(SIGTERM, &soft_shutdown);
@@ -98,14 +80,6 @@ int main(int argc, char **argv) {
 
   // Now we are finished with our own setup, wait for crio to be ready.
   wait_for_path(CRIO_SOCK);
-
-  if (!fexists(KUBELET_CONFIG)) {
-    start_kubelet();
-    wait_for_path(KUBELET_CONFIG);
-    set_hostname_from_file();
-
-    stop_kubelet();
-  }
 
   start_kubelet();
   run_wait_loop();

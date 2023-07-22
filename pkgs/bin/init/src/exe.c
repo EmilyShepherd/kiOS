@@ -4,6 +4,7 @@
 #include "include/kmsg.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -12,6 +13,23 @@ int should_restart_processes = 1;
 
 pid_t crio_pid;
 pid_t kubelet_pid;
+
+/**
+ * Set Hostname From File
+ *
+ * Checks to see if /etc/hostname exists and contains content - if it
+ * does the hostname is updated.
+ */
+static void set_hostname_from_file(void) {
+  char hostname[HOST_NAME_MAX];
+  FILE *fp = fopen("/etc/hostname", "r");
+  if (fp) {
+    if (fgets(hostname, HOST_NAME_MAX, fp)) {
+      sethostname(hostname, strlen(hostname));
+    }
+    fclose(fp);
+  }
+}
 
 /**
  * Start Exe
@@ -190,6 +208,7 @@ void start_kubelet(void) {
     SET_ARG("--image-credential-provider-bin-dir", KUBELET_CREDENTIAL_PROVIDER_BIN_DIR);
   }
 
+  set_hostname_from_file();
   kubelet_pid = start_exe("/bin/kubelet", KUBELET_LOG, kubeletArgs);
 }
 
