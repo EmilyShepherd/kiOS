@@ -1,9 +1,48 @@
 type="make"
-make_target=binaries
-install_target=install.bin
 depends="lib/libseccomp bin/conmon"
 initrd_binaries="/bin/crio /bin/pinns"
 
 pre_build() {
   export BINDIR=${BUILD_DIR}/bin
+  export CC_FOR_BUILD=$(which gcc)
+  export LDFLAGS="-static ${LDFLAGS}"
+
+  configure_args="--enable-static --disable-doc"
+
+  make_target="doc="
+  install_target="install doc="
+
+  (
+    cd ../libgpg-error
+    ./autogen.sh
+    build_configure
+  )
+
+  (
+    cd ../libassuan
+    ./autogen.sh
+    build_configure
+  )
+
+  (
+    cd ../gpgme
+    ./autogen.sh
+    build_configure
+  )
+
+  # We want to statically link to libgpgme _and_ its dependant private
+  # libraries (libassauan and libgpg-error). The easiest way to do this
+  # seems to be to simply add everything into a single archive, named
+  # libgpgme. There is probably a more sensible way to do this, but
+  # pkgconfig gets in the way and this works.
+  (
+    cd $(mktemp -d)
+    ar x ${BUILD_DIR}/lib/libassuan.a
+    ar x ${BUILD_DIR}/lib/libgpgme.a
+    ar x ${BUILD_DIR}/lib/libgpg-error.a
+    ar qc ${BUILD_DIR}/lib/libgpgme.a *
+  )
+
+  make_target=binaries
+  install_target=install.bin
 }
