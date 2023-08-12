@@ -60,7 +60,7 @@ do_build() {
   export CGO_ENABLED=1
   export GOARCH=${ARCH}
   export CROSS_COMPILE=${TARGET}-
-  export PREFIX=""
+  export PREFIX="/"
   export DESTDIR=$BUILD_DIR
   export PKG_CONFIG_SYSTEM_LIBRARY_PATH=${BUILD_DIR}/lib
   export PKG_CONFIG_LIBDIR=${BUILD_DIR}/lib
