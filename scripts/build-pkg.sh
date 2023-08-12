@@ -22,7 +22,8 @@ build_configure() {
   if test -n "$CLEAN" || ! test -f ${configure_test:-Makefile}
   then
     ./${configure_cmd:-configure} --prefix=$PREFIX \
-      --host=${AARCH}-unknown-linux-gnu \
+      --host=${AARCH}-unknown-linux-musl \
+      --build=x86_64-unknown-linux-gnu \
       --with-sysroot=${BUILD_DIR} \
       $configure_flags
   fi
