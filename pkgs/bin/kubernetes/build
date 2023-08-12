@@ -4,6 +4,17 @@ initrd_binaries="/bin/kubelet"
 pre_build() {
   cat ../*.patch | patch -p1 -N
   cp ../inhibit_linux.go pkg/kubelet/nodeshutdown/systemd/
+
+  # Load the Kube Version variables and then replace "dirty" in the
+  # version string with the kios identifier (the repository is expected
+  # to be dirty as we apply some patches).
+  export KUBE_ROOT=$(pwd)
+  . hack/lib/version.sh
+  kube::version::get_version_vars
+  KIOS_VERSION=$(git --git-dir=${PROJROOT}/.git rev-parse --short HEAD)
+  KUBE_GIT_VERSION=${KUBE_GIT_VERSION/dirty/kios-${KIOS_VERSION}}
+  export KUBE_GIT_VERSION_FILE=$(mktemp)
+  kube::version::save_version_vars $KUBE_GIT_VERSION_FILE
 }
 
 build() {
