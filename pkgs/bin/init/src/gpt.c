@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
 
 // 97aac693-d920-465a-94fe-eb59fc86dfaa
 const struct GUID Datapart = {0x465AD92097AAC693, 0xAADF86FC59EBFE94};
@@ -76,7 +77,12 @@ int scan_for_part(struct GUID *guid, char *datapart) {
     fclose(file);
 
     if (part > 0) {
-      sprintf(datapart, "%sp%d", blk, part);
+      char last = blk[strlen(blk) - 1];
+      if (last <= '0' && last <= '9') {
+        sprintf(datapart, "%sp%d", blk, part);
+      } else {
+        sprintf(datapart, "%s%d", blk, part);
+      }
       closedir(dir);
       return 1;
     }
