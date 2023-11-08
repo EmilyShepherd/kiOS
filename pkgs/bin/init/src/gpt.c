@@ -98,7 +98,10 @@ int scan_for_part(struct GUID *guid, char *datapart) {
 int determine_datapart(char *datapart) {
   char *env = getenv("datapart");
   if (!env || strcmp(env, "auto")) {
-    return scan_for_part((struct GUID *)&Datapart, datapart);
+    while(!scan_for_part((struct GUID *)&Datapart, datapart)) {
+      sleep(1);
+    }
+    return 1;
   } else if (strncmp(env, "/dev/", 5) == 0) {
     strcpy(datapart, env);
     return 1;
