@@ -1,7 +1,11 @@
 
+version=6.6.2
+localversion=1
+
+make_target="KERNELRELEASE=${version}_kios-${localversion}"
 case "$ARCH" in
-  amd64) install_target="install modules_install" ;;
-  arm64) install_target="zinstall modules_install dtbs_install" ;;
+  amd64) install_target="$make_target install modules_install" ;;
+  arm64) install_target="$make_target zinstall modules_install dtbs_install" ;;
 esac
 type=make
 
@@ -11,6 +15,8 @@ pre_build() {
 
   mkdir -p $INSTALL_PATH
   rm -rf ${INSTALL_PATH}/*
+
+  cat ../*.patch | patch -p1 -N
 
   if test "${ARCH}" == "amd64"
   then

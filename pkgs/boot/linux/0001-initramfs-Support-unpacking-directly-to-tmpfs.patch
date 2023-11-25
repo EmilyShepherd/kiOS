@@ -1,0 +1,137 @@
+From 3d88ca629a3a4326ba2a28baf415513e799bc2de Mon Sep 17 00:00:00 2001
+From: Emily Shepherd <emily@redcoat.dev>
+Date: Sat, 25 Nov 2023 14:21:00 +0000
+Subject: [PATCH] initramfs: Support unpacking directly to tmpfs
+
+For systems which run directly from initramfs, it is not possible to use
+pivot_root without first changing root. This is because of the
+intentional design choice that rootfs, which is where initramfs is
+unpacked to, cannot be unmounted.
+
+pivot_root is an important feature for creating containers and the
+alternative (mounting the new root over the top of the old with MS_MOVE
+and then calling chroot) is not favoured by most container runtimes
+[1][2].
+
+The general work around, when running directly from initramfs, is to
+have init mount a new tmpfs, copy everything out of rootfs, and then
+switch_root [3]. This is only required when running directly from the
+initramfs as all other methods of acquiring a root device (having the
+kernel mount a root device directly via the root= parameter, or using
+initramfs to mount and then switch_root to a new root) leave an empty
+rootfs at the top of the mount stack.
+
+This commit adds a new build option - EMPTY_ROOTFS, available when
+initrd/initramfs is enabled. When selected, rather than unpacking the
+inbuilt / bootloader provided initramfs directly into rootfs, the kernel
+will mount a new tmpfs/ramfs over the top of the rootfs and unpack to
+that instead, leaving an empty rootfs at the top of the stack. This
+removes the need to have init copy everything as a workaround.
+
+[1]: https://github.com/opencontainers/runc/blob/95a93c132cf179a017312e22a954f137e8237c4e/man/runc-create.8.md?plain=1#L27
+[2]: https://github.com/containers/crun/blob/8e8d7972f738f28294cd5c16091d136ca278759e/crun.1.md?plain=1#L103
+[3]: https://github.com/tinycorelinux/Core-scripts/blob/dbb24bf42a0a9935b18e66a0b936266b2244251b/init#L13
+
+Signed-off-by: Emily Shepherd <emily@redcoat.dev>
+---
+ init/Kconfig     | 13 +++++++++++++
+ init/do_mounts.c | 24 ++++++++++++++++++++++++
+ init/do_mounts.h |  6 ++++++
+ init/initramfs.c |  4 ++++
+ 4 files changed, 47 insertions(+)
+
+diff --git a/init/Kconfig b/init/Kconfig
+index 6d35728b94b2b..bf15bd08abdc2 100644
+--- a/init/Kconfig
++++ b/init/Kconfig
+@@ -1299,6 +1299,19 @@ config BLK_DEV_INITRD
+ 
+ if BLK_DEV_INITRD
+ 
++config EMPTY_ROOTFS
++	bool "Mount initramfs over empty rootfs"
++	help
++		Normally initramfs is unpacked directly into the rootfs. When this
++		option is enabled, initramfs is instead unpacked into a tmpfs
++		mounted on top of a permanently empty rootfs.
++
++		This is mostly useful for embedded operating systems, running
++		directly from initramfs, which need to make use of pivot_root (for
++		example systems running containers).
++
++		If unsure, say N.
++
+ source "usr/Kconfig"
+ 
+ endif
+diff --git a/init/do_mounts.c b/init/do_mounts.c
+index 5dfd30b13f485..86008635b5098 100644
+--- a/init/do_mounts.c
++++ b/init/do_mounts.c
+@@ -514,3 +514,27 @@ void __init init_rootfs(void)
+ 		(!root_fs_names || strstr(root_fs_names, "tmpfs")))
+ 		is_tmpfs = true;
+ }
++
++#ifdef CONFIG_EMPTY_ROOTFS
++int __init overmount_rootfs() {
++	int err;
++
++	err = init_mkdir("/root", 0700);
++	if (err != 0)
++		goto out;
++
++	err = init_mount("rootfs", "/root", is_tmpfs ? "tmpfs" : "ramfs", 0, NULL);
++	if (err != 0)
++		goto out;
++
++	init_chdir("/root");
++	init_mount(".", "/", NULL, MS_MOVE, NULL);
++	init_chroot(".");
++
++	return 0;
++
++out:
++	printk(KERN_WARNING "Failed to mount over rootfs\n");
++	return err;
++}
++#endif /* CONFIG_EMPTY_ROOTFS */
+diff --git a/init/do_mounts.h b/init/do_mounts.h
+index 15e372b00ce70..7cbb8af460f22 100644
+--- a/init/do_mounts.h
++++ b/init/do_mounts.h
+@@ -41,3 +41,9 @@ static inline bool initrd_load(char *root_device_name)
+ 	}
+ 
+ #endif
++
++#ifdef CONFIG_EMPTY_ROOTFS
++int __init overmount_rootfs(void);
++#else
++static inline int __init overmount_rootfs(void) { return 0; }
++#endif
+diff --git a/init/initramfs.c b/init/initramfs.c
+index 8d0fd946cdd2b..76525108a39d2 100644
+--- a/init/initramfs.c
++++ b/init/initramfs.c
+@@ -19,6 +19,8 @@
+ #include <linux/task_work.h>
+ #include <linux/umh.h>
+ 
++#include "do_mounts.h"
++
+ static __initdata bool csum_present;
+ static __initdata u32 io_csum;
+ 
+@@ -688,6 +690,8 @@ static void __init populate_initrd_image(char *err)
+ 
+ static void __init do_populate_rootfs(void *unused, async_cookie_t cookie)
+ {
++	overmount_rootfs();
++
+ 	/* Load the built in initramfs */
+ 	char *err = unpack_to_rootfs(__initramfs_start, __initramfs_size);
+ 	if (err)
+-- 
+2.42.0
+

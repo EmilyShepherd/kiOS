@@ -85,7 +85,6 @@ void start_container_runtime(void) {
   char *crioArgs[] = {
     "/bin/crio",
     "--runtimes", "crun:/bin/crun:/var/run/crun:oci",
-    "--no-pivot",
     "--cgroup-manager", "cgroupfs",
     "--default-runtime", "crun",
     "--listen", "/var/run/crio/crio.sock",
