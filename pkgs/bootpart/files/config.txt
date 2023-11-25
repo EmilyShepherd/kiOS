@@ -1,3 +1,0 @@
-arm_64bit=1
-initramfs initramfs followkernel
-os_prefix=boot/

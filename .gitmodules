@@ -35,11 +35,8 @@
 	path = pkgs/bin/kubernetes/src
 	url = https://github.com/kubernetes/kubernetes.git
 [submodule "pkgs/boot/linux/src"]
-	path = pkgs/boot/linux/src
+	path = pkgs/kernel/src
 	url = https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
-[submodule "pkgs/rpi-firmware/src"]
-	path = pkgs/boot/rpi-firmware/src
-	url = https://github.com/raspberrypi/rpi-firmware.git
 [submodule "pkgs/conmon/src"]
 	path = pkgs/bin/conmon/src
 	url = https://github.com/containers/conmon.git
