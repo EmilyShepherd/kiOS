@@ -1,7 +1,6 @@
 
 type=configure
 configure_flags="--disable-nftables --enable-static --disable-shared --disable-devel"
-initrd_binaries="/sbin/iptables /sbin/ip6tables /sbin/iptables-save /sbin/iptables-restore"
 
 pre_build() {
   ./autogen.sh

@@ -1,10 +1,9 @@
 #!/bin/bash
 set -e
 
-PROJROOT=$(pwd)
+export PROJROOT=$(pwd)
 BUILT_PACKAGES=$(pwd)/.build/built
 BUILD_DIR=$(pwd)/.build/root
-INITRD=$(pwd)/.build/initrd
 BOOTPART=$(pwd)/.build/bootpart
 DATAPART=$(pwd)/.build/datapart
 
@@ -83,53 +82,6 @@ do_build() {
   cd ..
 }
 
-copy_files() {
-  if test -d files
-  then
-    for location in ${file_location:-$BUILD_DIR $INITRD}
-    do
-      cp -r files/* ${location}/
-      find ${location} -name .gitkeep -delete
-    done
-  fi
-
-  for file in $files
-  do
-    cp -r ${BUILD_DIR}/$file ${INITRD}/$(dirname $file)/
-  done
-}
-
-
-process_elf() {
-  for lib in $(readelf -d ${BUILD_DIR}/$1 | grep NEEDED | grep -o '\[.*\]' | tr '[]' ' ')
-  do
-    if ! test -f ${BIN_TARGET}/lib/$lib
-    then
-      cp -L ${BUILD_DIR}/lib/$lib ${BIN_TARGET}/lib/
-      process_elf lib/$lib
-    fi
-  done
-}
-
-copy_binaries() {
-  for bin in $@
-  do
-    path=${BUILD_DIR}/$bin
-    if test -e $path
-    then
-      process_elf $bin
-
-      if ! test -L $path
-      then
-        cp $path ${INITRD}/bin/
-      else
-        ln -fs $(basename $(readlink $path)) ${BIN_TARGET}/bin/$(basename $bin)
-        cp -L $(dirname $path)/$(readlink $path) ${BIN_TARGET}/bin/
-      fi
-    fi
-  done
-}
-
 build_dependencies() {
   for dep in $depends
   do
@@ -178,14 +130,12 @@ fi
 
 pkg=$1
 
-mkdir -p $BUILD_DIR $BUILT_PACKAGES ${INITRD}/{bin,lib} ${BOOTPART} ${DATAPART}
+mkdir -p $BUILD_DIR $BUILT_PACKAGES ${BOOTPART} ${DATAPART}
 
 load_pkg
 build_dependencies
 
 cd $pkgpath
 do_build
-copy_files
-BIN_TARGET=${INITRD} copy_binaries $initrd_binaries
 build_container
 mark_built

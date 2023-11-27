@@ -1,6 +1,5 @@
 type="make"
 depends="lib/libseccomp bin/conmon"
-initrd_binaries="/bin/crio /bin/pinns"
 
 pre_build() {
   export BINDIR=${BUILD_DIR}/bin

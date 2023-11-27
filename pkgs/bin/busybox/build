@@ -1,5 +1,4 @@
 type=make
-initrd_binaries="/sbin/modprobe /usr/bin/nsenter /bin/mount /bin/umount"
 
 pre_build() {
   if ! test -f .config

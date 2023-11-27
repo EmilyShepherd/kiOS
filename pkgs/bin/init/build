@@ -1,8 +1,3 @@
 
 type=make
 
-post_build() {
-  mkdir -p ${INITRD}/{dev,bin,lib/modules,etc,proc,run,sys,tmp,var/cache,var/lib/kubelet/pods,var/log,var/run,var/tmp,var/meta,var/lib/containers/storage,var/lib/kubelet/seccomp,etc/seccomp}
-  ln -sf bin ${INITRD}/sbin
-  cp ${BUILD_DIR}/init ${INITRD}/init
-}

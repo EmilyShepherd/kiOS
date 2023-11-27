@@ -2,7 +2,6 @@
 type=configure
 configure_flags="--disable-systemd --enable-embedded-yajl"
 depends="lib/libseccomp"
-initrd_binaries="/bin/crun"
 
 pre_build() {
   export BUILD_CC=$(which gcc)

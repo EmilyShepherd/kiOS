@@ -6,23 +6,3 @@ configure_test=config.mak
 # MUSL doesn't play nice with Link Time Optimisation
 nolto=1
 
-# We also need to copy across the dynamic linker symlink to our libc
-# library, otherwise programs will fail to run!
-post_build() {
-  cp -P ${BUILD_DIR}/lib/ld-* ${INITRD}/lib/
-
-  # Some providers are copying CNI binaries into the host which still
-  # try to reference the GNU dynamic linker - this is naughty but it
-  # seems that linking to the musl linker works. This allows some badly
-  # written containers to work but be aware that this is not officially
-  # supported by kiOS - if you are copying binaries into any host
-  # machine (not just kiOS nodes!) you should statically link. There are
-  # no guarantees that binaries that expect GNU ld to exist will work.
-  ln -sf lib ${INITRD}/lib64
-  if test "${AARCH}" == "x86_64"
-  then
-    ln -sf libc.so ${INITRD}/lib/ld-linux-x86-64.so.2
-  else
-    ln -sf libc.so ${INITRD}/lib/ld-linux-${AARCH}.so.1
-  fi
-}

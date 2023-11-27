@@ -1,0 +1,170 @@
+
+# Base System
+# ======================================================================
+
+dir /dev 0500 0 0
+nod /dev/console 0400 0 0 c 5 1
+
+dir /proc 0500 0 0
+dir /sys 0500 0 0
+
+# At runtime, these are tmpfs mounts
+dir /run 0700 0 0
+dir /tmp 0700 0 0
+
+
+# Variable files
+# ======================================================================
+
+dir /var 0500 0 0
+dir /var/lib 0500 0 0
+
+# Persistent storage is bind mounted here. While direct access via this
+# directory is possible, most relevant directories are bind mounted to
+# their standard locations at runtime.
+dir /var/meta 0500 0 0
+
+# At runtime, the persistent storage for container storage will be bind
+# mounted here.
+dir /var/lib/containers 0500 0 0
+dir /var/lib/containers/storage 0500 0 0
+
+# At runtime, the persistent storage for pods is bind mounted here. We
+# also bind mount /etc/seccomp to the kubelet's seccomp directory.
+dir /var/lib/kubelet 0500 0 0
+dir /var/lib/kubelet/pods 0500 0 0
+dir /var/lib/kubelet/seccomp 0500 0 0
+
+# At runtime persistent storage for log files is bind mounted here.
+dir /var/log 0700 0 0
+
+# At runtime, these will all be tmpfs mounts.
+dir /var/cache 0700 0 0
+dir /var/run 0700 0 0
+dir /var/tmp 0700 0 0
+
+
+# Binaries
+# ======================================================================
+
+dir /bin 0500 0 0
+
+file /init ${PROJROOT}/pkgs/bin/init/src/init 0500 0 0
+
+# Some binaries (eg modprobe) are expected to be in /sbin. At some point
+# we may remove the need for this, but for the moment it is a lot less
+# of a headache to just symlink it here.
+slink /sbin bin 0500 0 0
+
+# modprobe, mount, umount and nsenter are all provided by busybox
+file /bin/modprobe ${PROJROOT}/pkgs/bin/busybox/src/busybox 0500 0 0 /bin/mount /bin/nsenter /bin/umount
+
+file /bin/conmon ${PROJROOT}/pkgs/bin/conmon/src/bin/conmon 0500 0 0
+file /bin/crio ${PROJROOT}/pkgs/bin/cri-o/src/bin/crio 0500 0 0
+file /bin/pinns ${PROJROOT}/pkgs/bin/cri-o/src/bin/pinns 0500 0 0
+file /bin/crun ${PROJROOT}/pkgs/bin/crun/src/crun 0500 0 0
+file /bin/kubelet ${PROJROOT}/pkgs/bin/kubernetes/src/_output/local/go/bin/kubelet 0500 0 0
+file /bin/iptables ${PROJROOT}/pkgs/bin/iptables/src/iptables/xtables-legacy-multi 0500 0 0 /bin/iptables6 /bin/iptables-save /bin/iptables-restore
+
+
+# Libraries
+# ======================================================================
+
+dir /lib 0555 0 0
+
+# At runtime, the kernel modules will be bind mounted here.
+dir /lib/modules 0555 0 0
+
+# Some naughty plugins expect still try to refer to linkers in the host
+# space (rather than being completely statically linked), so we need to
+# ensure there is a /lib64 in case that's the way they want to reference
+# them. We also hardlink libc.so to both the musl and gcc variants of
+# the ld file. While this is a bit naughty, it seems compatible enough
+# to bork the binaries that use it.
+# This is absolutely a bodge - if you are installing plugins into a k8s
+# cluster, they should ALWAYS be statically linked as making assumptions
+# about the host system is not helpful.
+slink /lib64 lib 0555 0 0
+file /lib/libc.so ${PROJROOT}/pkgs/lib/musl/src/lib/libc.so 0555 0 0 /lib/ld-linux-x86-64.so.2 /lib/ld-musl-x86_64.so.1
+
+# libseccomp is used by both crun and cri-o, so we will dynamically link
+# it.
+file /lib/libseccomp.so.2 ${PROJROOT}/pkgs/lib/libseccomp/src/src/.libs/libseccomp.so 0555 0 0
+
+
+# Etc (config) directory
+# ======================================================================
+
+dir /etc 0555 0 0
+
+# Some programs do not hard-code that localhost = 127.0.0.0, ::1 and
+# require a hosts file to tell them that. This is fine, as we can also
+# use it as an example file so cluster operators can see that it is
+# configurable.
+file /etc/hosts ${PROJROOT}/etc/hosts 0444 0 0
+
+# Let them see who powers them.
+file /etc/os-release ${PROJROOT}/etc/os-release 0444 0 0
+
+# I am in two minds about the appropriateness of this file - it defines
+# kiOS' default nameservers to be CloudFlare's public resolvers. I don't
+# really like having random providers in the box like this, but in
+# many situations, kiOS cannot function without resolvers (as they are
+# needed for image pulling). Most sensible distros of kiOS should
+# override this, or prime kiOS with a bootstrap container which sets
+# more specific ones. For the moment I'll include it here so that kiOS
+# isn't just _broken_ if you don't do either of those things.
+file /etc/resolv.conf ${PROJROOT}/etc/resolv.conf 0444 0 0
+
+# This directory is bind mounted to /var/lib/kubelet/seccomp, so must
+# exist.
+dir /etc/seccomp 0555 0 0
+
+# Default Root CA Bundle (which comes from Mozilla) so that we trust
+# most of the TLS/HTTPS URLs that one would normally expect a system to
+# trust. Cluster Operators can override this if they want to specify
+# their own Root CAs.
+# This is only used by cri-o for pulling images over TLS.
+dir /etc/ssl 0555 0 0
+file /etc/ssl/ca-bundle.pem ${PROJROOT}/etc/ssl/ca-bundle.pem 0444 0 0
+
+# Sensible default / sample files for the registries.conf and
+# policy.json files. Cluster Operators can change these to suit their
+# needs.
+# Default Settings:
+#   - No image verification required
+#   - Unqualified images search docker.io
+# These settings match how most casual docker/container users expect
+# containers to work.
+dir /etc/containers 0555 0 0
+file /etc/containers/policy.json ${PROJROOT}/etc/containers/policy.json 0444 0 0
+
+# Cri-o's massive and unwieldy config file.
+dir /etc/crio 0555 0 0
+file /etc/crio/crio.conf ${PROJROOT}/etc/crio/crio.conf 0444 0 0
+
+# Nothing particularly interesting in this directory - mostly just
+# placeholders for Cluster Operators to use. The location of the pki and
+# manifests directories _can_ be changed by Cluster Operators via the
+# KubeletConfiguration file if Cluster Operators wish - kiOS does not
+# care - however, these are the "standard" locations.
+# kiOS _does_ hard-code the following paths, however:
+#   - /etc/kubernetes/config.yaml (for KubeletConfiguration file)
+#   - /etc/kubernetes/node-labels (for labels, passed to kubelet by kiOS
+#     via the command line)
+#   - /etc/kubernetes/kubelet.conf (KubeConfig file, will be passed to
+#     the kubelet by kiOS via the command line if this file exists)
+#   - /etc/kubernetes/bootstrap-kubelet.conf (Bootstrap KubeConfig file,
+#     will be passed to the kubelet by kiOS via the command line if this
+#     file exists)
+#   - /etc/kubernetes/credential-providers.conf (CredentialProviders
+#     file: will be passed to the kubelet by kiOS via the command line
+#     if this file exists)
+#   - /usr/libexec/kubernetes/kubelet-plugins/credential-provider/exec
+#     (CredentialProviders binary directory - will be passed to the
+#     kubelet by kiOS via the command line if the CredentialProviders
+#     config file exists)
+dir /etc/kubernetes 0555 0 0
+dir /etc/kubernetes/manifests 0555 0 0
+dir /etc/kubernetes/pki 0500 0 0
+file /etc/kubernetes/node-labels ${PROJROOT}/etc/kubernetes/node-labels 0444 0 0
