@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+#
+
+set -e
+
+SSL_PATH=etc/ssl
+ETAG_FILE="${SSL_PATH}/last_pulled_etag"
+BUNDLE_FILE="${SSL_PATH}/ca-bundle.pem"
+
+curl -o "${BUNDLE_FILE}" \
+  --etag-compare "${ETAG_FILE}" --etag-save "${ETAG_FILE}" \
+  https://curl.se/ca/cacert.pem
