@@ -1,3 +1,9 @@
 
 type=meson
 meson_flags="-Dtests=false -Ddefault_library=static"
+make_target="glib/libglib-2.0.a"
+
+post_build() {
+  echo "prefix=$(pwd -P)" > $PKG_CONFIG_PATH/glib-2.0.pc
+  cat ../glib-2.0.pc >> $PKG_CONFIG_PATH/glib-2.0.pc
+}

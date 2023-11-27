@@ -1,5 +1,4 @@
 
 type=make
 make_target="bin/conmon"
-install_target="install.bin"
 depends="lib/glib lib/libseccomp"

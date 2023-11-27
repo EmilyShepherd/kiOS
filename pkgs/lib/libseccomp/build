@@ -1,9 +1,2 @@
 
 type=configure
-
-build_make() {
-
-  make install-pkgconfDATA
-  make -C src install-libLTLIBRARIES
-  make -C include install
-}

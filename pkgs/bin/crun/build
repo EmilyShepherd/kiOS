@@ -9,11 +9,12 @@ pre_build() {
 
   cd ..
   (cd argp-standalone && build_meson)
-  make -C libcap/libcap lib=lib prefix=/ install-static-cap
+  make -C libcap/libcap libcap.a
   cd src
 
+  argp=$(pwd -P)/../argp-standalone
+  libcap=$(pwd -P)/../libcap/libcap
 
-  # crun expects the yajl headers to exist in the system's include
-  # directory.
-  cp -r libocispec/yajl/src/headers/yajl ${BUILD_DIR}/include/yajl
+  export CFLAGS="$CFLAGS -I${argp} -I${libcap}/include"
+  export LDFLAGS="$LDFLAGS -L${argp}/_build -L${libcap}"
 }

@@ -13,9 +13,6 @@ pre_build() {
   export INSTALL_PATH=${BUILD_DIR}/boot
   export INSTALL_MOD_PATH=${BUILD_DIR}
 
-  mkdir -p $INSTALL_PATH
-  rm -rf ${INSTALL_PATH}/*
-
   cat ../*.patch | patch -p1 -N
 
   if test "${ARCH}" == "amd64"
@@ -31,11 +28,10 @@ pre_build() {
 
 post_build() {
   mkdir -p ${DATAPART} ${BOOTPART}/EFI/Boot
-  cp -r ${BUILD_DIR}/lib/modules ${DATAPART}/
 
   case "$ARCH" in
     x86_64)
-      cp ${INSTALL_PATH}/vmlinuz ${BOOTPART}/EFI/Boot/Bootx64.efi
+      cp arch/x86/boot/bzImage ${BOOTPART}/EFI/Boot/Bootx64.efi
       ;;
     arm64)
       cp ${INSTALL_PATH}/vmlinux* ${BOOTPART}/EFI/Boot/BootAA64.efi

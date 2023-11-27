@@ -3,7 +3,6 @@ set -e
 
 export PROJROOT=$(pwd)
 BUILT_PACKAGES=$(pwd)/.build/built
-BUILD_DIR=$(pwd)/.build/root
 BOOTPART=$(pwd)/.build/bootpart
 DATAPART=$(pwd)/.build/datapart
 
@@ -18,6 +17,13 @@ case ${HOST:-arm} in
 esac
 
 build_configure() {
+  export PREFIX=$(pwd -P)
+
+  if test -n "$libs"
+  then
+    export CFLAGS="$CFLAGS $(pkg-config --cflags-only-I $libs)"
+  fi
+
   if test -n "$CLEAN" || ! test -f ${configure_test:-Makefile}
   then
     if test -x autogen.sh
@@ -28,16 +34,18 @@ build_configure() {
     ./${configure_cmd:-configure} --prefix=$PREFIX \
       --host=${AARCH}-unknown-linux-musl \
       --build=x86_64-unknown-linux-gnu \
-      --with-sysroot=${BUILD_DIR} \
+      --libdir='${prefix}/src/.libs' \
+      --includedir="\${prefix}/${includedir:-include}" \
       $configure_flags
   fi
   build_make
+
+  find -name '*.pc' | xargs -I{} cp {} ${PKG_CONFIG_PATH}/
 }
 
 build_make() {
   test -n "$CLEAN" && make clean
   make -j 19 ${make_target}
-  make ${install_target:-install}
 }
 
 build_meson() {
@@ -52,7 +60,6 @@ build_meson() {
   fi
 
   ninja -C _build ${make_target}
-  ninja -C _build ${install_target:-install}
 }
 
 run_cmd() {
@@ -64,12 +71,7 @@ do_build() {
   export CGO_ENABLED=1
   export GOARCH=${ARCH}
   export CROSS_COMPILE=${TARGET}-
-  export PREFIX="/"
-  export DESTDIR=$BUILD_DIR
-  export PKG_CONFIG_SYSTEM_LIBRARY_PATH=${BUILD_DIR}/lib
-  export PKG_CONFIG_LIBDIR=${BUILD_DIR}/lib
-  export PKG_CONFIG_PATH=${BUILD_DIR}/lib/pkgconfig
-  export PKG_CONFIG_SYSROOT_DIR=${BUILD_DIR}
+  export PKG_CONFIG_PATH=${PROJROOT}/pkgs/lib/pkgconfig
   export CC=$(which ${TARGET}-gcc)
   export CXX=$(which ${TARGET}-g++)
   export STRIP=$(which ${TARGET}-strip)
@@ -77,8 +79,8 @@ do_build() {
   local lto=""
   test -z "${nolto}" && lto="-flto"
 
-  export CFLAGS="${lto} -isystem ${BUILD_DIR}/include -${optimise:-O2}"
-  export LDFLAGS="${lto} -w -s -L${BUILD_DIR}/lib -Xlinker -rpath-link=${BUILD_DIR}/lib"
+  export CFLAGS="${lto} -${optimise:-O2}"
+  export LDFLAGS="${lto} -w -s -L${PROJROOT}/pkgs/lib/musl/src/lib"
 
   cd src
   run_cmd pre_build || true
@@ -135,7 +137,7 @@ fi
 
 pkg=$1
 
-mkdir -p $BUILD_DIR $BUILT_PACKAGES ${BOOTPART} ${DATAPART}
+mkdir -p $BUILT_PACKAGES ${BOOTPART} ${DATAPART}
 
 load_pkg
 build_dependencies
