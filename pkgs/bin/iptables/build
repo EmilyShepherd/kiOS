@@ -1,7 +1,3 @@
 
 type=configure
 configure_flags="--disable-nftables --enable-static --disable-shared --disable-devel"
-
-pre_build() {
-  ./autogen.sh
-}

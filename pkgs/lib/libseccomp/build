@@ -7,8 +7,3 @@ build_make() {
   make -C src install-libLTLIBRARIES
   make -C include install
 }
-
-pre_build() {
-  ./autogen.sh
-}
-

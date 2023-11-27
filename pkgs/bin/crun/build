@@ -12,7 +12,6 @@ pre_build() {
   make -C libcap/libcap lib=lib prefix=/ install-static-cap
   cd src
 
-  ./autogen.sh
 
   # crun expects the yajl headers to exist in the system's include
   # directory.

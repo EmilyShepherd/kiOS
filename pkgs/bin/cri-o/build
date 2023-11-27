@@ -13,19 +13,16 @@ pre_build() {
 
   (
     cd ../libgpg-error
-    ./autogen.sh
     build_configure
   )
 
   (
     cd ../libassuan
-    ./autogen.sh
     build_configure
   )
 
   (
     cd ../gpgme
-    ./autogen.sh
     build_configure
   )
 

@@ -20,6 +20,11 @@ esac
 build_configure() {
   if test -n "$CLEAN" || ! test -f ${configure_test:-Makefile}
   then
+    if test -x autogen.sh
+    then
+      ./autogen.sh
+    fi
+
     ./${configure_cmd:-configure} --prefix=$PREFIX \
       --host=${AARCH}-unknown-linux-musl \
       --build=x86_64-unknown-linux-gnu \
