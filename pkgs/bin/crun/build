@@ -7,13 +7,11 @@ pre_build() {
   export BUILD_CC=$(which gcc)
   export BUILD_LD=$(which ld)
 
-  cd ..
-  (cd argp-standalone && build_meson)
-  make -C libcap/libcap libcap.a
-  cd src
-
   argp=$(pwd -P)/../argp-standalone
   libcap=$(pwd -P)/../libcap/libcap
+
+  (cd $argp && build_meson)
+  (cd $libcap && make libcap.a)
 
   export CFLAGS="$CFLAGS -I${argp} -I${libcap}/include"
   export LDFLAGS="$LDFLAGS -L${argp}/_build -L${libcap}"
