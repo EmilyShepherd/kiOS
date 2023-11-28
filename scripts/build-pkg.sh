@@ -19,11 +19,6 @@ esac
 build_configure() {
   export PREFIX=$(pwd -P)
 
-  if test -n "$libs"
-  then
-    export CFLAGS="$CFLAGS $(pkg-config --cflags-only-I $libs)"
-  fi
-
   if test -n "$CLEAN" || ! test -f ${configure_test:-Makefile}
   then
     if test -x autogen.sh

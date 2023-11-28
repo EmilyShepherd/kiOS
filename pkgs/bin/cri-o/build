@@ -10,9 +10,14 @@ pre_build() {
   configure_flags="--enable-static --disable-doc"
   make_target="-C src"
 
-  (cd ../libgpg-error && build_configure)
-  (cd ../libassuan && libs="gpg-error" build_configure)
-  (cd ../gpgme && libs="libassuan" build_configure)
+  for lib in gpg-error libassuan gpgme
+  do
+    if ! test -f ${PKG_CONFIG_PATH}/$lib.pc
+    then
+      (cd ../$lib && CFLAGS="$CFLAGS $(pkg-config --cflags $last)" build_configure)
+    fi
+    last=$lib
+  done
 
   export CGO_LDFLAGS="$(pkg-config --static --libs gpgme)"
   export LDFLAGS="$LDFLAGS $CGO_LDFLAGS"
