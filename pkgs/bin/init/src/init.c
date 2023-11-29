@@ -72,7 +72,6 @@ int main(int argc, char **argv) {
   // start up on a modern machine, so we start it as soon as is
   // reasonable to do so. All our other init steps are performed in that
   // three second window.
-  bring_if_up("eth0");
   enable_ip_forwarding();
   start_socket();
   signal(SIGTERM, &soft_shutdown);
