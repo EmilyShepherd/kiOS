@@ -76,6 +76,7 @@ int main(int argc, char **argv) {
   start_socket();
   signal(SIGTERM, &soft_shutdown);
   clear_cmd_line(argv);
+  unlink("/init");
 
   // Now we are finished with our own setup, wait for crio to be ready.
   wait_for_path(CRIO_SOCK);
