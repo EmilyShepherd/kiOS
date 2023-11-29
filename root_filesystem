@@ -32,8 +32,6 @@ dir /var/lib/containers/storage 0500 0 0
 # At runtime, the persistent storage for pods is bind mounted here. We
 # also bind mount /etc/seccomp to the kubelet's seccomp directory.
 dir /var/lib/kubelet 0500 0 0
-dir /var/lib/kubelet/pods 0500 0 0
-dir /var/lib/kubelet/seccomp 0500 0 0
 
 # At runtime persistent storage for log files is bind mounted here.
 dir /var/log 0700 0 0

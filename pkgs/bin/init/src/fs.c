@@ -62,7 +62,8 @@ void mount_fs(void) {
   mount("tmpfs", "/var/run", "tmpfs", MS_SHARED, 0);
   mount("tmpfs", "/var/lib/kubelet", "tmpfs", MS_SHARED, 0);
   mkdir("/var/run/crio", 0700);
-  mkdir("/var/lib/kubelet/pods", 0700);
+  mkdir("/var/lib/kubelet/pods", 0500);
+  mkdir("/var/lib/kubelet/seccomp", 0500);
 
   // Mount the cgroup file systems
   // When k8s supports cgroupv2 we can drop almost all of this
