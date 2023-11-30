@@ -1,6 +1,6 @@
-From 62693e678c2b849eb00246bc6bfc7bebf0fbf448 Mon Sep 17 00:00:00 2001
+From 5969e05ed34f3cf8980f29f187bad831d0e28eff Mon Sep 17 00:00:00 2001
 From: Emily Shepherd <emily@redcoat.dev>
-Date: Thu, 25 May 2023 00:42:15 +0100
+Date: Thu, 30 Nov 2023 21:28:53 +0000
 Subject: [PATCH] Update the way kubelet names static pods internally
 
 Previously, static pods had their names appended with the node name upon
@@ -51,7 +51,7 @@ index 7dade01b9c3..d7f4cdbf247 100644
  	if isFile {
  		// Applying the default Taint tolerations to static pods,
 diff --git a/pkg/kubelet/container/runtime.go b/pkg/kubelet/container/runtime.go
-index ad59de4df1c..37af0aa3052 100644
+index e53b74bca54..aa58dc1a82f 100644
 --- a/pkg/kubelet/container/runtime.go
 +++ b/pkg/kubelet/container/runtime.go
 @@ -33,6 +33,7 @@ import (
@@ -62,7 +62,7 @@ index ad59de4df1c..37af0aa3052 100644
  )
  
  // Version interface allow to consume the runtime versions - compare and format to string.
-@@ -619,11 +620,27 @@ func (p *Pod) IsEmpty() bool {
+@@ -633,11 +634,27 @@ func (p *Pod) IsEmpty() bool {
  
  // GetPodFullName returns a name that uniquely identifies a pod.
  func GetPodFullName(pod *v1.Pod) string {
@@ -164,19 +164,19 @@ index 2eeb4788af8..a14a6d02a51 100644
  	}
  	hash, ok := getHashFromMirrorPod(mirrorPod)
 diff --git a/pkg/kubelet/status/status_manager.go b/pkg/kubelet/status/status_manager.go
-index c767e7dc41b..bfdd6595c98 100644
+index 4022b7e806a..960951aa670 100644
 --- a/pkg/kubelet/status/status_manager.go
 +++ b/pkg/kubelet/status/status_manager.go
-@@ -545,6 +545,9 @@ func (m *manager) updateStatusInternal(pod *v1.Pod, status v1.PodStatus, forceUp
+@@ -565,6 +565,9 @@ func (m *manager) updateStatusInternal(pod *v1.Pod, status v1.PodStatus, forceUp
  		podName:      pod.Name,
  		podNamespace: pod.Namespace,
  	}
 +	if kubetypes.IsStaticPod(pod) {
 +		newStatus.podName = pod.Annotations[kubetypes.ConfigApiName]
 +	}
- 	m.podStatuses[pod.UID] = newStatus
  
- 	select {
+ 	// Multiple status updates can be generated before we update the API server,
+ 	// so we track the time from the first status update until we retire it to
 diff --git a/pkg/kubelet/types/pod_update.go b/pkg/kubelet/types/pod_update.go
 index 6c7e236fc9a..905c1a02805 100644
 --- a/pkg/kubelet/types/pod_update.go
@@ -191,5 +191,5 @@ index 6c7e236fc9a..905c1a02805 100644
  	ConfigHashAnnotationKey      = "kubernetes.io/config.hash"
  )
 -- 
-2.41.0
+2.42.0
 
