@@ -115,8 +115,18 @@ file /etc/os-release ${PROJROOT}/etc/os-release 0444 0 0
 file /etc/resolv.conf ${PROJROOT}/etc/resolv.conf 0444 0 0
 
 # This directory is bind mounted to /var/lib/kubelet/seccomp, so must
-# exist.
+# exist. We include just one default profile - audit - which can be
+# to whack on when figuring out more fine grained profiles.
+# Although it doesn't matter much, I've chosen to omit the file
+# extension in the included version, this is so the path can look more
+# "natural" in the pod manifest:
+#
+# securityContext:
+#   seccompProfile:
+#     type: Localhost
+#     localhostProfile: audit  # (as opposed to audit.json)
 dir /etc/seccomp 0555 0 0
+file /etc/seccomp/audit ${PROJROOT}/etc/seccomp/audit.json 0400 0 0
 
 # Default Root CA Bundle (which comes from Mozilla) so that we trust
 # most of the TLS/HTTPS URLs that one would normally expect a system to
