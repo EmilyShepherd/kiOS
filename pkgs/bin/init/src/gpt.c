@@ -78,7 +78,7 @@ int scan_for_part(struct GUID *guid, char *datapart) {
 
     if (part > 0) {
       char last = blk[strlen(blk) - 1];
-      if (last <= '0' && last <= '9') {
+      if ('0' <= last && last <= '9') {
         sprintf(datapart, "%sp%d", blk, part);
       } else {
         sprintf(datapart, "%s%d", blk, part);
