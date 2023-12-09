@@ -146,6 +146,7 @@ file /etc/ssl/ca-bundle.pem ${PROJROOT}/etc/ssl/ca-bundle.pem 0444 0 0
 # containers to work.
 dir /etc/containers 0555 0 0
 file /etc/containers/policy.json ${PROJROOT}/etc/containers/policy.json 0444 0 0
+file /etc/containers/registries.conf ${PROJROOT}/etc/containers/registries.conf 0444 0 0
 
 # Cri-o's massive and unwieldy config file.
 dir /etc/crio 0555 0 0
