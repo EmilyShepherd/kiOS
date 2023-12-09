@@ -13,6 +13,6 @@ pre_build() {
   (cd $argp && build_meson)
   (cd $libcap && make libcap.a)
 
-  export CFLAGS="$CFLAGS -I${argp} -I${libcap}/include"
-  export LDFLAGS="$LDFLAGS -L${argp}/_build -L${libcap}"
+  export CFLAGS="$CFLAGS -I${argp} -I${libcap}/include $(pkg-config --cflags libseccomp)"
+  export LDFLAGS="$LDFLAGS -L${argp}/_build -L${libcap} $(pkg-config --libs libseccomp)"
 }
