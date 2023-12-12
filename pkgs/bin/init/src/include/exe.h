@@ -21,6 +21,6 @@ void stop_container_runtime(void);
 void start_kubelet(void);
 void stop_kubelet(void);
 
-void run_wait_loop(void);
+void sig_child(int);
 
 #endif

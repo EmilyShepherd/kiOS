@@ -75,6 +75,7 @@ int main(int argc, char **argv) {
   enable_ip_forwarding();
   start_socket();
   signal(SIGTERM, &soft_shutdown);
+  signal(SIGCHLD, &sig_child);
   clear_cmd_line(argv);
   unlink("/init");
 
@@ -82,5 +83,5 @@ int main(int argc, char **argv) {
   wait_for_path(CRIO_SOCK);
 
   start_kubelet();
-  run_wait_loop();
+  run_socket_loop();
 }

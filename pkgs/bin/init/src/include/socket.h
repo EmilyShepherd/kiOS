@@ -36,11 +36,30 @@ void notify_all(unsigned char);
  */
 void start_socket(void);
 
+typedef void (*event_cb)(uint32_t event, void *data);
+typedef struct EventCallback event_t;
+typedef struct client client_t;
+
+struct EventCallback {
+  event_cb cb;
+  void *data;
+};
+
+struct client {
+  int fd;
+  client_t *next;
+};
+
 /**
  * Sends out a shutdown event to any current clients on the system
  * socket. This is intended to be used for the kubelet graceful shutdown
  * process.
  */
 void soft_shutdown(int);
+
+void run_socket_loop(void);
+
+void add_event_listener(int fd, event_cb cb, void* data);
+void remove_event_listener(int fd);
 
 #endif
