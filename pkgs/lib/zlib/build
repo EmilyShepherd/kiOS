@@ -1,0 +1,11 @@
+type=configure
+make_target="libz.a"
+
+pre_build() {
+  if test -f ${configure_test}
+  then
+    ./configure --static --prefix=$(pwd -P) \
+      --libdir='${prefix}' \
+      --includedir='${prefix}'
+  fi
+}
