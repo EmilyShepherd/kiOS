@@ -3,6 +3,7 @@
 #include "include/fs.h"
 #include "include/kmsg.h"
 #include "include/socket.h"
+#include "http/http.h"
 
 #include <errno.h>
 #include <signal.h>

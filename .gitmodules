@@ -67,3 +67,6 @@
 [submodule "pkgs/bin/cri-o/libassuan"]
 	path = pkgs/bin/cri-o/libassuan
 	url = https://github.com/gpg/libassuan.git
+[submodule "pkgs/lib/wolfssl/src"]
+	path = pkgs/lib/wolfssl/src
+	url = https://github.com/wolfSSL/wolfssl.git
