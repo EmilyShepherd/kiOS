@@ -1,8 +1,9 @@
 
 CFLAGS ?= -s -Os
-OBJS := $(patsubst %.c,%.o,$(wildcard *.c))
+OBJS := $(patsubst %.c,%.o,$(wildcard *.c */*.c))
 CMD := init
 
+CFLAGS += -I$(CURDIR)/include
 LDFLAGS += -L/home/emily/dev/kiOS/core/pkgs/lib/musl/src/lib
 
 %.o: %.c
