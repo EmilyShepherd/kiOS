@@ -55,7 +55,7 @@ static void clear_cmd_line(char **argv) {
   }
 }
 
-int main(int argc, char **argv) {
+int _main(int argc, char **argv) {
   notice("kiOS Init\n");
 
   mount_fs();

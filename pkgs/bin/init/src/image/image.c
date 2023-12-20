@@ -127,6 +127,8 @@ static PARSER_CB(layer_keys) {
   return 0;
 }
 
+int _debug = 0;
+
 size_t write_download(char *ptr, size_t nmemb, struct Download *d) {
   write(d->rawFd, ptr, nmemb);
 
@@ -137,6 +139,10 @@ size_t write_download(char *ptr, size_t nmemb, struct Download *d) {
     close(d->tar_info.dirfd);
     free(d);
     printf("LAYER COMPLETE\n");
+
+    if (++_debug == 3) {
+      exit(0);
+    }
   }
 
   return nmemb;
