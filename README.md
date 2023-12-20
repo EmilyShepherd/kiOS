@@ -39,8 +39,8 @@ harder, even if you were able to circumvent the protections above. kiOS
 only has a `/bin` directory (no `/usr/bin` or `/sbin` etc) and this
 contains just 7 binaries. At runtime, there are only three long term
 processes in the host pid namespace - init itself, the container
-container runtime, and kubelet). kiOS' lack of complexity makes hiding
-an 8th binary, or a 4th running process almost impossible.
+runtime, and kubelet). kiOS' lack of complexity makes hiding an 8th
+binary, or a 4th running process almost impossible.
 
 ### kiOS is configurable
 
