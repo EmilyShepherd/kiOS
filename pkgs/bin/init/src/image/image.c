@@ -142,8 +142,8 @@ size_t write_download(char *ptr, size_t nmemb, struct Download *d) {
   return nmemb;
 }
 
-void write_unzipped(unsigned char *buf, size_t size, struct Download *d) {
-  parse_block(buf, size, &d->tar);
+size_t write_unzipped(unsigned char *buf, size_t size, struct Download *d) {
+  return parse_block(buf, size, &d->tar);
 }
 
 int end_layer(ImageDownload *data) {

@@ -104,6 +104,7 @@ static PARSER_CB(do_inflate) {
     if (have) {
       if (!g->cb(out, have, g->data)) {
         ret = Z_STREAM_END;
+        break;
       }
     }
   } while (g->z.avail_out == 0);
