@@ -68,12 +68,6 @@ static PARSER_CB(start_save_data) {
   return 0;
 }
 
-static void copy(char *to, char *ptr, size_t bytes) {
-  for (int i = 0; i < bytes; i++) {
-    to[i] = ptr[i];
-  }
-}
-
 static PARSER_CB(start_header) {
   DATA_IS(Tar);
 
@@ -92,7 +86,7 @@ static PARSER_CB(start_header) {
   } else if (want > remaining) {
     int smallerWant = want - membersize(tar_header_t, linkname);
     if (header->typeflag == '2' || smallerWant > remaining) {
-      copy(p->str_target, &ptr[*i], remaining);
+      memcpy(p->str_target, &ptr[*i], remaining);
       p->str_target += remaining;
       p->func = &start_header;
       return 1;
@@ -107,7 +101,7 @@ static PARSER_CB(start_header) {
   // If there is data in the buffer we need to copy over what we have
   // in the stream into it to recreate a complete header block.
   if (in_buffer) {
-    copy(p->str_target, &ptr[*i], want);
+    memcpy(p->str_target, &ptr[*i], want);
     p->str_target = p->str_buffer;
     p->target -= in_buffer;
   }
