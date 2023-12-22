@@ -15,6 +15,8 @@ static PARSER_CB(read_status);
 
 host_t *hosts = NULL;
 
+void open_http2(conn_t *conn);
+
 /**
  * We currently just use the one context for the whole application
  */
@@ -81,7 +83,15 @@ void socket_cb(uint32_t event, conn_t *conn) {
   if (conn->status != STATUS_PENDING) {
     read_http(conn);
   } else if (wolfSSL_connect(conn->ssl_session) == SSL_SUCCESS) {
-    conn->status = STATUS_OK;
+    char *protocol;
+    unsigned short size;
+    wolfSSL_ALPN_GetProtocol(conn->ssl_session, &protocol, &size);
+    if (strcmp(protocol, "h2") != 0) {
+      conn->status = STATUS_OK;
+    } else {
+      conn->type = HTTP2;
+      open_http2(conn);
+    }
     conn->host->pending_connections--;
     mark_available(conn);
   }
@@ -106,6 +116,9 @@ static void new_connection(host_t *host) {
 
   add_event_listener(conn->socket, (event_cb)&socket_cb, conn);
   host->pending_connections++;
+
+  char *alpn_list = "h2,http/1.1";
+  wolfSSL_UseALPN(conn->ssl_session, alpn_list, sizeof(alpn_list), WOLFSSL_ALPN_CONTINUE_ON_MISMATCH);
 }
 
 /**
@@ -332,28 +345,32 @@ static void pickup_request(host_t *host, req_t *req) {
 
   conn->expected_length = 0;
   conn->read_length = 0;
-  conn->status = STATUS_ONGOING;
-
-  memset(&conn->p, 0, sizeof(Parser));
-  conn->p.func = &expect_token;
-  conn->p.str_i = 0;
-  conn->p.then = &read_status;
-  strcpy(conn->p.str_buffer, "HTTP/1.1 ");
-
-  conn->p.data = conn;
   conn->req = req;
   req->conn = conn;
 
-  char buff[2000] = "GET ";
-  strcat(buff, req->path);
-  strcat(buff, " HTTP/1.1\nhost: ");
-  strcat(buff, conn->host->name);
-  strcat(buff, "\nconnection: keep-alive\naccept: application/vnd.docker.distribution.manifest.v2+json, application/vnd.docker.distribution.manifest.list.v2+json\n\n");
+  switch (conn->type) {
+    case HTTP1:
+      memset(&conn->p, 0, sizeof(Parser));
+      conn->p.func = &expect_token;
+      conn->p.str_i = 0;
+      conn->p.then = &read_status;
+      conn->p.data = conn;
+      strcpy(conn->p.str_buffer, "HTTP/1.1 ");
 
-  wolfSSL_write(conn->ssl_session, buff, strlen(buff));
+      // Remove this connection from the available pool.
+      host->available_conn = conn->next;
 
-  // Remove this connection from the available pool.
-  host->available_conn = conn->next;
+      char buff[2000] = "GET ";
+      strcat(buff, req->path);
+      strcat(buff, " HTTP/1.1\nhost: ");
+      strcat(buff, conn->host->name);
+      strcat(buff, "\nconnection: keep-alive\naccept: application/vnd.docker.distribution.manifest.v2+json, application/vnd.docker.distribution.manifest.list.v2+json\n\n");
+      wolfSSL_write(conn->ssl_session, buff, strlen(buff));
+      break;
+    case HTTP2:
+      //
+      break;
+  }
 }
 
 /**

@@ -6,6 +6,7 @@
 #include <wolfssl/ssl.h>
 
 #include "parser/parser.h"
+#include "http/http2.h"
 
 #define UNKNOWN 0
 #define HTTP1 1
@@ -18,6 +19,7 @@
 #define STATUS_ONGOING 1
 #define STATUS_UNNEEDED 2
 #define STATUS_PENDING 3
+#define STATUS_NEEDS_PREFACE 4
 
 typedef struct Host host_t;
 typedef struct Connection conn_t;
@@ -45,6 +47,11 @@ struct Connection {
   int status;
 
   /**
+   * The type of connection this is (HTTP1 or HTTP2)
+   */
+  int type;
+
+  /**
    * If the content-length header is seen, it is saved there - this is
    * used for fast skipping over the rest of a message body when it is
    * no longer needed.
@@ -70,6 +77,10 @@ struct Connection {
    * nested parsers if needed.
    */
   Parser p;
+
+  frame_header_t last_frame;
+
+  setting_t last_setting;
 };
 
 struct Host {
