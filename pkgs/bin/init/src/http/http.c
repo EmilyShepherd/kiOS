@@ -4,13 +4,16 @@
 #include "socket.h"
 
 static void do_new_request(host_t *host, req_t *req);
-static void pickup_request(conn_t *conn, req_t *req);
+static void pickup_request(host_t *conn, req_t *req);
+static void new_connection(host_t *host);
 static void read_http(conn_t *conn);
 
 static PARSER_CB(to_eol);
 static PARSER_CB(save_header);
 static PARSER_CB(next_header);
 static PARSER_CB(read_status);
+
+host_t *hosts = NULL;
 
 /**
  * We currently just use the one context for the whole application
@@ -39,15 +42,30 @@ void init_http_client() {
  * Otherwise the connection is added to the host's available pool.
  */
 static void mark_available(conn_t *conn) {
-  req_t *req = conn->host->next_request;
+  conn->next = conn->host->available_conn;
+  conn->host->available_conn = conn;
+}
 
-  if (req == NULL) {
-    conn->next = conn->host->available_conn;
-    conn->host->available_conn = conn;
-  } else {
-    conn->host->pending_requests--;
-    conn->host->next_request = req->next;
-    pickup_request(conn, req);
+void pickup_requests() {
+  host_t *host = hosts;
+
+  while (host) {
+    while (host->next_request) {
+      if (host->available_conn) {
+        pickup_request(host, host->next_request);
+        host->next_request = host->next_request->next;
+        host->pending_requests--;
+      } else {
+        if (host->type != HTTP1 && !host->pending_connections) {
+          new_connection(host);
+        } else while (host->pending_connections < host->pending_requests) {
+          new_connection(host);
+        }
+        break;
+      }
+    }
+
+    host = host->next;
   }
 }
 
@@ -106,6 +124,9 @@ host_t* new_host(char *hostname) {
   host->pending_requests = 0;
   host->available_conn = NULL;
   host->next_request = NULL;
+  host->type = UNKNOWN;
+  host->next = hosts;
+  hosts = host;
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = AF_UNSPEC;
@@ -289,11 +310,8 @@ static PARSER_CB(read_status) {
  * it, it will request more.
  */
 static void do_new_request(host_t *host, req_t *req) {
-  conn_t *conn = host->available_conn;
-
-  if (conn != NULL) {
-    host->available_conn = conn->next;
-    pickup_request(conn, req);
+  if (host->available_conn) {
+    pickup_request(host, req);
   } else {
     req->conn = NULL;
     host->pending_requests++;
@@ -303,16 +321,15 @@ static void do_new_request(host_t *host, req_t *req) {
       host->last_request->next = req;
     }
     host->last_request = req;
-    while (host->pending_connections < host->pending_requests) {
-      new_connection(host);
-    }
   }
 }
 
 /**
  * Sends an HTTP request on the given connection
  */
-static void pickup_request(conn_t *conn, req_t *req) {
+static void pickup_request(host_t *host, req_t *req) {
+  conn_t *conn = host->available_conn;
+
   conn->expected_length = 0;
   conn->read_length = 0;
   conn->status = STATUS_ONGOING;
@@ -334,6 +351,9 @@ static void pickup_request(conn_t *conn, req_t *req) {
   strcat(buff, "\nconnection: keep-alive\naccept: application/vnd.docker.distribution.manifest.v2+json, application/vnd.docker.distribution.manifest.list.v2+json\n\n");
 
   wolfSSL_write(conn->ssl_session, buff, strlen(buff));
+
+  // Remove this connection from the available pool.
+  host->available_conn = conn->next;
 }
 
 /**

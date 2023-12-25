@@ -161,6 +161,8 @@ void run_socket_loop(void) {
       struct EventCallback *callback = events[n].data.ptr;
       callback->cb(events[n].events, callback->data);
     }
+
+    pickup_requests();
   }
 }
 

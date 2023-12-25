@@ -7,6 +7,7 @@
 
 #include "parser/parser.h"
 
+#define UNKNOWN 0
 #define HTTP1 1
 #define HTTP2 2
 
@@ -109,6 +110,11 @@ struct Host {
   int pending_requests;
   req_t *next_request;
   req_t *last_request;
+
+  /**
+   * Next host in the list of all hosts
+   */
+  host_t* next;
 };
 
 struct ArtifactRequest {
@@ -157,5 +163,7 @@ host_t* new_host(char *name);
  * Perform a new artifact request
  */
 void new_request(host_t* host, char *image, char *type, char *name, write_callback cb, void* data);
+
+void pickup_requests();
 
 #endif /* ifndef _H_HTTP */
