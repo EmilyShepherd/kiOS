@@ -177,4 +177,6 @@ void new_request(host_t* host, char *image, char *type, char *name, write_callba
 
 void pickup_requests();
 
+void mark_available(conn_t *conn);
+
 #endif /* ifndef _H_HTTP */

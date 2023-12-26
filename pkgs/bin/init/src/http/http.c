@@ -43,9 +43,13 @@ void init_http_client() {
  * one will be picked up immediately for the connection to take over.
  * Otherwise the connection is added to the host's available pool.
  */
-static void mark_available(conn_t *conn) {
+void mark_available(conn_t *conn) {
   conn->next = conn->host->available_conn;
   conn->host->available_conn = conn;
+  if (conn->status != STATUS_OK) {
+    conn->status = STATUS_OK;
+    conn->host->pending_connections--;
+  }
 }
 
 void pickup_requests() {
@@ -87,13 +91,11 @@ void socket_cb(uint32_t event, conn_t *conn) {
     unsigned short size;
     wolfSSL_ALPN_GetProtocol(conn->ssl_session, &protocol, &size);
     if (strcmp(protocol, "h2") != 0) {
-      conn->status = STATUS_OK;
+      mark_available(conn);
     } else {
       conn->type = HTTP2;
       open_http2(conn);
     }
-    conn->host->pending_connections--;
-    mark_available(conn);
   }
 }
 
