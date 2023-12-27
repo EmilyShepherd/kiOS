@@ -12,10 +12,22 @@
 #define HTTP2_FRAME_TYPE_WINDOW_UPDATE 0x08
 #define HTTP2_FRAME_TYPE_CONTINUATION 0x09
 
+#define HTTP2_FLAG_END_HEADERS 0x04
 #define HTTP2_FLAG_ACK 0x01
 #define HTTP2_FLAG_NONE 0x00
 
 #define HTTP2_FRAME_HEADER_SIZE 9
+
+#define HTTP2_INDEX_AUTHORITY 1
+#define HTTP2_INDEX_METHOD_GET 2
+#define HTTP2_INDEX_METHOD_POST 3
+#define HTTP2_INDEX_PATH 4
+#define HTTP2_INDEX_SCHEME_HTTP 6
+#define HTTP2_INDEX_SCHEME_HTTPS 7
+#define HTTP2_INDEX_ACCEPT 19
+
+#define HTTP2_HEADER_INDEXED 0x80
+#define HTTP2_HEADER_ADD_INDEX 0x40
 
 typedef struct setting {
   short type;
@@ -36,6 +48,8 @@ typedef struct http2_frame {
   char stream_id[4];
   char data[];
 } http2_frame_t;
+
+typedef char index_t;
 
 #define frameb(member, n) offsetof(frame_header_t, member) + n
 #define t_ntoh16(s, m) offsetof(s, m) + 1, offsetof(s, m)

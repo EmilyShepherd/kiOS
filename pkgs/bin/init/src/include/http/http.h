@@ -126,6 +126,11 @@ struct Host {
    * Next host in the list of all hosts
    */
   host_t* next;
+
+  /**
+   * Last stream ID
+   */
+  int next_stream_id;
 };
 
 struct ArtifactRequest {

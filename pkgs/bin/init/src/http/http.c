@@ -141,6 +141,7 @@ host_t* new_host(char *hostname) {
   host->next_request = NULL;
   host->type = UNKNOWN;
   host->next = hosts;
+  host->next_stream_id = 1;
   hosts = host;
 
   memset(&hints, 0, sizeof(hints));
@@ -339,6 +340,8 @@ static void do_new_request(host_t *host, req_t *req) {
   }
 }
 
+void do_http2_req(conn_t *conn, req_t *req);
+
 /**
  * Sends an HTTP request on the given connection
  */
@@ -349,6 +352,8 @@ static void pickup_request(host_t *host, req_t *req) {
   conn->read_length = 0;
   conn->req = req;
   req->conn = conn;
+
+  printf("REQ\n");
 
   switch (conn->type) {
     case HTTP1:
@@ -370,7 +375,7 @@ static void pickup_request(host_t *host, req_t *req) {
       wolfSSL_write(conn->ssl_session, buff, strlen(buff));
       break;
     case HTTP2:
-      //
+      do_http2_req(conn, req);
       break;
   }
 }
@@ -394,7 +399,7 @@ void new_request(host_t *host, char *image, char *type, char *name, write_callba
  * the HTTP parser.
  */
 static void read_http(conn_t *conn) {
-  char buff[32000];
+  unsigned char buff[32000];
   int ret, tot = 0;
 
   while ((ret = wolfSSL_read(conn->ssl_session, buff, sizeof(buff))) > 0) {

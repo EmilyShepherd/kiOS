@@ -93,7 +93,7 @@ PARSER_CB(expect_token) {
 /**
  * A push based event based block parser
  */
-size_t parse_block(char *ptr, size_t nmemb, Parser *parser) {
+size_t parse_block(unsigned char *ptr, size_t nmemb, Parser *parser) {
   size_t i = 0;
   size_t max = nmemb - 1;
 

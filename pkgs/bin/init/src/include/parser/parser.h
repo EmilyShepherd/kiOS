@@ -6,9 +6,9 @@
 
 typedef struct Parser Parser;
 
-typedef size_t (*write_callback)(char *ptr, size_t, void*);
+typedef size_t (*write_callback)(unsigned char *ptr, size_t, void*);
 
-typedef int (*Op)(char *ptr, size_t *i, size_t max, Parser *parser);
+typedef int (*Op)(unsigned char *ptr, size_t *i, size_t max, Parser *parser);
 
 typedef int (*end_obj_cb)(void *data);
 
@@ -35,7 +35,7 @@ struct Parser {
 
 #define INC() if (*i == max) { return 1; } else { (*i)++; }
 #define EXPECT(c) if (ptr[*i] != c) { printf("(ERR) %c %d %c %d\n", c, c, ptr[*i], ptr[*i]); return -1; } else { INC(); }
-#define PARSER_CB(name) int name(char *ptr, size_t *i, size_t max, Parser *p)
+#define PARSER_CB(name) int name(unsigned char *ptr, size_t *i, size_t max, Parser *p)
 #define DATA_IS(type) type *data = (type*)p->data
 
 PARSER_CB(skip_whitespace);
@@ -44,6 +44,6 @@ PARSER_CB(read_int);
 PARSER_CB(skip_n);
 PARSER_CB(expect_token);
 
-size_t parse_block(char *ptr, size_t nmemb, Parser *parser);
+size_t parse_block(unsigned char *ptr, size_t nmemb, Parser *parser);
 
 #endif /* ifndef _H_PARSER */
