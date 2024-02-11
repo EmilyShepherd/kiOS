@@ -4,6 +4,7 @@
 
 dir /dev 0500 0 0
 nod /dev/console 0400 0 0 c 5 1
+nod /dev/kmsg 0400 0 0 c 1 11
 
 dir /proc 0500 0 0
 dir /sys 0500 0 0
