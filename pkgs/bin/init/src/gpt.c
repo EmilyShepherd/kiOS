@@ -97,7 +97,7 @@ int scan_for_part(struct GUID *guid, char *datapart) {
  */
 int determine_datapart(char *datapart) {
   char *env = getenv("datapart");
-  if (!env || strcmp(env, "auto")) {
+  if (!env || strcmp(env, "auto") == 0) {
     while(!scan_for_part((struct GUID *)&Datapart, datapart)) {
       sleep(1);
     }
