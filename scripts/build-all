@@ -1,0 +1,13 @@
+#!/bin/bash
+
+for dir in musl glib libseccomp
+do
+  ./scripts/build-pkg.sh lib/$dir
+done
+
+for dir in $(ls pkgs/bin)
+do
+  ./scripts/build-pkg.sh bin/$dir
+done
+
+./scripts/build-pkg.sh kernel
