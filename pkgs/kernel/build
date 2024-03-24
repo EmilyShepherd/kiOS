@@ -9,9 +9,10 @@ case "$ARCH" in
 esac
 type=make
 
+export INSTALL_MOD_PATH=${DATAPART}
+
 pre_build() {
   export INSTALL_PATH=${BUILD_DIR}/boot
-  export INSTALL_MOD_PATH=${BUILD_DIR}
 
   cat ../*.patch | patch -p1 -N
 
@@ -28,6 +29,8 @@ pre_build() {
 
 post_build() {
   mkdir -p ${DATAPART} ${BOOTPART}/EFI/Boot
+
+  make modules_install
 
   case "$ARCH" in
     x86_64)
