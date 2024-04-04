@@ -100,6 +100,16 @@ void mount_fs(void) {
     }
   }
   fclose(fp);
+
+  // Like systemd, it is slightly more helpful to us to make our mounts
+  // shared rather than private. This allows kubernetes mountPropagation
+  // work as expected. This, ironically, is actually _more_ secure as,
+  // without sharing our mounts, the only way to make changes to the
+  // host system is to setns into the host mount namespace. This
+  // requires granting the container SYS_CHROOT and SYS_ADMIN, which
+  // gives way more permissions than just selectively mounting hostPaths
+  // with mountPropagation set on them.
+  mount(NULL, "/", NULL, MS_REC|MS_SHARED, NULL);
 }
 
 /**
