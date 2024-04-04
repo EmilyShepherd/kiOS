@@ -88,13 +88,12 @@ void start_container_runtime(void) {
     "--cgroup-manager", "cgroupfs",
     "--default-runtime", "crun",
     "--listen", "/var/run/crio/crio.sock",
-    "--root", "/var/lib/containers/storage",
-    "--runroot", "/var/lib/containers/storage",
     "--conmon", "/bin/conmon",
     "--conmon-cgroup", "pod",
     "--pinns-path", "/bin/pinns",
     NULL
   };
+
   crio_pid = start_exe("/bin/crio", CRIO_LOG, crioArgs);
 }
 
