@@ -51,10 +51,10 @@ index 7dade01b9c3..d7f4cdbf247 100644
  	if isFile {
  		// Applying the default Taint tolerations to static pods,
 diff --git a/pkg/kubelet/container/runtime.go b/pkg/kubelet/container/runtime.go
-index e53b74bca54..aa58dc1a82f 100644
+index 8a154f272c8..869b0646111 100644
 --- a/pkg/kubelet/container/runtime.go
 +++ b/pkg/kubelet/container/runtime.go
-@@ -33,6 +33,7 @@ import (
+@@ -34,6 +34,7 @@ import (
  	runtimeapi "k8s.io/cri-api/pkg/apis/runtime/v1"
  	"k8s.io/klog/v2"
  	"k8s.io/kubernetes/pkg/volume"
@@ -62,7 +62,7 @@ index e53b74bca54..aa58dc1a82f 100644
  )
  
  // Version interface allow to consume the runtime versions - compare and format to string.
-@@ -633,11 +634,27 @@ func (p *Pod) IsEmpty() bool {
+@@ -652,11 +653,27 @@ func (p *Pod) IsEmpty() bool {
  
  // GetPodFullName returns a name that uniquely identifies a pod.
  func GetPodFullName(pod *v1.Pod) string {
@@ -125,10 +125,10 @@ index 22ea62b1a31..b7eaadce0f0 100644
  		klog.ErrorS(err, "Failed to parse a pod full name", "podFullName", podFullName)
  		return false, err
 diff --git a/pkg/kubelet/pod/pod_manager.go b/pkg/kubelet/pod/pod_manager.go
-index 2eeb4788af8..a14a6d02a51 100644
+index 69457e6c983..dd4f13ecadf 100644
 --- a/pkg/kubelet/pod/pod_manager.go
 +++ b/pkg/kubelet/pod/pod_manager.go
-@@ -192,6 +192,14 @@ func (pm *basicManager) updatePodsInternal(pods ...*v1.Pod) {
+@@ -184,6 +184,14 @@ func (pm *basicManager) updatePodsInternal(pods ...*v1.Pod) {
  			updateMetrics(pm.podByUID[resolvedPodUID], pod)
  			pm.podByUID[resolvedPodUID] = pod
  			pm.podByFullName[podFullName] = pod
@@ -143,7 +143,7 @@ index 2eeb4788af8..a14a6d02a51 100644
  			if mirror, ok := pm.mirrorPodByFullName[podFullName]; ok {
  				pm.translationByUID[kubetypes.MirrorPodUID(mirror.UID)] = resolvedPodUID
  			}
-@@ -292,8 +300,8 @@ func (pm *basicManager) GetOrphanedMirrorPodNames() []string {
+@@ -284,8 +292,8 @@ func (pm *basicManager) GetOrphanedMirrorPodNames() []string {
  	pm.lock.RLock()
  	defer pm.lock.RUnlock()
  	var podFullNames []string
@@ -154,7 +154,7 @@ index 2eeb4788af8..a14a6d02a51 100644
  			podFullNames = append(podFullNames, podFullName)
  		}
  	}
-@@ -302,7 +310,7 @@ func (pm *basicManager) GetOrphanedMirrorPodNames() []string {
+@@ -294,7 +302,7 @@ func (pm *basicManager) GetOrphanedMirrorPodNames() []string {
  
  func (pm *basicManager) IsMirrorPodOf(mirrorPod, pod *v1.Pod) bool {
  	// Check name and namespace first.
@@ -164,12 +164,12 @@ index 2eeb4788af8..a14a6d02a51 100644
  	}
  	hash, ok := getHashFromMirrorPod(mirrorPod)
 diff --git a/pkg/kubelet/status/status_manager.go b/pkg/kubelet/status/status_manager.go
-index 4022b7e806a..960951aa670 100644
+index d9aa072a932..6779e455861 100644
 --- a/pkg/kubelet/status/status_manager.go
 +++ b/pkg/kubelet/status/status_manager.go
-@@ -565,6 +565,9 @@ func (m *manager) updateStatusInternal(pod *v1.Pod, status v1.PodStatus, forceUp
- 		podName:      pod.Name,
- 		podNamespace: pod.Namespace,
+@@ -657,6 +657,9 @@ func (m *manager) updateStatusInternal(pod *v1.Pod, status v1.PodStatus, forceUp
+ 		podNamespace:  pod.Namespace,
+ 		podIsFinished: podIsFinished,
  	}
 +	if kubetypes.IsStaticPod(pod) {
 +		newStatus.podName = pod.Annotations[kubetypes.ConfigApiName]
