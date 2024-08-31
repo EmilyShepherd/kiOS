@@ -178,3 +178,4 @@ dir /etc/kubernetes 0555 0 0
 dir /etc/kubernetes/manifests 0555 0 0
 dir /etc/kubernetes/pki 0500 0 0
 file /etc/kubernetes/node-labels ${PROJROOT}/etc/kubernetes/node-labels 0444 0 0
+file /etc/kubernetes/config.yaml ${PROJROOT}/etc/kubernetes/config.yaml 0444 0 0

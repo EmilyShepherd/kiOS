@@ -174,7 +174,7 @@ void populate_labels(char *labels) {
 void start_kubelet(void) {
   char * kubeletArgs[1 + 2 * KUBELET_MAX_OPTIONS + 1] = {
     "/bin/kubelet",
-    "--container-runtime-endpoint", "unix:///var/run/crio/crio.sock"
+    "--config", KUBELET_CONFIG
   };
 
   // We are keeping the first arg (container-runtime-endpoint). Others
@@ -187,11 +187,6 @@ void start_kubelet(void) {
     SET_ARG("--node-labels", labels);
   }
 
-  if (fexists(KUBELET_CONFIG)) {
-    SET_ARG("--config", KUBELET_CONFIG);
-  } else {
-    SET_ARG("--pod-manifest-path", "/etc/kubernetes/manifests");
-  }
 
   if (fexists(KUBELET_KUBECONFIG)) {
     SET_ARG("--kubeconfig", KUBELET_KUBECONFIG);

@@ -1,0 +1,30 @@
+# Default configuration for the kubelet
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+
+# kiOS will always run the container runtime from here, and there is no
+# way to change that behaviour. It is rare, therefore, that this would
+# need to be changed.
+containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
+
+# The path to where local pods should run. This is normally required for
+# local bootstrapping of a node, however this can be safely changed or
+# disabled if the node is otherwise statically / externally provisioned.
+staticPodPath: /etc/kubernetes/manifests
+
+# Keep these set to non-zero values to enable graceful node shutdown. In
+# this mode, when kiOS is notified of a system shutdown, it will first
+# inform kubelet and give it time to gracefully shut down all pods in
+# line with their shutdown settings.
+shutdownGracePeriod: 30s
+shutdownGracePeriodCriticalPods: 10s
+
+# When running in API server mode, webhook auth is almost always a good
+# thing to turn on. However, in early boot, we often run in standalone
+# mode during bootstrapping. Kubelet will complain if these are on when
+# running in standalone mode, so we must turn them off in the defaults.
+authentication:
+  webhook:
+    enabled: false
+authorization:
+  mode: AlwaysAllow
