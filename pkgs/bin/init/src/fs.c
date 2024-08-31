@@ -24,6 +24,11 @@ static void init_mount(const char *type, const char *target, unsigned long flags
   mount(type, target, type, flags | MS_NOSUID | MS_NOEXEC, 0);
 }
 
+static void mkinit_mount(const char *type, const char *target, unsigned long flags) {
+  mkdir(target, 0755);
+  init_mount(type, target, flags);
+}
+
 static void tmp_mount(const char *target) {
   init_mount("tmpfs", target, MS_NODEV);
 }
@@ -46,12 +51,9 @@ void mount_fs(void) {
   init_mount("proc", "/proc", MS_NODEV);
   init_mount("sysfs", "/sys", MS_NODEV);
   init_mount("devtmpfs", "/dev", 0);
-  mkdir("/dev/pts", 0755);
-  init_mount("devpts", "/dev/pts", 0);
-  mkdir("/sys/kernel/security", 0755);
-  init_mount("securityfs", "/sys/kernel/security", 0);
-  mkdir("/sys/fs/cgroup", 0755);
-  init_mount("cgroup2", "/sys/fs/cgroup", 0);
+  mkinit_mount("devpts", "/dev/pts", 0);
+  mkinit_mount("securityfs", "/sys/kernel/security", 0);
+  mkinit_mount("cgroup2", "/sys/fs/cgroup", 0);
 
   // Sensible tmpfs mounts
   tmp_mount("/run");
