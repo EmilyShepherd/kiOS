@@ -50,6 +50,8 @@ void mount_fs(void) {
   init_mount("devpts", "/dev/pts", 0);
   mkdir("/sys/kernel/security", 0755);
   init_mount("securityfs", "/sys/kernel/security", 0);
+  mkdir("/sys/fs/cgroup", 0755);
+  init_mount("cgroup2", "/sys/fs/cgroup", 0);
 
   // Sensible tmpfs mounts
   tmp_mount("/run");
@@ -64,42 +66,6 @@ void mount_fs(void) {
   mkdir("/var/run/crio", 0700);
   mkdir("/var/lib/kubelet/pods", 0500);
   mkdir("/var/lib/kubelet/seccomp", 0500);
-
-  // Mount the cgroup file systems
-  // When k8s supports cgroupv2 we can drop almost all of this
-  mkdir("/sys/fs/cgroup", 0755);
-  tmp_mount("/sys/fs/cgroup");
-  char line[50];
-  FILE *fp = fopen("/proc/cgroups", "r");
-  fgets(line, sizeof(line), fp);
-
-  while (fgets(line, sizeof(line), fp) != NULL) {
-    char cgroup[20];
-    char path[50] = "/sys/fs/cgroup/";
-    int i = 0;
-    for (; i < sizeof(line); i++) {
-      if (line[i] != '\t') {
-        cgroup[i] = line[i];
-        path[i + 15] = line[i];
-      } else {
-        cgroup[i] = 0;
-        path[i + 15] = 0;
-        break;
-      }
-    }
-
-    i++;
-    while (line[i++] != '\t'); // Skip over "heirarchy" col
-    while (line[i++] != '\t'); // Skip over "num_cgroups" col
-
-    // At the "enabled" col
-    // If the cgroup is enabled, we can mount it
-    if (line[i] == '1') {
-      mkdir(path, 0555);
-      mount("cgroup", path, "cgroup", 0, cgroup);
-    }
-  }
-  fclose(fp);
 
   // Like systemd, it is slightly more helpful to us to make our mounts
   // shared rather than private. This allows kubernetes mountPropagation
