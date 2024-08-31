@@ -51,7 +51,7 @@ index 7dade01b9c3..d7f4cdbf247 100644
  	if isFile {
  		// Applying the default Taint tolerations to static pods,
 diff --git a/pkg/kubelet/container/runtime.go b/pkg/kubelet/container/runtime.go
-index 8a154f272c8..869b0646111 100644
+index 7fa8f44ef73..21a1cd7739b 100644
 --- a/pkg/kubelet/container/runtime.go
 +++ b/pkg/kubelet/container/runtime.go
 @@ -34,6 +34,7 @@ import (
@@ -62,7 +62,7 @@ index 8a154f272c8..869b0646111 100644
  )
  
  // Version interface allow to consume the runtime versions - compare and format to string.
-@@ -652,11 +653,27 @@ func (p *Pod) IsEmpty() bool {
+@@ -646,11 +647,27 @@ func (p *Pod) IsEmpty() bool {
  
  // GetPodFullName returns a name that uniquely identifies a pod.
  func GetPodFullName(pod *v1.Pod) string {
@@ -125,10 +125,10 @@ index 22ea62b1a31..b7eaadce0f0 100644
  		klog.ErrorS(err, "Failed to parse a pod full name", "podFullName", podFullName)
  		return false, err
 diff --git a/pkg/kubelet/pod/pod_manager.go b/pkg/kubelet/pod/pod_manager.go
-index 69457e6c983..dd4f13ecadf 100644
+index e3cc4f76080..96c56482822 100644
 --- a/pkg/kubelet/pod/pod_manager.go
 +++ b/pkg/kubelet/pod/pod_manager.go
-@@ -184,6 +184,14 @@ func (pm *basicManager) updatePodsInternal(pods ...*v1.Pod) {
+@@ -182,6 +182,14 @@ func (pm *basicManager) updatePodsInternal(pods ...*v1.Pod) {
  			updateMetrics(pm.podByUID[resolvedPodUID], pod)
  			pm.podByUID[resolvedPodUID] = pod
  			pm.podByFullName[podFullName] = pod
@@ -143,20 +143,20 @@ index 69457e6c983..dd4f13ecadf 100644
  			if mirror, ok := pm.mirrorPodByFullName[podFullName]; ok {
  				pm.translationByUID[kubetypes.MirrorPodUID(mirror.UID)] = resolvedPodUID
  			}
-@@ -284,8 +292,8 @@ func (pm *basicManager) GetOrphanedMirrorPodNames() []string {
- 	pm.lock.RLock()
- 	defer pm.lock.RUnlock()
- 	var podFullNames []string
+@@ -218,8 +226,8 @@ func (pm *basicManager) GetPodsAndMirrorPods() (allPods []*v1.Pod, allMirrorPods
+ 	allPods = podsMapToPods(pm.podByUID)
+ 	allMirrorPods = mirrorPodsMapToMirrorPods(pm.mirrorPodByUID)
+ 
 -	for podFullName := range pm.mirrorPodByFullName {
 -		if _, ok := pm.podByFullName[podFullName]; !ok {
 +	for podFullName, pod := range pm.mirrorPodByFullName {
 +		if _, ok := pm.podByFullName[kubecontainer.GetPodFullName(pod)]; !ok {
- 			podFullNames = append(podFullNames, podFullName)
+ 			orphanedMirrorPodFullnames = append(orphanedMirrorPodFullnames, podFullName)
  		}
  	}
-@@ -294,7 +302,7 @@ func (pm *basicManager) GetOrphanedMirrorPodNames() []string {
- 
- func (pm *basicManager) IsMirrorPodOf(mirrorPod, pod *v1.Pod) bool {
+@@ -287,7 +295,7 @@ func (pm *basicManager) GetUIDTranslations() (podToMirror map[kubetypes.Resolved
+ // IsMirrorPodOf returns true if pod and mirrorPod are associated with each other.
+ func IsMirrorPodOf(mirrorPod, pod *v1.Pod) bool {
  	// Check name and namespace first.
 -	if pod.Name != mirrorPod.Name || pod.Namespace != mirrorPod.Namespace {
 +	if kubecontainer.GetPodFullName(pod) != kubecontainer.GetPodFullName(mirrorPod) {
@@ -164,10 +164,10 @@ index 69457e6c983..dd4f13ecadf 100644
  	}
  	hash, ok := getHashFromMirrorPod(mirrorPod)
 diff --git a/pkg/kubelet/status/status_manager.go b/pkg/kubelet/status/status_manager.go
-index d9aa072a932..6779e455861 100644
+index e43c5874481..5c9ecb03b22 100644
 --- a/pkg/kubelet/status/status_manager.go
 +++ b/pkg/kubelet/status/status_manager.go
-@@ -657,6 +657,9 @@ func (m *manager) updateStatusInternal(pod *v1.Pod, status v1.PodStatus, forceUp
+@@ -701,6 +701,9 @@ func (m *manager) updateStatusInternal(pod *v1.Pod, status v1.PodStatus, forceUp
  		podNamespace:  pod.Namespace,
  		podIsFinished: podIsFinished,
  	}
@@ -178,7 +178,7 @@ index d9aa072a932..6779e455861 100644
  	// Multiple status updates can be generated before we update the API server,
  	// so we track the time from the first status update until we retire it to
 diff --git a/pkg/kubelet/types/pod_update.go b/pkg/kubelet/types/pod_update.go
-index 6c7e236fc9a..905c1a02805 100644
+index 7f7fc5b799b..16febd56aa8 100644
 --- a/pkg/kubelet/types/pod_update.go
 +++ b/pkg/kubelet/types/pod_update.go
 @@ -28,6 +28,8 @@ import (
