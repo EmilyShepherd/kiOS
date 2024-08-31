@@ -22,9 +22,6 @@
 [submodule "pkgs/dhcp/src"]
 	path = pkgs/images/dhcp/src
 	url = https://github.com/NetworkConfiguration/dhcpcd.git
-[submodule "pkgs/iptables/src"]
-	path = pkgs/bin/iptables/src
-	url = https://git.netfilter.org/iptables
 [submodule "pkgs/libseccomp/src"]
 	path = pkgs/lib/libseccomp/src
 	url = https://github.com/seccomp/libseccomp.git

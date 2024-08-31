@@ -63,7 +63,6 @@ file /bin/crio ${PROJROOT}/pkgs/bin/cri-o/src/bin/crio 0500 0 0
 file /bin/pinns ${PROJROOT}/pkgs/bin/cri-o/src/bin/pinns 0500 0 0
 file /bin/crun ${PROJROOT}/pkgs/bin/crun/src/crun 0500 0 0
 file /bin/kubelet ${PROJROOT}/pkgs/bin/kubernetes/src/_output/local/go/bin/kubelet 0500 0 0
-file /bin/iptables ${PROJROOT}/pkgs/bin/iptables/src/iptables/xtables-legacy-multi 0500 0 0 /bin/iptables6 /bin/iptables-save /bin/iptables-restore
 
 
 # Libraries

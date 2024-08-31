@@ -7,6 +7,12 @@ kind: KubeletConfiguration
 # need to be changed.
 containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
 
+# kiOS does not ship with iptables installed in the base system, so
+# this needs to be off. If legacy iptables util chains are essential,
+# the iptables binary needs to be installed by the bootstrapping
+# process.
+makeIPTablesUtilChains: false
+
 # The path to where local pods should run. This is normally required for
 # local bootstrapping of a node, however this can be safely changed or
 # disabled if the node is otherwise statically / externally provisioned.
