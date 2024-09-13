@@ -174,12 +174,13 @@ void populate_labels(char *labels) {
 void start_kubelet(void) {
   char * kubeletArgs[1 + 2 * KUBELET_MAX_OPTIONS + 1] = {
     "/bin/kubelet",
-    "--config", KUBELET_CONFIG
+    "--config", KUBELET_CONFIG,
+    "--node-ip", "::"
   };
 
-  // We are keeping the first arg (container-runtime-endpoint). Others
-  // will be overridden from there when calling set_arg.
-  int arg = 1;
+  // We are keeping the first two args.
+  // Others will be overridden from there when calling set_arg.
+  int arg = 2;
 
   char labels[2000];
   populate_labels(labels);

@@ -11,7 +11,7 @@
 #define KUBELET_BOOTSTRAP_KUBECONFIG "/etc/kubernetes/bootstrap-kubelet.conf"
 #define KUBELET_IMAGE_CREDENTIAL_PROVIDER_CONFIG "/etc/kubernetes/credential-providers.yaml"
 #define KUBELET_CREDENTIAL_PROVIDER_BIN_DIR "/usr/libexec/kubernetes/kubelet-plugins/credential-provider/exec"
-#define KUBELET_MAX_OPTIONS 6
+#define KUBELET_MAX_OPTIONS 7
 
 extern int should_restart_processes;
 
