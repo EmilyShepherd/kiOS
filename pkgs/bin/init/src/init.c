@@ -59,7 +59,6 @@ int main(int argc, char **argv) {
   notice("kiOS Init\n");
 
   mount_fs();
-  mount_datapart();
 
   // The loopback device is required for crio to be able to listen on
   // localhost

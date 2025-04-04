@@ -17,7 +17,6 @@ struct mountinfo {
 };
 
 void mount_fs(void);
-void mount_datapart(void);
 void umount_all(void);
 
 void wait_for_path(const char *path);

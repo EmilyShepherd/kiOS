@@ -81,52 +81,6 @@ void mount_fs(void) {
 }
 
 /**
- * Mount Datapart
- *
- * Mounts the data partition folders. The data partition to use is
- * normally given by the datapart kernel command line parameter, however
- * kiOS will use an internal default if nothing else is provided.
- *
- * In the data partition, kiOS expects the following directories to
- * exist:
- *   modules - mounted to /lib/modules
- *   log - mounted to /var/log
- *   lib - mounted to /var/lib
- *   etc - mounted to /etc
- *
- * Other files and directories in the datapartition are ignored and are
- * not accessible at runtime by init-created mounts.
- */
-void mount_datapart(void) {
-  determine_datapart(datapart);
-  info("Using Datapart:");
-  info(datapart);
-
-  wait_for_path(datapart);
-  mount(datapart, "/tmp", "ext4", 0, 0);
-
-  mkdir("/tmp/meta", 0700);
-  bind_mount("/tmp/meta", "/var/meta", MS_NODEV | MS_NOEXEC | MS_NOSUID);
-
-  mkdir("/var/meta/log", 0700);
-  bind_mount("/var/meta/log", "/var/log", 0);
-
-  mkdir("/var/meta/etc", 0700);
-  mkdir("/var/meta/.etc.work", 0700);
-  mount("etc", "/etc", "overlay", 0, "lowerdir=/etc,workdir=/var/meta/.etc.work,upperdir=/var/meta/etc");
-  bind_mount("/etc/seccomp", "/var/lib/kubelet/seccomp", MS_NODEV | MS_NOEXEC | MS_NOSUID);
-
-  mkdir("/tmp/data", 0700);
-  mkdir("/tmp/data/pods", 0700);
-  mkdir("/tmp/data/oci", 0700);
-  bind_mount("/tmp/data/pods", "/var/lib/kubelet/pods", 0);
-  bind_mount("/tmp/data/oci", "/var/lib/containers/storage", 0);
-
-  bind_mount("/tmp/modules", "/lib/modules", STATIC_FLAGS);
-  umount("/tmp");
-}
-
-/**
  * Wait for Path
  *
  * Waits for a path to exist by setting up an inotify watcher for its
