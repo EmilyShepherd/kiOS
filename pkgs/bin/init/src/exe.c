@@ -32,6 +32,26 @@ static void set_hostname_from_file(void) {
 }
 
 /**
+ * The maximum number of bytes a string represenation of an IP address
+ * should take up.
+ */
+#define IP_MAX 40
+
+/**
+ * Determine the Kubelet Node IP
+ *
+ * Checks to see if /etc/kubernetes/node-ip exists - if it does, its
+ * contents is returned.
+ */
+static void get_kubelet_ip(char *ip) {
+  FILE *fp = fopen("/etc/kubernetes/node-ip", "r");
+  if (fp) {
+    fgets(ip, IP_MAX, fp);
+    fclose(fp);
+  }
+}
+
+/**
  * Start Exe
  *
  * Helper function to fork, update stdout and stderr to the given log
@@ -175,12 +195,11 @@ void start_kubelet(void) {
   char * kubeletArgs[1 + 2 * KUBELET_MAX_OPTIONS + 1] = {
     "/bin/kubelet",
     "--config", KUBELET_CONFIG,
-    "--node-ip", "::"
   };
 
-  // We are keeping the first two args.
+  // We are keeping the first arg.
   // Others will be overridden from there when calling set_arg.
-  int arg = 2;
+  int arg = 1;
 
   char labels[2000];
   populate_labels(labels);
@@ -188,6 +207,11 @@ void start_kubelet(void) {
     SET_ARG("--node-labels", labels);
   }
 
+  char ip[IP_MAX];
+  get_kubelet_ip(ip);
+  if (ip[0]) {
+    SET_ARG("--node-ip", ip);
+  }
 
   if (fexists(KUBELET_KUBECONFIG)) {
     SET_ARG("--kubeconfig", KUBELET_KUBECONFIG);
