@@ -235,17 +235,19 @@ void start_kubelet(void) {
 }
 
 void sig_child(int) {
-  pid_t pid = wait(0);
-
-  // Under normal circumstances, critical processes should always be
-  // restarted, however, this can be turned off for system shutdown.
-  if (should_restart_processes == 0) {
-    return;
-  } else if (pid == crio_pid) {
-    warn("crio has exited! Restarting...\n");
-    start_container_runtime();
-  } else if (pid == kubelet_pid) {
-    warn("kubelet has exited! Restarting\n");
-    start_kubelet();
+  int status;
+  pid_t pid;
+  while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+    // Under normal circumstances, critical processes should always be
+    // restarted, however, this can be turned off for system shutdown.
+    if (should_restart_processes == 0) {
+      continue;
+    } else if (pid == crio_pid) {
+      warn("crio has exited! Restarting...\n");
+      start_container_runtime();
+    } else if (pid == kubelet_pid) {
+      warn("kubelet has exited! Restarting\n");
+      start_kubelet();
+    }
   }
 }
