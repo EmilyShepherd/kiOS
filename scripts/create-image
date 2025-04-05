@@ -27,7 +27,7 @@ make_blank_part() {
 #
 make_boot_part() {
   local efi_size=$(du -B 1024 --max-depth=0 ${BOOTPART_PATH} | cut -f1)
-  local boot_blocks=$(expr $efi_size + 70)
+  local boot_blocks=$(expr $efi_size '*' 2)
   boot_lbas=$(expr $boot_blocks '*' 2)
 
   mkfs.vfat -C .iso/boot -f1 ${boot_blocks}
