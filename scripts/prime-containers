@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+# Pre-downloads images to the given location
+#
+# This is intended to be used to prime containers within a datapart or
+# initramfs so that they can be used before networking is setup.
+#
+# The images to download can either be given explicitly on the command
+# line, or one or more manifest directories can be specified. Any images
+# specified in the manifests will be pulled.
+#
+
+declare -A images
+
+while ! test -z "$1"
+do
+  case "$1" in
+    "--root" | "-r")
+      ROOT="$2"
+      shift
+      ;;
+    "--manifest-dir" | "-m")
+      for img in $(grep image: $2/*.yaml | grep -o '\("[^"]\+"\)\|\([^ "]\+$\)' | sed 's/"//g')
+      do
+        images[$img]=""
+      done
+      shift
+      ;;
+    "--pause" | "-p")
+      images["registry.k8s.io/pause:$2"]=""
+      shift
+      ;;
+    *)
+      images[$1]=""
+      ;;
+  esac
+  shift
+done
+
+podman --root "${ROOT}" pull --platform=linux/amd64 "${!images[@]}"
+
+cd "${ROOT}"
+
+rm -rf \
+  overlay-containers \
+  libpod \
+  overlay-layers/*.gz \
+  volumes \
+  defaultNetworkBackend networks \
+  *.lock */*.lock db.sql
