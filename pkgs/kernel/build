@@ -1,5 +1,5 @@
 
-version=6.6.2
+version=6.12.21
 localversion=1
 
 make_target="KERNELRELEASE=${version}_kios-${localversion}"
