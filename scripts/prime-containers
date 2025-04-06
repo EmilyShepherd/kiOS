@@ -22,22 +22,47 @@ do
     "--manifest-dir" | "-m")
       for img in $(grep image: $2/*.yaml | grep -o '\("[^"]\+"\)\|\([^ "]\+$\)' | sed 's/"//g')
       do
-        images[$img]=""
+        images[$img]="y"
       done
       shift
       ;;
     "--pause" | "-p")
-      images["registry.k8s.io/pause:$2"]=""
+      images["registry.k8s.io/pause:$2"]="y"
       shift
       ;;
     *)
-      images[$1]=""
+      images[$1]="y"
       ;;
   esac
   shift
 done
 
-podman --root "${ROOT}" pull --platform=linux/amd64 "${!images[@]}"
+podman="podman --root ${ROOT}"
+
+$podman pull --platform=linux/amd64 "${!images[@]}"
+
+is_desired() {
+  for name in $@
+  do
+    if test "${images[$name]}" == "y"
+    then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+$podman images \
+  --format '{{printf "%s\t" .Id}}{{- range $i := .Names}}{{printf "%s\t" $i}}{{- end}}' | \
+  while read id names
+  do
+    if ! is_desired $names
+    then
+      $podman rmi -f $id;
+    fi
+  done
+
 
 cd "${ROOT}"
 
