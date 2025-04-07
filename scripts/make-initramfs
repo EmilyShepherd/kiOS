@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+#
+#
+
+DATAPART=${DATAPART:-./data}
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+${SCRIPT_DIR}/prime-containers --root .oci \
+  -p 3.6 \
+  -m ${DATAPART}/etc/kubernetes/manifests \
+  -m ${DATAPART}/etc/kubernetes/manifests-real
+
+echo "Creating Image..."
+
+podman run \
+  -w/data \
+  -v${DATAPART}:/data \
+  -v.oci:/data/var/lib/containers/initial-storage \
+  -v${SCRIPT_DIR}/../.build/datapart/lib/modules:/data/lib/modules \
+  alpine sh -c 'find -print | cpio -oHnewc' | lzma > initrd
