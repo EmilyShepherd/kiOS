@@ -56,13 +56,12 @@ done
 
 podman="podman --root ${ROOT}"
 
-$podman pull --platform=linux/amd64 "${!images[@]}"
-
 is_desired() {
   for name in $@
   do
-    if test "${images[$name]}" == "y"
+    if test -n "${images[$name]}"
     then
+      images[$name]="seen"
       return 0
     fi
   done
@@ -70,16 +69,21 @@ is_desired() {
   return 1
 }
 
-$podman images \
-  --format '{{printf "%s\t" .Id}}{{- range $i := .Names}}{{printf "%s\t" $i}}{{- end}}' | \
-  while read id names
-  do
-    if ! is_desired $names
-    then
-      $podman rmi -f $id;
-    fi
-  done
+for image in $($podman images --format '{{printf "%s," .Id}}{{- range $i := .Names}}{{printf "%s," $i}}{{- end}}')
+do
+  if ! is_desired $(echo -n $image | cut -f2- -d, | tr ',' ' ')
+  then
+    $podman rmi -f $(echo -n $image | cut -f1 -d,)
+  fi
+done
 
+for image in "${!images[@]}"
+do
+  if test "${images[$image]}" != "seen"
+  then
+    $podman pull --platform=linux/amd64 "$image"
+  fi
+done
 
 cd "${ROOT}"
 
