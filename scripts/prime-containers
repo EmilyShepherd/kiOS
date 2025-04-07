@@ -12,6 +12,23 @@
 
 declare -A images
 
+add_image() {
+  local image=$1
+
+  # Docker.io has some weird non standard behaviour which most container
+  # tools silently take care of. When an image just has a name and no
+  # organisation, it is silently re-rewritten to include "library" as
+  # the organisation. We need to be aware of this and do that transform
+  # so when we check if an image is needed we correctly identify an
+  # image.
+  if echo -n $image | grep -sq '^docker\.io/[^/]\+$'
+  then
+    image=$(echo -n $image | sed 's#/#/library/#')
+  fi
+
+  images[$image]="y"
+}
+
 while ! test -z "$1"
 do
   case "$1" in
@@ -22,16 +39,16 @@ do
     "--manifest-dir" | "-m")
       for img in $(grep image: $2/*.yaml | grep -o '\("[^"]\+"\)\|\([^ "]\+$\)' | sed 's/"//g')
       do
-        images[$img]="y"
+        add_image $img
       done
       shift
       ;;
     "--pause" | "-p")
-      images["registry.k8s.io/pause:$2"]="y"
+      add_image "registry.k8s.io/pause:$2"
       shift
       ;;
     *)
-      images[$1]="y"
+      add_image $1
       ;;
   esac
   shift
