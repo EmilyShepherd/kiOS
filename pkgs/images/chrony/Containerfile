@@ -15,4 +15,4 @@ COPY /etc/passwd /etc/group /etc/
 USER 999:999
 
 ENTRYPOINT ["/bin/chronyd", "-Ud"]
-
+CMD ["-6"]
