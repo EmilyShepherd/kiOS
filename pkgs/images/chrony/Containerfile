@@ -1,16 +1,21 @@
-ARG TARGETPLATFORM
+FROM alpine:latest as build
 
-FROM --platform=$BUILDPLATFORM k8s.gcr.io/build-image/setcap:bullseye-v1.0.0
+WORKDIR /app
+RUN apk add --no-cache make gcc libcap libc-dev
 
-ADD /sbin/chronyd /bin/chronyd
-RUN setcap cap_sys_time=+ep /bin/chronyd
-RUN echo $TARGETPLATFORM
+COPY src /app
 
-FROM --platform=${TARGETPLATFORM} docker.io/emilyls/musl:1.2.3
+ENV LDFLAGS="-w -s -flto -static"
+ENV CFLAGS="-flto"
 
-COPY --from=0 --chown=999:999 /bin/chronyd /bin/
-COPY /etc/chrony.conf /etc/chrony.conf
-COPY /etc/passwd /etc/group /etc/
+RUN ./configure --without-libcap
+RUN make chronyd
+RUN setcap cap_sys_time=+ep chronyd
+
+FROM scratch
+
+COPY --from=build --chown=999:999 /app/chronyd /bin/
+COPY --chown=999:999 files/etc /etc
 
 USER 999:999
 
