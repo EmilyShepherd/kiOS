@@ -1,9 +1,8 @@
-version=4.3
+version=4.6
 type=configure
 file_location=$BUILD_DIR
 
 pre_build() {
-  cat ../*.patch | patch -p1
   export PREFIX=$DESTDIR
   configure_flags="--sysconfigdir=$DESTDIR/etc --chronyvardir=$DESTDIR/var/ --without-libcap"
 }
