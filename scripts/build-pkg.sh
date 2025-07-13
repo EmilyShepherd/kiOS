@@ -111,19 +111,6 @@ mark_built() {
   done
 }
 
-build_container() {
-  if test -f $pkgpath/Containerfile
-  then
-    cd $BUILD_DIR
-    image=docker.io/emilyls/$pkg:$version-$ARCH
-    podman build \
-      --no-cache --squash \
-      --platform=linux/${ARCH} \
-      -t $image \
-      -f $pkgpath/Containerfile .
-  fi
-}
-
 if test "$1" == "--clean"
 then
   export CLEAN=1
@@ -139,5 +126,4 @@ build_dependencies
 
 cd $pkgpath
 do_build
-build_container
 mark_built
