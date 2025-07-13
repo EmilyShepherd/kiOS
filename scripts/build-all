@@ -1,9 +1,42 @@
-#!/bin/bash
+#!/bin/sh
 
-for dir in musl glib libseccomp
-do
-  ./scripts/build-pkg.sh lib/$dir
-done
+if test "$container" != "podman"
+then
+  exec podman run -it -w/app -v$(pwd):/app alpine scripts/build-all
+fi
+
+apk add --no-cache \
+  make \
+  autoconf \
+  automake \
+  bison \
+  bash \
+  gcc \
+  meson \
+  ninja \
+  rsync \
+  elfutils-dev \
+  openssl openssl-dev \
+  diffutils \
+  git \
+  gettext \
+  pkgconfig \
+  gperf \
+  tar \
+  curl \
+  patch \
+  findutils
+
+curl -L https://go.dev/dl/go1.24.5.linux-amd64.tar.gz | tar xzf - -C /
+cp /go/bin/go /bin/
+
+export GOROOT=/go
+
+./scripts/build-pkg.sh lib/musl
+mkdir -p /usr/include
+cp -r pkgs/lib/musl/src/include/* /usr/include/
+(cd pkgs/kernel/src && make headers)
+cp -r pkgs/kernel/src/usr/include/* /usr/include/
 
 for dir in $(ls pkgs/bin)
 do
