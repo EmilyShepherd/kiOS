@@ -70,12 +70,13 @@ do_build() {
   export CC=$(which ${TARGET}-gcc)
   export CXX=$(which ${TARGET}-g++)
   export STRIP=$(which ${TARGET}-strip)
+  export LIBRARY_PATH=${PROJROOT}/pkgs/lib/musl/src/lib
 
   local lto=""
   test -z "${nolto}" && lto="-flto"
 
   export CFLAGS="${lto} -${optimise:-O2}"
-  export LDFLAGS="${lto} -w -s -L${PROJROOT}/pkgs/lib/musl/src/lib"
+  export LDFLAGS="${lto} -w -s"
 
   cd src
   run_cmd pre_build || true
