@@ -6,16 +6,6 @@ BUILT_PACKAGES=$(pwd)/.build/built
 BOOTPART=$(pwd)/.build/bootpart
 DATAPART=$(pwd)/.build/datapart
 
-case ${HOST:-arm} in
-  amd|x86)
-    export ARCH=amd64
-    export AARCH=x86_64
-    ;;
-  arm)
-    export ARCH=arm64
-    export AARCH=aarch64
-esac
-
 build_configure() {
   export PREFIX=$(pwd -P)
 
@@ -27,8 +17,6 @@ build_configure() {
     fi
 
     ./${configure_cmd:-configure} --prefix=$PREFIX \
-      --host=${AARCH}-unknown-linux-musl \
-      --build=x86_64-unknown-linux-gnu \
       --libdir='${prefix}/src/.libs' \
       --includedir="\${prefix}/${includedir:-include}" \
       $configure_flags
@@ -51,7 +39,7 @@ build_meson() {
 
   if ! test -d _build
   then
-    meson _build -Dprefix="/" --cross-file ${PROJROOT}/scripts/${AARCH} $meson_flags
+    meson _build -Dprefix="/" $meson_flags
   fi
 
   ninja -C _build ${make_target}
@@ -62,14 +50,8 @@ run_cmd() {
 }
 
 do_build() {
-  export TARGET=${AARCH}-linux-musl
   export CGO_ENABLED=1
-  export GOARCH=${ARCH}
-  export CROSS_COMPILE=${TARGET}-
   export PKG_CONFIG_PATH=${PROJROOT}/pkgs/lib/pkgconfig
-  export CC=$(which ${TARGET}-gcc)
-  export CXX=$(which ${TARGET}-g++)
-  export STRIP=$(which ${TARGET}-strip)
   export LIBRARY_PATH=${PROJROOT}/pkgs/lib/musl/src/lib
 
   local lto=""
