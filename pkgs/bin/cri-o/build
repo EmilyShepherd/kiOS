@@ -6,6 +6,8 @@ pre_build() {
   export CC_FOR_BUILD=$(which gcc)
 
   export LDFLAGS="-static ${LDFLAGS}"
+  export GPG_ERROR_CONFIG=$(pwd)/../gpg-error/src/gpg-error-config
+  export LIBASSUAN_CONFIG=$(pwd)/../libassuan/src/libassuan-config
 
   configure_flags="--enable-static --disable-doc"
   make_target="-C src"
@@ -14,7 +16,7 @@ pre_build() {
   do
     if ! test -f ${PKG_CONFIG_PATH}/$lib.pc
     then
-      (cd ../$lib && CFLAGS="$CFLAGS $(pkg-config --cflags $last)" build_configure)
+      (cd ../$lib && build_configure)
     fi
     last=$lib
   done
