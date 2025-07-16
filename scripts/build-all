@@ -40,6 +40,9 @@ cp -r pkgs/lib/musl/src/include/* /usr/include/
 (cd pkgs/kernel/src && make headers)
 cp -r pkgs/kernel/src/usr/include/* /usr/include/
 
+./scripts/build-pkg.sh lib/libseccomp
+./scripts/build-pkg.sh lib/glib
+
 for dir in $(ls pkgs/bin)
 do
   ./scripts/build-pkg.sh bin/$dir
