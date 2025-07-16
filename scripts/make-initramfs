@@ -9,8 +9,7 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 ${SCRIPT_DIR}/prime-containers --root .oci \
   -p 3.6 \
-  -m ${DATAPART}/etc/kubernetes/manifests \
-  -m ${DATAPART}/etc/kubernetes/manifests-real
+  -m ${DATAPART}/etc/kubernetes/manifests
 
 echo "Creating Image..."
 
