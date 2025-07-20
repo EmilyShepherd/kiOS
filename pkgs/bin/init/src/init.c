@@ -26,6 +26,10 @@ void enable_ip_forwarding(void) {
   FILE *fp = fopen("/proc/sys/net/ipv4/ip_forward", "w");
   fputs("1", fp);
   fclose(fp);
+
+  FILE *fp2 = fopen("/proc/sys/net/ipv6/conf/all/forwarding", "w");
+  fputs("1", fp2);
+  fclose(fp2);
 }
 
 /**
