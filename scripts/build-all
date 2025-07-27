@@ -33,12 +33,21 @@ curl -L https://go.dev/dl/go1.24.5.linux-amd64.tar.gz | tar xzf - -C /
 cp /go/bin/go /bin/
 
 export GOROOT=/go
-
-./scripts/build-pkg.sh lib/musl
 mkdir -p /usr/include
-cp -r pkgs/lib/musl/src/include/* /usr/include/
-(cd pkgs/kernel/src && make headers)
-cp -r pkgs/kernel/src/usr/include/* /usr/include/
+
+(
+  ./scripts/build-pkg.sh lib/musl
+  cd pkgs/lib/musl/src
+  make install-headers
+  cp -r include/* /usr/include/
+  cp -r lib/* /lib/
+)
+
+(
+  cd pkgs/kernel/src
+  make headers
+  cp -r usr/include/* /usr/include/
+)
 
 ./scripts/build-pkg.sh lib/libseccomp
 ./scripts/build-pkg.sh lib/glib
