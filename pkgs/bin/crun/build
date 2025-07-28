@@ -15,4 +15,10 @@ pre_build() {
 
   export CFLAGS="$CFLAGS -I${argp} -I${libcap}/include $(pkg-config --cflags libseccomp)"
   export LDFLAGS="$LDFLAGS -L${argp}/_build -L${libcap} $(pkg-config --libs libseccomp)"
+
+  # There is a bug which causes some lines to be lost when exec'ing with a tty into
+  # containers. It is not clear yet what exactly is causing this, as it does not appear
+  # in the static builds provided directly by crun but does appear here. For the moment,
+  # we shall revert this change.
+  git revert -n 8b972be9be232c61d4545ad8414713e66ef3aa51
 }
