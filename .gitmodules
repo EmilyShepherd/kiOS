@@ -7,9 +7,6 @@
 [submodule "pkgs/busybox/src"]
 	path = pkgs/bin/busybox/src
 	url = https://github.com/mirror/busybox.git
-[submodule "pkgs/chrony/src"]
-	path = pkgs/images/chrony/src
-	url = https://github.com/mlichvar/chrony.git
 [submodule "pkgs/cni-plugins/src"]
 	path = pkgs/images/dhcp-cni/cni-plugins
 	url = https://github.com/containernetworking/plugins.git
