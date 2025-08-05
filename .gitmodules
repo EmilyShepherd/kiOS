@@ -7,9 +7,6 @@
 [submodule "pkgs/busybox/src"]
 	path = pkgs/bin/busybox/src
 	url = https://github.com/mirror/busybox.git
-[submodule "pkgs/cni-plugins/src"]
-	path = pkgs/images/dhcp-cni/cni-plugins
-	url = https://github.com/containernetworking/plugins.git
 [submodule "pkgs/cri-o/src"]
 	path = pkgs/bin/cri-o/src
 	url = https://github.com/cri-o/cri-o
