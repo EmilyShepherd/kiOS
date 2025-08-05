@@ -1,9 +1,0 @@
-
-version=v1
-type=make
-
-pre_build() {
-  # We set the build time as the application's defined "sensible time" -
-  # it will treat any time before this as incorrect.
-  export SENSIBLE_TIME=$(date +%s)
-}
