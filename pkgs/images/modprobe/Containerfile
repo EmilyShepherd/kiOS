@@ -1,6 +1,0 @@
-FROM docker.io/emilyls/musl:1.2.3
-
-COPY src/tools/kmod /bin/modprobe
-
-ENTRYPOINT ["/bin/modprobe"]
-
