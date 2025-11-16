@@ -1,6 +1,5 @@
 
 #include "include/fs.h"
-#include "include/gpt.h"
 #include "include/kmsg.h"
 
 #include <stdio.h>
