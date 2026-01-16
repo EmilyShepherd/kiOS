@@ -5,6 +5,6 @@ COPY docs /docs/docs
 
 RUN mkdocs build
 
-FROM nginxinc/nginx-unprivileged:alpine
+FROM docker.io/nginxinc/nginx-unprivileged:alpine
 
 COPY --from=builder /docs/site /usr/share/nginx/html/
