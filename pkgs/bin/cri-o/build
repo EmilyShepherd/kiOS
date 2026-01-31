@@ -16,7 +16,7 @@ pre_build() {
   do
     if ! test -f ${PKG_CONFIG_PATH}/$lib.pc
     then
-      (cd ../$lib && build_configure)
+      (cd ../$lib && CFLAGS="${CFLAGS} -D=_LARGEFILE64_SOURCE=1" build_configure)
     fi
     last=$lib
   done
