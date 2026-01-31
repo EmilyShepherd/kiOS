@@ -22,6 +22,8 @@ package systemd
 import (
 	"net"
 	"time"
+
+	"k8s.io/klog/v2"
 )
 
 type Inhibitor struct {
@@ -88,7 +90,7 @@ func (bus *Inhibitor) ReleaseInhibitLock(lock InhibitLock) error {
 // This listens on the system socket for shutdown events. If one is
 // received, this will trigger kubelet's Graceful Node Shutdown
 // behaviour and kill all the pods in a graceful way.
-func (bus *Inhibitor) MonitorShutdown() (<-chan bool, error) {
+func (bus *Inhibitor) MonitorShutdown(_ klog.Logger) (<-chan bool, error) {
 	shutdownChan := make(chan bool, 1)
 
 	go func() {

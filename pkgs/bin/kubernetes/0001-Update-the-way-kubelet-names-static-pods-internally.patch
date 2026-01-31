@@ -19,12 +19,12 @@ speaking with the api server.
  pkg/kubelet/status/status_manager.go |  3 +++
  pkg/kubelet/types/pod_update.go      |  2 ++
  6 files changed, 42 insertions(+), 8 deletions(-)
-
+ 
 diff --git a/pkg/kubelet/config/common.go b/pkg/kubelet/config/common.go
-index 7dade01b9c3..d7f4cdbf247 100644
+index 48f6ba77ada..c1aeb49e504 100644
 --- a/pkg/kubelet/config/common.go
 +++ b/pkg/kubelet/config/common.go
-@@ -60,7 +60,6 @@ func applyDefaults(pod *api.Pod, source string, isFile bool, nodeName types.Node
+@@ -64,7 +64,6 @@ func applyDefaults(pod *api.Pod, source string, isFile bool, nodeName types.Node
  		// DeepHashObject resets the hash, so we should write the pod source
  		// information AFTER it.
  		if isFile {
@@ -32,7 +32,7 @@ index 7dade01b9c3..d7f4cdbf247 100644
  			fmt.Fprintf(hasher, "file:%s", source)
  		} else {
  			fmt.Fprintf(hasher, "url:%s", source)
-@@ -69,9 +68,6 @@ func applyDefaults(pod *api.Pod, source string, isFile bool, nodeName types.Node
+@@ -73,9 +72,6 @@ func applyDefaults(pod *api.Pod, source string, isFile bool, nodeName types.Node
  		klog.V(5).InfoS("Generated UID", "pod", klog.KObj(pod), "podUID", pod.UID, "source", source)
  	}
  
@@ -42,7 +42,7 @@ index 7dade01b9c3..d7f4cdbf247 100644
  	if pod.Namespace == "" {
  		pod.Namespace = metav1.NamespaceDefault
  	}
-@@ -85,6 +81,7 @@ func applyDefaults(pod *api.Pod, source string, isFile bool, nodeName types.Node
+@@ -89,6 +85,7 @@ func applyDefaults(pod *api.Pod, source string, isFile bool, nodeName types.Node
  	}
  	// The generated UID is the hash of the file.
  	pod.Annotations[kubetypes.ConfigHashAnnotationKey] = string(pod.UID)
@@ -51,18 +51,18 @@ index 7dade01b9c3..d7f4cdbf247 100644
  	if isFile {
  		// Applying the default Taint tolerations to static pods,
 diff --git a/pkg/kubelet/container/runtime.go b/pkg/kubelet/container/runtime.go
-index 7fa8f44ef73..21a1cd7739b 100644
+index a6e8fa9c880..96c956d2c77 100644
 --- a/pkg/kubelet/container/runtime.go
 +++ b/pkg/kubelet/container/runtime.go
-@@ -34,6 +34,7 @@ import (
- 	runtimeapi "k8s.io/cri-api/pkg/apis/runtime/v1"
- 	"k8s.io/klog/v2"
+@@ -36,6 +36,7 @@ import (
+ 	"k8s.io/kubernetes/pkg/credentialprovider"
+ 	kubelettypes "k8s.io/kubernetes/pkg/kubelet/types"
  	"k8s.io/kubernetes/pkg/volume"
 +	kubetypes "k8s.io/kubernetes/pkg/kubelet/types"
  )
  
  // Version interface allow to consume the runtime versions - compare and format to string.
-@@ -646,11 +647,27 @@ func (p *Pod) IsEmpty() bool {
+@@ -746,11 +747,27 @@ func (p *Pod) IsEmpty() bool {
  
  // GetPodFullName returns a name that uniquely identifies a pod.
  func GetPodFullName(pod *v1.Pod) string {
@@ -92,21 +92,10 @@ index 7fa8f44ef73..21a1cd7739b 100644
  func BuildPodFullName(name, namespace string) string {
  	return name + "_" + namespace
 diff --git a/pkg/kubelet/pod/mirror_client.go b/pkg/kubelet/pod/mirror_client.go
-index 22ea62b1a31..b7eaadce0f0 100644
+index 08cbfe61b4f..ad2cca410ec 100644
 --- a/pkg/kubelet/pod/mirror_client.go
 +++ b/pkg/kubelet/pod/mirror_client.go
-@@ -66,6 +66,10 @@ func NewBasicMirrorClient(apiserverClient clientset.Interface, nodeName string,
- 	}
- }
- 
-+func (mc *basicMirrorClient) makeApiName(name string) string {
-+	return name + "-" + mc.nodeName
-+}
-+
- func (mc *basicMirrorClient) CreateMirrorPod(pod *v1.Pod) error {
- 	if mc.apiserverClient == nil {
- 		return nil
-@@ -78,7 +82,9 @@ func (mc *basicMirrorClient) CreateMirrorPod(pod *v1.Pod) error {
+@@ -78,7 +78,9 @@ func (mc *basicMirrorClient) CreateMirrorPod(ctx context.Context, pod *v1.Pod) e
  		copyPod.Annotations[k] = v
  	}
  	hash := getPodHash(pod)
@@ -116,19 +105,30 @@ index 22ea62b1a31..b7eaadce0f0 100644
  
  	// With the MirrorPodNodeRestriction feature, mirror pods are required to have an owner reference
  	// to the owning node.
-@@ -118,6 +124,7 @@ func (mc *basicMirrorClient) DeleteMirrorPod(podFullName string, uid *types.UID)
- 		return false, nil
+@@ -119,6 +121,7 @@ func (mc *basicMirrorClient) DeleteMirrorPod(ctx context.Context, podFullName st
  	}
+ 	logger := klog.FromContext(ctx)
  	name, namespace, err := kubecontainer.ParsePodFullName(podFullName)
 +	name = mc.makeApiName(name)
  	if err != nil {
- 		klog.ErrorS(err, "Failed to parse a pod full name", "podFullName", podFullName)
+ 		logger.Error(err, "Failed to parse a pod full name", "podFullName", podFullName)
  		return false, err
+@@ -154,6 +157,10 @@ func (mc *basicMirrorClient) getNodeUID() (types.UID, error) {
+ 	return node.UID, nil
+ }
+ 
++func (mc *basicMirrorClient) makeApiName(name string) string {
++ return name + "-" + mc.nodeName
++}
++
+ func getHashFromMirrorPod(pod *v1.Pod) (string, bool) {
+ 	hash, ok := pod.Annotations[kubetypes.ConfigMirrorAnnotationKey]
+ 	return hash, ok
 diff --git a/pkg/kubelet/pod/pod_manager.go b/pkg/kubelet/pod/pod_manager.go
-index e3cc4f76080..96c56482822 100644
+index e7bed9d5586..acd463cfd34 100644
 --- a/pkg/kubelet/pod/pod_manager.go
 +++ b/pkg/kubelet/pod/pod_manager.go
-@@ -182,6 +182,14 @@ func (pm *basicManager) updatePodsInternal(pods ...*v1.Pod) {
+@@ -188,6 +188,14 @@ func (pm *basicManager) updatePodsInternal(pods ...*v1.Pod) {
  			updateMetrics(pm.podByUID[resolvedPodUID], pod)
  			pm.podByUID[resolvedPodUID] = pod
  			pm.podByFullName[podFullName] = pod
@@ -143,7 +143,7 @@ index e3cc4f76080..96c56482822 100644
  			if mirror, ok := pm.mirrorPodByFullName[podFullName]; ok {
  				pm.translationByUID[kubetypes.MirrorPodUID(mirror.UID)] = resolvedPodUID
  			}
-@@ -218,8 +226,8 @@ func (pm *basicManager) GetPodsAndMirrorPods() (allPods []*v1.Pod, allMirrorPods
+@@ -224,8 +232,8 @@ func (pm *basicManager) GetPodsAndMirrorPods() (allPods []*v1.Pod, allMirrorPods
  	allPods = podsMapToPods(pm.podByUID)
  	allMirrorPods = mirrorPodsMapToMirrorPods(pm.mirrorPodByUID)
  
@@ -154,7 +154,7 @@ index e3cc4f76080..96c56482822 100644
  			orphanedMirrorPodFullnames = append(orphanedMirrorPodFullnames, podFullName)
  		}
  	}
-@@ -287,7 +295,7 @@ func (pm *basicManager) GetUIDTranslations() (podToMirror map[kubetypes.Resolved
+@@ -305,7 +313,7 @@ func (pm *basicManager) GetUIDTranslations() (podToMirror map[kubetypes.Resolved
  // IsMirrorPodOf returns true if pod and mirrorPod are associated with each other.
  func IsMirrorPodOf(mirrorPod, pod *v1.Pod) bool {
  	// Check name and namespace first.
@@ -164,10 +164,10 @@ index e3cc4f76080..96c56482822 100644
  	}
  	hash, ok := getHashFromMirrorPod(mirrorPod)
 diff --git a/pkg/kubelet/status/status_manager.go b/pkg/kubelet/status/status_manager.go
-index e43c5874481..5c9ecb03b22 100644
+index 236e06576e7..f548bb4b126 100644
 --- a/pkg/kubelet/status/status_manager.go
 +++ b/pkg/kubelet/status/status_manager.go
-@@ -701,6 +701,9 @@ func (m *manager) updateStatusInternal(pod *v1.Pod, status v1.PodStatus, forceUp
+@@ -856,6 +856,9 @@ func (m *manager) updateStatusInternal(logger klog.Logger, pod *v1.Pod, status v
  		podNamespace:  pod.Namespace,
  		podIsFinished: podIsFinished,
  	}
@@ -178,10 +178,10 @@ index e43c5874481..5c9ecb03b22 100644
  	// Multiple status updates can be generated before we update the API server,
  	// so we track the time from the first status update until we retire it to
 diff --git a/pkg/kubelet/types/pod_update.go b/pkg/kubelet/types/pod_update.go
-index 7f7fc5b799b..16febd56aa8 100644
+index ee4bd58c7e6..d617c81148c 100644
 --- a/pkg/kubelet/types/pod_update.go
 +++ b/pkg/kubelet/types/pod_update.go
-@@ -28,6 +28,8 @@ import (
+@@ -29,6 +29,8 @@ import (
  const (
  	ConfigSourceAnnotationKey    = "kubernetes.io/config.source"
  	ConfigMirrorAnnotationKey    = v1.MirrorPodAnnotationKey
