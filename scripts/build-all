@@ -13,6 +13,7 @@ apk add --no-cache \
   flex \
   bash \
   gcc \
+  g++ \
   meson \
   ninja \
   rsync \
