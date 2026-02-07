@@ -2,7 +2,6 @@
 set -e
 
 export PROJROOT=$(pwd)
-BUILT_PACKAGES=$(pwd)/.build/built
 BOOTPART=$(pwd)/.build/bootpart
 DATAPART=$(pwd)/.build/datapart
 
@@ -67,17 +66,6 @@ do_build() {
   cd ..
 }
 
-build_dependencies() {
-  for dep in $depends
-  do
-    if ! ( test -f $BUILT_PACKAGES/${dep/\//_} || $0 $dep )
-    then
-      echo "ERROR: $pkg requires $dep but it could not be automatically built"
-      exit 1
-    fi
-  done
-}
-
 load_pkg() {
   pkgpath=$(pwd)/pkgs/$pkg
 
@@ -85,13 +73,6 @@ load_pkg() {
   then
     . $pkgpath/build
   fi
-}
-
-mark_built() {
-  for built in $provides $pkg
-  do
-    touch ${BUILT_PACKAGES}/${built/\//_}
-  done
 }
 
 if test "$1" == "--clean"
@@ -102,11 +83,9 @@ fi
 
 pkg=$1
 
-mkdir -p $BUILT_PACKAGES ${BOOTPART} ${DATAPART}
+mkdir -p ${BOOTPART} ${DATAPART}
 
 load_pkg
-build_dependencies
 
 cd $pkgpath
 do_build
-mark_built

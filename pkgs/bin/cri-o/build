@@ -1,5 +1,4 @@
 type="make"
-depends="lib/libseccomp bin/conmon"
 includedir=src
 
 pre_build() {
