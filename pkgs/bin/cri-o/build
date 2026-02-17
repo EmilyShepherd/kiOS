@@ -1,32 +1,8 @@
 type="make"
 includedir=src
 export BUILDTAGS="containers_image_ostree_stub \
+  containers_image_openpgp \
   exclude_graphdriver_btrfs \
   btrfs_noversion \
   seccomp"
-
-pre_build() {
-  export CC_FOR_BUILD=$(which gcc)
-
-  export LDFLAGS="-static ${LDFLAGS}"
-  export GPG_ERROR_CONFIG=$(pwd)/../gpg-error/src/gpg-error-config
-  export LIBASSUAN_CONFIG=$(pwd)/../libassuan/src/libassuan-config
-
-  configure_flags="--enable-static --disable-doc"
-  make_target="-C src"
-
-  for lib in gpg-error libassuan gpgme
-  do
-    if ! test -f ${PKG_CONFIG_PATH}/$lib.pc
-    then
-      (cd ../$lib && CFLAGS="${CFLAGS} -D=_LARGEFILE64_SOURCE=1" build_configure)
-    fi
-    last=$lib
-  done
-
-  export CGO_LDFLAGS="$(pkg-config --static --libs gpgme)"
-  export LDFLAGS="$LDFLAGS $CGO_LDFLAGS"
-  export CGO_CFLAGS="$(pkg-config --cflags-only-I gpgme)"
-
-  make_target="bin/crio bin/pinns"
-}
+make_target="bin/crio bin/pinns"
