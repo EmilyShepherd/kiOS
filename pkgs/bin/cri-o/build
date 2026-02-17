@@ -1,5 +1,9 @@
 type="make"
 includedir=src
+export BUILDTAGS="containers_image_ostree_stub \
+  exclude_graphdriver_btrfs \
+  btrfs_noversion \
+  seccomp"
 
 pre_build() {
   export CC_FOR_BUILD=$(which gcc)
