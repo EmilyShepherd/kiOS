@@ -48,7 +48,7 @@ dir /var/tmp 0700 0 0
 
 dir /bin 0500 0 0
 
-file /init ${PROJROOT}/pkgs/bin/init/src/init 0500 0 0
+file /init /init 0500 0 0
 
 # Some binaries (eg modprobe) are expected to be in /sbin. At some point
 # we may remove the need for this, but for the moment it is a lot less
@@ -56,13 +56,13 @@ file /init ${PROJROOT}/pkgs/bin/init/src/init 0500 0 0
 slink /sbin bin 0500 0 0
 
 # modprobe, mount, umount and nsenter are all provided by busybox
-file /bin/modprobe ${PROJROOT}/pkgs/bin/busybox/src/busybox 0500 0 0 /bin/mount /bin/nsenter /bin/umount
+file /bin/modprobe /busybox 0500 0 0 /bin/mount /bin/nsenter /bin/umount
 
-file /bin/conmon ${PROJROOT}/pkgs/bin/conmon/src/bin/conmon 0500 0 0
-file /bin/crio ${PROJROOT}/pkgs/bin/cri-o/src/bin/crio 0500 0 0
-file /bin/pinns ${PROJROOT}/pkgs/bin/cri-o/src/bin/pinns 0500 0 0
-file /bin/crun ${PROJROOT}/pkgs/bin/crun/src/crun 0500 0 0
-file /bin/kubelet ${PROJROOT}/pkgs/bin/kubernetes/src/_output/local/go/bin/kubelet 0500 0 0
+file /bin/conmon /bin/conmon 0500 0 0
+file /bin/crio /bin/crio 0500 0 0
+file /bin/pinns /bin/pinns 0500 0 0
+file /bin/crun /bin/crun 0500 0 0
+file /bin/kubelet /bin/kubelet 0500 0 0
 
 
 # Libraries
@@ -83,11 +83,11 @@ dir /lib/modules 0555 0 0
 # cluster, they should ALWAYS be statically linked as making assumptions
 # about the host system is not helpful.
 slink /lib64 lib 0555 0 0
-file /lib/libc.so ${PROJROOT}/pkgs/lib/musl/src/lib/libc.so 0555 0 0 /lib/ld-linux-x86-64.so.2 /lib/ld-musl-x86_64.so.1
+file /lib/libc.so /usr/lib/libc.so 0555 0 0 /lib/ld-linux-x86-64.so.2 /lib/ld-musl-x86_64.so.1
 
 # libseccomp is used by both crun and cri-o, so we will dynamically link
 # it.
-file /lib/libseccomp.so.2 ${PROJROOT}/pkgs/lib/libseccomp/src/src/.libs/libseccomp.so 0555 0 0
+file /lib/libseccomp.so.2 /usr/lib/libseccomp.so 0555 0 0
 
 
 # Etc (config) directory

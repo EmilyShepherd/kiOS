@@ -17,5 +17,5 @@ podman run \
   -w/data \
   -v${DATAPART}:/data \
   -v.oci:/data/var/lib/containers/initial-storage \
-  -v${SCRIPT_DIR}/../.build/datapart/lib/modules:/data/lib/modules \
+  -v${SCRIPT_DIR}/../_output/lib/modules:/data/lib/modules \
   alpine sh -c 'find -print | cpio -oHnewc' | lzma > initrd

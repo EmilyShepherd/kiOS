@@ -1,0 +1,314 @@
+name = "kios.keisson.net"
+
+targets.default = ["kios"]
+
+[targets]
+kios = [
+  "linux:/boot/EFI/Boot/Bootx64.efi",
+  "linux:/lib/modules",
+]
+libc = ["musl", "ssp"]
+rootfs = [
+  "libc:/usr/lib",
+  "seccomp:/usr/lib",
+  "init",
+  "kubelet",
+  "crun",
+  "cri-o",
+  "conmon",
+  "busybox",
+]
+
+[env]
+CFLAGS = "-O2 -flto"
+LDFLAGS = "-flto -w -s"
+
+#
+# libc (musl)
+# ===========
+#
+# Generic library used by all programs
+[job.musl]
+workdir = "pkgs/lib/musl/src"
+# Link-Time-Optimisation does not play nicely with libc so we'll override
+# CFLAGS here to turn that off.
+env.CFLAGS = "-O2"
+
+[[job.musl.step]]
+configure.prefix = "/usr"
+
+[[job.musl.step]]
+make.phony = "install"
+outputs."/usr/lib" = "/usr/lib"
+outputs."/usr/include" = "/usr/include"
+
+#
+# ssp
+# ===
+#
+# Stack Smashing Protection used by most programs
+[job.ssp]
+sources = "pkgs/lib/musl/__stack_chk_fail_local.c"
+
+[[job.ssp.step]]
+install = ["gcc"]
+run = [
+  "gcc -c -o ssp_nonshared.o __stack_chk_fail_local.c",
+  "ar r libssp_nonshared.a ssp_nonshared.o"
+]
+outputs."/usr/lib/libssp_nonshared.a" = "libssp_nonshared.a"
+
+#
+# Linux Kernel
+# ============
+#
+[job.linux]
+workdir = "pkgs/kernel"
+sources."src/.config" = "pkgs/kernel/config.x86_64"
+sources."etc" = "etc"
+sources."root_filesystem" = "root_filesystem"
+env.PROJROOT = "/pkgs/kernel"
+
+sources = [
+  {"." = "pkg/kernel"},
+  {"src/.config" = "pkgs/kernel/config.x86_64"},
+  "etc",
+  "root_filesystem",
+]
+
+[[job.linux.step]]
+cd = "src"
+patch = "../*.patch"
+
+[[job.linux.step]]
+make.phony = "headers"
+needs = "libc"
+outputs."/usr/include" = "usr/include"
+
+[[job.linux.step]]
+make.phony = ["modules", "bzImage"]
+make.CONFIG_INITRAMFS_SOURCE = "../root_filesystem"
+outputs."/boot/EFI/Boot/Bootx64.efi" = "arch/x86/boot/bzImage"
+install = [
+  "flex",
+  "bison",
+  "openssl",
+  "openssl-dev",
+  "diffutils",
+  "elfutils-dev",
+  "findutils",
+  "perl",
+  "tar",
+]
+needs = [
+  "linux:/usr/include",
+  "rootfs",
+]
+
+[[job.linux.step]]
+make.phony = "modules_install"
+outputs."/lib/modules" = "/lib/modules"
+
+#
+# libseccomp
+# ==========
+#
+# Seccomp library
+[job.seccomp]
+workdir = "pkgs/lib/libseccomp/src"
+
+[[job.seccomp.step]]
+autoreconf = true
+
+[[job.seccomp.step]]
+configure.prefix = "/usr"
+install = ["bash", "make", "gperf"]
+outputs."/usr/lib/pkgconfig/libseccomp.pc" = "libseccomp.pc"
+outputs."/usr/include" = "include"
+needs = ["linux:/usr/include", "libc"]
+
+[[job.seccomp.step]]
+cd = "src"
+make = {  }
+outputs."/usr/lib" = ".libs"
+
+#
+# Busybox
+# =======
+#
+# Used for mount, nsenter, umount
+[job.busybox]
+workdir = "pkgs/bin/busybox/src"
+sources.".config" = "pkgs/bin/busybox/config"
+
+[[job.busybox.step]]
+make = "busybox"
+needs = ["libc", "linux:/usr/include"]
+
+#
+# Conmon
+# ======
+#
+# Container monitor
+[job.conmon]
+workdir = "pkgs/bin/conmon/src"
+
+[[job.conmon.step]]
+make = "bin/conmon"
+install = ["bash", "pkgconfig"]
+needs = ["glib", "libc", "linux:/usr/include"]
+
+#
+# Glib
+# ====
+#
+# Glib is required by conmon
+[job.glib]
+workdir = "pkgs/lib/glib/src"
+
+[[job.glib.step]]
+meson = {
+  prefix = "/usr",
+  tests = "false",
+  default_library = "static",
+}
+install = ["gcc", "g++"]
+needs = "libc"
+
+[[job.glib.step]]
+run = "sed -i '/Requires/d' _build/meson-private/glib-2.0.pc"
+outputs."/usr/lib/pkgconfig/glib-2.0.pc" = "_build/meson-private/glib-2.0.pc"
+
+[[job.glib.step]]
+ninja = ["glib/libglib-2.0.a"]
+
+[[job.glib.step]]
+run = [
+  "mkdir -p include/glib/deprecated include/glib/gnulib",
+  "cp -u _build/glib/*.h glib/*.h include/glib",
+  "cp -u glib/deprecated/*.h include/glib/deprecated",
+  "cp -u glib/gnulib/*.h include/glib/gnulib"
+]
+outputs."/usr/include" = "include"
+outputs."/usr/lib/glib-2.0/include" = "include/glib"
+
+
+#
+# Cri-o
+# =====
+#
+# Container Runtime Daemon
+[job.cri-o]
+workdir = "pkgs/bin/cri-o/src"
+image = "golang:1.24-alpine"
+
+[[job.cri-o.step]]
+make.outputs = ["bin/crio", "bin/pinns"]
+make.BUILDTAGS = [
+  "containers_image_ostree_stub",
+  "containers_image_openpgp",
+  "exclude_graphdriver_btrfs",
+  "btrfs_noversion",
+  "seccomp"
+]
+needs = ["seccomp", "libc", "linux:/usr/include"]
+install = ["pkgconfig"]
+
+#
+# argp-standalone
+# ===============
+#
+# libargp is used by crun to parse args
+[job.argp]
+workdir = "pkgs/bin/crun/argp-standalone"
+
+[[job.argp.step]]
+meson.prefix = "/usr"
+needs = ["libc"]
+install = ["gcc"]
+
+[[job.argp.step]]
+ninja = "libargp.a"
+outputs."/usr/include" = "."
+
+#
+# Libcap
+# ------
+#
+# Linux Capability Library for crun
+[job.libcap]
+workdir = "pkgs/bin/crun/libcap"
+
+[[job.libcap.step]]
+cd = "libcap"
+make = "libcap.a"
+outputs."/usr/include" = "include"
+needs = ["libc"]
+
+#
+# Crun
+# ====
+#
+# Container runtime utility
+[job.crun]
+workdir = "pkgs/bin/crun/src"
+
+[[job.crun.step]]
+autoreconf = true
+install = "pkgconfig"
+
+[[job.crun.step]]
+configure.flags = ["disable-systemd", "enable-embedded-yajl"]
+needs = ["seccomp", "libc", "libcap", "argp", "linux:/usr/include"]
+install = [
+  "python3",  # Y THO
+  "make"
+]
+
+[[job.crun.step]]
+make = {  }
+outputs."/bin/crun" = "crun"
+
+#
+# kiOS init
+# =========
+#
+[job.init]
+workdir = "pkgs/bin/init/src"
+
+[[job.init.step]]
+make = "init"
+needs = ["libc", "linux:/usr/include"]
+
+#
+# Kubelet
+# =======
+#
+# The kubernetes node daemon
+[job.kubelet]
+workdir = "pkgs/bin/kubernetes"
+env.GOFLAGS = "-trimpath"
+env.KUBE_GIT_VERSION_FILE = "/version"
+sources."src/pkg/kubelet/nodeshutdown/systemd/inhibit_linux.go" = "pkgs/bin/kubernetes/inhibit_linux.go"
+
+[[job.kubelet.step]]
+cd = "src"
+patch = "../*.patch"
+
+[[job.kubelet.step]]
+run = """
+cat <<EOF >"${KUBE_GIT_VERSION_FILE}"
+KUBE_GIT_VERSION=v1.34.4-kios
+KUBE_GIT_MAJOR=1
+KUBE_GIT_MINOR=34
+EOF
+"""
+
+[[job.kubelet.step]]
+run = "sed -i '/place_bins/d' hack/make-rules/build.sh"
+
+[[job.kubelet.step]]
+run = "hack/make-rules/build.sh cmd/kubelet"
+outputs."/bin/kubelet" = "_output/local/go/bin/kubelet"
+install = ["bash"]
+needs = ["libc"]

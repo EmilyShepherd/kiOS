@@ -1,4 +1,3 @@
-.build/
-srcpkg
+_output/
 .iso
 kios.img

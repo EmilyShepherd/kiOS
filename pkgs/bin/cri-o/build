@@ -1,8 +1,0 @@
-type="make"
-includedir=src
-export BUILDTAGS="containers_image_ostree_stub \
-  containers_image_openpgp \
-  exclude_graphdriver_btrfs \
-  btrfs_noversion \
-  seccomp"
-make_target="bin/crio bin/pinns"

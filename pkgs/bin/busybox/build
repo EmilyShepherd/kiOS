@@ -1,8 +1,0 @@
-type=make
-
-pre_build() {
-  if ! test -f .config
-  then
-    sed "s#BUILD_DIR#${BUILD_DIR}#" ../config > .config
-  fi
-}
