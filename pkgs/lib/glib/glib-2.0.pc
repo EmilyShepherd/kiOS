@@ -1,8 +1,0 @@
-builddir=${prefix}/_build
-libdir=${builddir}/glib
-
-Name: GLib
-Description: C Utility Library
-Version: 2.75.0
-Libs: -L${libdir} -lglib-2.0 -lm -pthread
-Cflags: -DPCRE2_STATIC -pthread -I${prefix} -I${builddir} -I${libdir} -I${prefix}/glib
