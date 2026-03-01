@@ -114,6 +114,11 @@ file /etc/os-release ${PROJROOT}/etc/os-release 0444 0 0
 # isn't just _broken_ if you don't do either of those things.
 file /etc/resolv.conf ${PROJROOT}/etc/resolv.conf 0444 0 0
 
+# The user and groups files are read by cri-o in order to configure user
+# namespaces.
+file /etc/passwd ${PROJROOT}/etc/passwd 0444 0 0
+file /etc/group ${PROJROOT}/etc/group 0444 0 0
+
 # This directory is bind mounted to /var/lib/kubelet/seccomp, so must
 # exist. We include just one default profile - audit - which can be
 # to whack on when figuring out more fine grained profiles.
