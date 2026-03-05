@@ -29,7 +29,7 @@ LDFLAGS = "-flto -w -s"
 #
 # Generic library used by all programs
 [job.musl]
-workdir = "pkgs/lib/musl/src"
+sources = "pkgs/lib/musl/src"
 # Link-Time-Optimisation does not play nicely with libc so we'll override
 # CFLAGS here to turn that off.
 env.CFLAGS = "-O2"
@@ -63,18 +63,13 @@ outputs."/usr/lib/libssp_nonshared.a" = "libssp_nonshared.a"
 # ============
 #
 [job.linux]
-workdir = "pkgs/kernel"
-sources."src/.config" = "pkgs/kernel/config.x86_64"
-sources."etc" = "etc"
-sources."root_filesystem" = "root_filesystem"
-env.PROJROOT = "/pkgs/kernel"
-
-sources = [
-  {"." = "pkg/kernel"},
-  {"src/.config" = "pkgs/kernel/config.x86_64"},
-  "etc",
-  "root_filesystem",
-]
+env.PROJROOT = "/app"
+sources = {
+  "." = "pkgs/kernel",
+  "src/.config" = "pkgs/kernel/config.x86_64",
+  "etc" = "etc",
+  "root_filesystem" = "root_filesystem",
+}
 
 [[job.linux.step]]
 cd = "src"
@@ -115,7 +110,7 @@ outputs."/lib/modules" = "/lib/modules"
 #
 # Seccomp library
 [job.seccomp]
-workdir = "pkgs/lib/libseccomp/src"
+sources = "pkgs/lib/libseccomp/src"
 
 [[job.seccomp.step]]
 autoreconf = true
@@ -138,7 +133,7 @@ outputs."/usr/lib" = ".libs"
 #
 # Used for mount, nsenter, umount
 [job.busybox]
-workdir = "pkgs/bin/busybox/src"
+sources."." = "pkgs/bin/busybox/src"
 sources.".config" = "pkgs/bin/busybox/config"
 
 [[job.busybox.step]]
@@ -151,7 +146,7 @@ needs = ["libc", "linux:/usr/include"]
 #
 # Container monitor
 [job.conmon]
-workdir = "pkgs/bin/conmon/src"
+sources = "pkgs/bin/conmon/src"
 
 [[job.conmon.step]]
 make = "bin/conmon"
@@ -164,7 +159,7 @@ needs = ["glib", "libc", "linux:/usr/include"]
 #
 # Glib is required by conmon
 [job.glib]
-workdir = "pkgs/lib/glib/src"
+sources = "pkgs/lib/glib/src"
 
 [[job.glib.step]]
 meson = {
@@ -199,7 +194,7 @@ outputs."/usr/lib/glib-2.0/include" = "include/glib"
 #
 # Container Runtime Daemon
 [job.cri-o]
-workdir = "pkgs/bin/cri-o/src"
+sources = "pkgs/bin/cri-o/src"
 image = "golang:1.24-alpine"
 
 [[job.cri-o.step]]
@@ -220,7 +215,7 @@ install = ["pkgconfig"]
 #
 # libargp is used by crun to parse args
 [job.argp]
-workdir = "pkgs/bin/crun/argp-standalone"
+sources = "pkgs/bin/crun/argp-standalone"
 
 [[job.argp.step]]
 meson.prefix = "/usr"
@@ -237,7 +232,7 @@ outputs."/usr/include" = "."
 #
 # Linux Capability Library for crun
 [job.libcap]
-workdir = "pkgs/bin/crun/libcap"
+sources = "pkgs/bin/crun/libcap"
 
 [[job.libcap.step]]
 cd = "libcap"
@@ -251,7 +246,7 @@ needs = ["libc"]
 #
 # Container runtime utility
 [job.crun]
-workdir = "pkgs/bin/crun/src"
+sources = "pkgs/bin/crun/src"
 
 [[job.crun.step]]
 autoreconf = true
@@ -274,7 +269,7 @@ outputs."/bin/crun" = "crun"
 # =========
 #
 [job.init]
-workdir = "pkgs/bin/init/src"
+sources = "pkgs/bin/init/src"
 
 [[job.init.step]]
 make = "init"
@@ -286,10 +281,12 @@ needs = ["libc", "linux:/usr/include"]
 #
 # The kubernetes node daemon
 [job.kubelet]
-workdir = "pkgs/bin/kubernetes"
 env.GOFLAGS = "-trimpath"
 env.KUBE_GIT_VERSION_FILE = "/version"
-sources."src/pkg/kubelet/nodeshutdown/systemd/inhibit_linux.go" = "pkgs/bin/kubernetes/inhibit_linux.go"
+sources = {
+  "." = "pkgs/bin/kubernetes",
+  "src/pkg/kubelet/nodeshutdown/systemd/" = "pkgs/bin/kubernetes/inhibit_linux.go",
+}
 
 [[job.kubelet.step]]
 cd = "src"
